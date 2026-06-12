@@ -22,7 +22,7 @@ func StartBackground(settings config.Settings) error {
 	if err != nil {
 		return err
 	}
-	if e, ok := st.Get(Slug); ok && state.ProcessAlive(e.PID) {
+	if e, ok := st.Get(Slug); ok && state.EntryAlive(e) {
 		return nil
 	}
 	self, err := os.Executable()
@@ -48,10 +48,19 @@ func StartBackground(settings config.Settings) error {
 	}
 	pgid, _ := syscall.Getpgid(c.Process.Pid)
 	go c.Wait()
-	return st.Set(state.Entry{
-		Slug: Slug, PID: c.Process.Pid, PGID: pgid,
-		Port: settings.ProxyPort, Cmd: "servd proxy",
-		Log: logPath, StartedAt: time.Now(),
+	pid := c.Process.Pid
+	return state.Mutate(func(s *state.State) error {
+		if e, ok := s.Get(Slug); ok && state.EntryAlive(e) && e.PID != pid {
+			// Another process won the race to start the proxy; keep theirs.
+			_ = syscall.Kill(-pgid, syscall.SIGTERM)
+			return nil
+		}
+		s.Entries[Slug] = state.Entry{
+			Slug: Slug, PID: pid, PGID: pgid,
+			Port: settings.ProxyPort, Cmd: "servd proxy",
+			Log: logPath, StartedAt: time.Now(),
+		}
+		return nil
 	})
 }
 
@@ -61,22 +70,20 @@ func StopBackground() error {
 	if err != nil {
 		return err
 	}
-	e, ok := st.Get(Slug)
-	if !ok || !state.ProcessAlive(e.PID) {
-		return st.Delete(Slug)
+	if e, ok := st.Get(Slug); ok && state.EntryAlive(e) {
+		if e.PGID > 0 {
+			_ = syscall.Kill(-e.PGID, syscall.SIGTERM)
+		} else {
+			_ = syscall.Kill(e.PID, syscall.SIGTERM)
+		}
 	}
-	if e.PGID > 0 {
-		_ = syscall.Kill(-e.PGID, syscall.SIGTERM)
-	} else {
-		_ = syscall.Kill(e.PID, syscall.SIGTERM)
-	}
-	return st.Delete(Slug)
+	return state.Delete(Slug)
 }
 
 // Running reports whether the background proxy process is alive, with its pid.
 func Running(st *state.State) (bool, int) {
 	e, ok := st.Get(Slug)
-	if ok && state.ProcessAlive(e.PID) {
+	if ok && state.EntryAlive(e) {
 		return true, e.PID
 	}
 	return false, 0

@@ -6,10 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
+	"github.com/reidransom/servd/internal/netcheck"
 )
 
 // maxDepth bounds how deep below the root we look for project dirs.
@@ -20,6 +22,7 @@ type Result struct {
 	Slug string
 	Path string
 	Port int
+	Kind string // resolved launcher kind, e.g. "jigyll", "static"
 }
 
 // Scan walks root (depth-limited), finds directories that resolve to a launch
@@ -39,14 +42,16 @@ func Scan(root string, reg *config.Registry, settings config.Settings) ([]Result
 		if reg.FindByPath(dir) != nil {
 			continue // already registered
 		}
-		if !launcher.Servable(dir) {
+		// walk only returns servable dirs; resolve again to record the kind.
+		res, err := launcher.Resolve(config.Site{Path: dir}, settings)
+		if err != nil {
 			continue
 		}
 		slug := uniqueSlug(Slugify(filepath.Base(dir)), reg)
-		port := reg.NextFreePort(settings.PortRangeStart)
-		site := config.Site{Slug: slug, Path: dir, Port: port, Enabled: settings.DefaultEnabled}
+		port := NextFreePort(reg, settings)
+		site := config.Site{Slug: slug, Path: dir, Port: port, Enabled: settings.DefaultEnabled, Launcher: res.Kind}
 		reg.Sites = append(reg.Sites, site)
-		added = append(added, Result{Slug: slug, Path: dir, Port: port})
+		added = append(added, Result{Slug: slug, Path: dir, Port: port, Kind: res.Kind})
 	}
 	return added, nil
 }
@@ -84,6 +89,19 @@ func walk(root string) ([]string, error) {
 	return dirs, nil
 }
 
+// NextFreePort returns the lowest port at or above settings.PortRangeStart
+// that is unused in the registry, isn't the proxy port, and isn't currently
+// bound by some other process on the host.
+func NextFreePort(reg *config.Registry, settings config.Settings) int {
+	p := settings.PortRangeStart
+	for {
+		if !reg.HasPort(p) && p != settings.ProxyPort && netcheck.PortFree(settings.BindHost, p) {
+			return p
+		}
+		p++
+	}
+}
+
 var nonSlug = regexp.MustCompile(`[^a-z0-9]+`)
 
 // Slugify lowercases and replaces runs of non-alphanumerics with a hyphen.
@@ -102,21 +120,9 @@ func uniqueSlug(base string, reg *config.Registry) string {
 		return base
 	}
 	for i := 2; ; i++ {
-		cand := base + "-" + itoa(i)
+		cand := base + "-" + strconv.Itoa(i)
 		if reg.Find(cand) == nil {
 			return cand
 		}
 	}
-}
-
-func itoa(i int) string {
-	if i == 0 {
-		return "0"
-	}
-	var b []byte
-	for i > 0 {
-		b = append([]byte{byte('0' + i%10)}, b...)
-		i /= 10
-	}
-	return string(b)
 }

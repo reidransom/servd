@@ -5,6 +5,12 @@
 // changes on disk, so newly added sites route without a restart. Unknown or
 // bare hosts get a landing page listing every site with live links.
 //
+// The Host header sent to the backend is rewritten to the backend's own
+// address by default, so dev servers with host allowlists (Vite 5+, Next,
+// Rails host authorization) accept proxied requests. Sites that need the
+// original Host can set preserve_host = true. X-Forwarded-Host/Proto/For are
+// always set from the inbound request.
+//
 // httputil.ReverseProxy transparently handles HTTP/1.1 Upgrade (websockets),
 // which jigyll live-reload and Vite/Next HMR depend on.
 package proxy
@@ -12,6 +18,7 @@ package proxy
 import (
 	"fmt"
 	"html"
+	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -30,15 +37,16 @@ import (
 type Server struct {
 	settings config.Settings
 
-	mu       sync.RWMutex
-	routes   map[string]int // slug -> backend port
-	sites    []config.Site  // for the landing page (sorted by slug)
-	regMtime time.Time
+	mu           sync.RWMutex
+	proxies      map[string]*httputil.ReverseProxy // slug -> backend proxy
+	sites        []config.Site                     // for the landing page (sorted by slug)
+	regMtime     time.Time
+	lastErrMtime time.Time // mtime of the last sites.toml version we logged a reload error for
 }
 
 // New builds a proxy server and loads the initial routing table.
 func New(settings config.Settings) *Server {
-	s := &Server{settings: settings, routes: map[string]int{}}
+	s := &Server{settings: settings, proxies: map[string]*httputil.ReverseProxy{}}
 	s.reload()
 	return s
 }
@@ -48,6 +56,26 @@ func (s *Server) ListenAndServe() error {
 	addr := net.JoinHostPort(s.settings.BindHost, strconv.Itoa(s.settings.ProxyPort))
 	srv := &http.Server{Addr: addr, Handler: s}
 	return srv.ListenAndServe()
+}
+
+// buildProxy creates the reverse proxy for one site.
+func (s *Server) buildProxy(site config.Site) *httputil.ReverseProxy {
+	target := &url.URL{Scheme: "http", Host: net.JoinHostPort(s.settings.BindHost, strconv.Itoa(site.Port))}
+	slug, port, preserve := site.Slug, site.Port, site.PreserveHost
+	return &httputil.ReverseProxy{
+		Rewrite: func(pr *httputil.ProxyRequest) {
+			pr.SetXForwarded()
+			pr.SetURL(target) // also rewrites Out.Host to the backend address
+			if preserve {
+				pr.Out.Host = pr.In.Host
+			}
+		},
+		ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
+			w.WriteHeader(http.StatusBadGateway)
+			fmt.Fprintf(w, "servd: %q is registered but not responding on port %d.\n", slug, port)
+			fmt.Fprintf(w, "Start it with: servd up %s\n\n(%v)\n", slug, err)
+		},
+	}
 }
 
 // reload re-reads the registry if sites.toml changed since last load.
@@ -63,17 +91,27 @@ func (s *Server) reload() {
 	}
 	reg, err := config.LoadRegistry()
 	if err != nil {
+		// Keep serving stale routes, but say so — once per broken file version.
+		s.mu.Lock()
+		if fi == nil || !fi.ModTime().Equal(s.lastErrMtime) {
+			log.Printf("proxy: reload of %s failed, keeping %d stale route(s): %v",
+				config.RegistryPath(), len(s.proxies), err)
+			if fi != nil {
+				s.lastErrMtime = fi.ModTime()
+			}
+		}
+		s.mu.Unlock()
 		return
 	}
-	routes := make(map[string]int, len(reg.Sites))
+	proxies := make(map[string]*httputil.ReverseProxy, len(reg.Sites))
 	for _, site := range reg.Sites {
-		routes[site.Slug] = site.Port
+		proxies[site.Slug] = s.buildProxy(site)
 	}
 	sites := append([]config.Site(nil), reg.Sites...)
 	sort.Slice(sites, func(i, j int) bool { return sites[i].Slug < sites[j].Slug })
 
 	s.mu.Lock()
-	s.routes = routes
+	s.proxies = proxies
 	s.sites = sites
 	if fi != nil {
 		s.regMtime = fi.ModTime()
@@ -109,19 +147,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.mu.RLock()
-	port, ok := s.routes[slug]
+	rp, ok := s.proxies[slug]
 	s.mu.RUnlock()
 	if !ok {
 		s.landing(w, r)
 		return
-	}
-
-	target := &url.URL{Scheme: "http", Host: net.JoinHostPort(s.settings.BindHost, strconv.Itoa(port))}
-	rp := httputil.NewSingleHostReverseProxy(target)
-	rp.ErrorHandler = func(w http.ResponseWriter, _ *http.Request, err error) {
-		w.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(w, "servd: %q is registered but not responding on port %d.\n", slug, port)
-		fmt.Fprintf(w, "Start it with: servd up %s\n\n(%v)\n", slug, err)
 	}
 	rp.ServeHTTP(w, r)
 }

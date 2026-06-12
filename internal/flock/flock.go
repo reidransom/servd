@@ -1,0 +1,28 @@
+// Package flock provides advisory file locking for servd's read-modify-write
+// cycles on its persistent files (state.json, sites.toml).
+package flock
+
+import (
+	"os"
+	"path/filepath"
+	"syscall"
+)
+
+// WithLock holds an exclusive flock on path+".lock" while fn runs. The lock
+// file is created (and its parent directories) if missing, and is left in
+// place afterwards — only the lock itself is released.
+func WithLock(path string, fn func() error) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	f, err := os.OpenFile(path+".lock", os.O_CREATE|os.O_RDWR, 0o644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+		return err
+	}
+	defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+	return fn()
+}

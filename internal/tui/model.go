@@ -4,8 +4,6 @@ package tui
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -15,8 +13,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
-	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/scan"
 	"github.com/reidransom/servd/internal/state"
@@ -46,6 +44,25 @@ func tick() tea.Cmd {
 	return tea.Tick(time.Second, func(time.Time) tea.Msg { return tickMsg{} })
 }
 
+// actionDoneMsg reports the result of an async supervisor/proxy action.
+type actionDoneMsg struct {
+	verb string // "started", "stopped", ...
+	slug string // empty for bulk actions
+	n    int    // count, for bulk actions
+	bulk bool   // true when the action covered multiple sites
+	err  error
+}
+
+// statusesMsg carries a freshly loaded registry/state and the table rows
+// computed from them. A nil reg means the load failed and should be ignored.
+type statusesMsg struct {
+	reg          *config.Registry
+	st           *state.State
+	rows         []table.Row
+	slugs        []string
+	proxyRunning bool
+}
+
 type model struct {
 	settings config.Settings
 	reg      *config.Registry
@@ -61,6 +78,7 @@ type model struct {
 	width        int
 	height       int
 	status       string // transient status line
+	busy         bool   // an async action is in flight
 }
 
 var (
@@ -71,10 +89,11 @@ var (
 	warnStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
 	offStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	statusStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#bb9af7"))
+	errStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("203"))
 )
 
 func newModel() (*model, error) {
-	settings, reg, st, err := loadAll()
+	settings, reg, st, err := app.Load()
 	if err != nil {
 		return nil, err
 	}
@@ -97,58 +116,59 @@ func newModel() (*model, error) {
 	t.SetStyles(s)
 
 	m := &model{settings: settings, reg: reg, st: st, table: t, viewport: viewport.New(80, 20)}
-	m.refresh()
+	m.applyStatuses(buildStatuses(reg, st))
 	return m, nil
 }
 
-func loadAll() (config.Settings, *config.Registry, *state.State, error) {
-	settings, err := config.LoadSettings()
-	if err != nil {
-		return settings, nil, nil, err
-	}
-	reg, err := config.LoadRegistry()
-	if err != nil {
-		return settings, nil, nil, err
-	}
-	st, err := state.Load()
-	if err != nil {
-		return settings, reg, nil, err
-	}
-	return settings, reg, st, nil
-}
-
-// refresh reloads registry+state and rebuilds the table rows, preserving the
-// cursor position.
-func (m *model) refresh() {
-	if reg, err := config.LoadRegistry(); err == nil {
-		m.reg = reg
-	}
-	if st, err := state.Load(); err == nil {
-		m.st = st
-	}
-	running, _ := proxy.Running(m.st)
-	m.proxyRunning = running
-
-	rows := make([]table.Row, 0, len(m.reg.Sites))
-	slugs := make([]string, 0, len(m.reg.Sites))
-	for _, s := range m.reg.Sites {
-		st := supervisor.StatusOf(s, m.st)
+// buildStatuses computes the table rows for a registry+state snapshot. It
+// dials ports (StatusOf), so it must run off the Update goroutine.
+func buildStatuses(reg *config.Registry, st *state.State) statusesMsg {
+	running, _ := proxy.Running(st)
+	rows := make([]table.Row, 0, len(reg.Sites))
+	slugs := make([]string, 0, len(reg.Sites))
+	for _, s := range reg.Sites {
+		stat := supervisor.StatusOf(s, st)
 		up := ""
-		if d := supervisor.Uptime(s.Slug, m.st); d > 0 {
-			up = fmtDur(d)
+		if d := supervisor.Uptime(s.Slug, st); d > 0 {
+			up = app.FmtDuration(d)
 		}
 		en := "✓"
 		if !s.Enabled {
 			en = "·"
 		}
-		rows = append(rows, table.Row{s.Slug, strconv.Itoa(s.Port), dash(s.Launcher), en, st.String(), dash(up)})
+		rows = append(rows, table.Row{s.Slug, strconv.Itoa(s.Port), app.Dash(s.Launcher), en, stat.String(), app.Dash(up)})
 		slugs = append(slugs, s.Slug)
 	}
+	return statusesMsg{reg: reg, st: st, rows: rows, slugs: slugs, proxyRunning: running}
+}
+
+// refreshCmd reloads registry+state and computes statuses in a goroutine.
+func refreshCmd() tea.Cmd {
+	return func() tea.Msg {
+		reg, err := config.LoadRegistry()
+		if err != nil {
+			return statusesMsg{}
+		}
+		st, err := state.Load()
+		if err != nil {
+			return statusesMsg{}
+		}
+		return buildStatuses(reg, st)
+	}
+}
+
+// applyStatuses swaps in a fresh snapshot, preserving the cursor position.
+func (m *model) applyStatuses(msg statusesMsg) {
+	if msg.reg == nil {
+		return
+	}
+	m.reg, m.st = msg.reg, msg.st
+	m.proxyRunning = msg.proxyRunning
 	cur := m.table.Cursor()
-	m.table.SetRows(rows)
-	m.slugs = slugs
-	if cur >= len(rows) {
-		cur = len(rows) - 1
+	m.table.SetRows(msg.rows)
+	m.slugs = msg.slugs
+	if cur >= len(msg.rows) {
+		cur = len(msg.rows) - 1
 	}
 	if cur < 0 {
 		cur = 0
@@ -173,17 +193,34 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
-		m.table.SetHeight(maxInt(5, msg.Height-7))
+		m.table.SetHeight(max(5, msg.Height-7))
 		m.viewport.Width = msg.Width
-		m.viewport.Height = maxInt(5, msg.Height-5)
+		m.viewport.Height = max(5, msg.Height-5)
 		return m, nil
 
 	case tickMsg:
-		m.refresh()
 		if m.mode == modeLogs {
 			m.loadLog()
 		}
-		return m, tick()
+		return m, tea.Batch(refreshCmd(), tick())
+
+	case statusesMsg:
+		m.applyStatuses(msg)
+		return m, nil
+
+	case actionDoneMsg:
+		m.busy = false
+		switch {
+		case msg.err != nil:
+			m.status = "ERROR: " + firstLine(msg.err.Error())
+		case msg.bulk:
+			m.status = fmt.Sprintf("%s %d site(s)", msg.verb, msg.n)
+		case msg.slug != "":
+			m.status = msg.verb + " " + msg.slug
+		default:
+			m.status = msg.verb
+		}
+		return m, refreshCmd()
 
 	case tea.KeyMsg:
 		return m.handleKey(msg)
@@ -215,78 +252,146 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "q", "ctrl+c":
 		return m, tea.Quit
 	case "s":
-		if s := m.selectedSite(); s != nil {
-			_ = supervisor.Start(*s, m.settings, m.st)
-			m.status = "started " + s.Slug
-			m.refresh()
+		if s := m.selectedSite(); s != nil && !m.busy {
+			site := *s
+			m.busy = true
+			m.status = "starting " + site.Slug + "…"
+			settings := m.settings
+			return m, func() tea.Msg {
+				err := supervisor.Start(site, settings)
+				return actionDoneMsg{verb: "started", slug: site.Slug, err: err}
+			}
 		}
 	case "x":
-		if s := m.selectedSite(); s != nil {
-			m.status = "stopping " + s.Slug + "…"
-			_ = supervisor.Stop(s.Slug, m.st)
-			m.status = "stopped " + s.Slug
-			m.refresh()
+		if s := m.selectedSite(); s != nil && !m.busy {
+			slug := s.Slug
+			m.busy = true
+			m.status = "stopping " + slug + "…"
+			return m, func() tea.Msg {
+				err := supervisor.Stop(slug)
+				return actionDoneMsg{verb: "stopped", slug: slug, err: err}
+			}
 		}
 	case "r":
-		if s := m.selectedSite(); s != nil {
-			_ = supervisor.Restart(*s, m.settings, m.st)
-			m.status = "restarted " + s.Slug
-			m.refresh()
+		if s := m.selectedSite(); s != nil && !m.busy {
+			site := *s
+			m.busy = true
+			m.status = "restarting " + site.Slug + "…"
+			settings := m.settings
+			return m, func() tea.Msg {
+				err := supervisor.Restart(site, settings)
+				return actionDoneMsg{verb: "restarted", slug: site.Slug, err: err}
+			}
 		}
 	case "a":
-		n := 0
-		for _, s := range m.reg.Sites {
-			if !s.Enabled {
-				continue
+		if !m.busy {
+			sites := append([]config.Site(nil), m.reg.Sites...)
+			settings := m.settings
+			m.busy = true
+			m.status = "starting enabled sites…"
+			return m, func() tea.Msg {
+				n := 0
+				var firstErr error
+				for _, s := range sites {
+					if !s.Enabled {
+						continue
+					}
+					if err := supervisor.Start(s, settings); err != nil {
+						if firstErr == nil {
+							firstErr = err
+						}
+						continue
+					}
+					n++
+				}
+				return actionDoneMsg{verb: "started", n: n, bulk: true, err: firstErr}
 			}
-			_ = supervisor.Start(s, m.settings, m.st)
-			n++
-		}
-		m.status = fmt.Sprintf("started %d enabled site(s)", n)
-		m.refresh()
-	case "e":
-		if s := m.selectedSite(); s != nil {
-			s.Enabled = !s.Enabled
-			_ = m.reg.Save()
-			if s.Enabled {
-				m.status = "enabled " + s.Slug
-			} else {
-				m.status = "disabled " + s.Slug
-			}
-			m.refresh()
 		}
 	case "X":
-		for _, s := range m.reg.Sites {
-			_ = supervisor.Stop(s.Slug, m.st)
+		if !m.busy {
+			sites := append([]config.Site(nil), m.reg.Sites...)
+			m.busy = true
+			m.status = "stopping all…"
+			return m, func() tea.Msg {
+				n := 0
+				var firstErr error
+				for _, s := range sites {
+					if err := supervisor.Stop(s.Slug); err != nil {
+						if firstErr == nil {
+							firstErr = err
+						}
+						continue
+					}
+					n++
+				}
+				return actionDoneMsg{verb: "stopped", n: n, bulk: true, err: firstErr}
+			}
 		}
-		m.status = "stopped all"
-		m.refresh()
+	case "e":
+		if s := m.selectedSite(); s != nil {
+			slug := s.Slug
+			var enabled bool
+			err := config.MutateRegistry(func(reg *config.Registry) error {
+				site := reg.Find(slug)
+				if site == nil {
+					return fmt.Errorf("unknown site %q", slug)
+				}
+				site.Enabled = !site.Enabled
+				enabled = site.Enabled
+				return nil
+			})
+			if err != nil {
+				m.status = "ERROR: " + firstLine(err.Error())
+				return m, nil
+			}
+			if enabled {
+				m.status = "enabled " + slug
+			} else {
+				m.status = "disabled " + slug
+			}
+			return m, refreshCmd()
+		}
 	case "o":
 		if s := m.selectedSite(); s != nil {
-			_ = openBrowser(m.siteURL(*s))
+			_ = app.OpenBrowser(m.settings.SiteURL(*s))
 			m.status = "opened " + s.Slug
 		}
 	case "S":
-		added, _ := scan.Scan(m.settings.ProjectsDir, m.reg, m.settings)
-		for i := range m.reg.Sites {
-			if m.reg.Sites[i].Launcher == "" {
-				if res, err := launcher.Resolve(m.reg.Sites[i], m.settings); err == nil {
-					m.reg.Sites[i].Launcher = res.Kind
-				}
-			}
+		var added []scan.Result
+		err := config.MutateRegistry(func(reg *config.Registry) error {
+			var err error
+			added, err = scan.Scan(m.settings.ProjectsDir, reg, m.settings)
+			return err
+		})
+		if err != nil {
+			m.status = "ERROR: " + firstLine(err.Error())
+			return m, nil
 		}
-		_ = m.reg.Save()
 		m.status = fmt.Sprintf("scan: +%d site(s)", len(added))
-		m.refresh()
+		return m, refreshCmd()
 	case "p":
-		if m.proxyRunning {
-			_ = proxy.StopBackground()
-			m.status = "proxy stopped"
-		} else {
-			_ = proxy.StartBackground(m.settings)
-			m.status = "proxy started"
+		if m.busy {
+			break
 		}
-		m.refresh()
+		running := m.proxyRunning
+		settings := m.settings
+		m.busy = true
+		if running {
+			m.status = "stopping proxy…"
+		} else {
+			m.status = "starting proxy…"
+		}
+		return m, func() tea.Msg {
+			var err error
+			verb := "proxy started"
+			if running {
+				verb = "proxy stopped"
+				err = proxy.StopBackground()
+			} else {
+				err = proxy.StartBackground(settings)
+			}
+			return actionDoneMsg{verb: verb, err: err}
+		}
 	case "l":
 		if s := m.selectedSite(); s != nil {
 			m.mode = modeLogs
@@ -327,7 +432,7 @@ func (m *model) View() string {
 
 	// Selected site URL.
 	if s := m.selectedSite(); s != nil {
-		b.WriteString(dimStyle.Render("→ ") + m.siteURL(*s) + "\n")
+		b.WriteString(dimStyle.Render("→ ") + m.settings.SiteURL(*s) + "\n")
 	}
 
 	// Proxy line.
@@ -337,50 +442,21 @@ func (m *model) View() string {
 		b.WriteString(offStyle.Render("○ proxy off") + dimStyle.Render("  press p to start"))
 	}
 	if m.status != "" {
-		b.WriteString("   " + statusStyle.Render(m.status))
+		style := statusStyle
+		if strings.HasPrefix(m.status, "ERROR:") {
+			style = errStyle
+		}
+		b.WriteString("   " + style.Render(m.status))
 	}
 	b.WriteString("\n")
 	b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/disable · l logs · o open · p proxy · S scan · q quit"))
 	return b.String()
 }
 
-func (m *model) siteURL(s config.Site) string {
-	return fmt.Sprintf("http://%s.%s:%d/", s.Slug, m.settings.DomainSuffix, m.settings.ProxyPort)
-}
-
-func dash(s string) string {
-	if s == "" {
-		return "-"
+// firstLine truncates a (possibly multi-line) error message for the status bar.
+func firstLine(s string) string {
+	if i := strings.IndexByte(s, '\n'); i >= 0 {
+		return s[:i]
 	}
 	return s
-}
-
-func fmtDur(d time.Duration) string {
-	d = d.Round(time.Second)
-	switch {
-	case d < time.Minute:
-		return fmt.Sprintf("%ds", int(d.Seconds()))
-	case d < time.Hour:
-		return fmt.Sprintf("%dm%ds", int(d.Minutes()), int(d.Seconds())%60)
-	default:
-		return fmt.Sprintf("%dh%dm", int(d.Hours()), int(d.Minutes())%60)
-	}
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func openBrowser(url string) error {
-	switch runtime.GOOS {
-	case "darwin":
-		return exec.Command("open", url).Start()
-	case "windows":
-		return exec.Command("cmd", "/c", "start", url).Start()
-	default:
-		return exec.Command("xdg-open", url).Start()
-	}
 }

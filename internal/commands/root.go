@@ -4,6 +4,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/tui"
@@ -50,19 +51,7 @@ func newRootCmd() *cobra.Command {
 
 // load reads settings, registry and reconciled runtime state.
 func load() (config.Settings, *config.Registry, *state.State, error) {
-	settings, err := config.LoadSettings()
-	if err != nil {
-		return settings, nil, nil, fmt.Errorf("loading settings: %w", err)
-	}
-	reg, err := config.LoadRegistry()
-	if err != nil {
-		return settings, nil, nil, fmt.Errorf("loading registry: %w", err)
-	}
-	st, err := state.Load()
-	if err != nil {
-		return settings, reg, nil, fmt.Errorf("loading state: %w", err)
-	}
-	return settings, reg, st, nil
+	return app.Load()
 }
 
 // selectSites resolves command args (slugs) plus an --all flag into sites.
@@ -72,6 +61,9 @@ func load() (config.Settings, *config.Registry, *state.State, error) {
 // named explicitly by slug are always returned regardless of their enabled
 // flag, so you can still start a disabled site on purpose.
 func selectSites(reg *config.Registry, args []string, all, onlyEnabled bool) ([]config.Site, error) {
+	if all && len(args) > 0 {
+		return nil, fmt.Errorf("pass slugs or --all, not both")
+	}
 	if all {
 		if !onlyEnabled {
 			return reg.Sites, nil
@@ -96,9 +88,4 @@ func selectSites(reg *config.Registry, args []string, all, onlyEnabled bool) ([]
 		out = append(out, *s)
 	}
 	return out, nil
-}
-
-// siteURL is the nip.io URL a site is reachable at through the proxy.
-func siteURL(s config.Site, settings config.Settings) string {
-	return fmt.Sprintf("http://%s.%s:%d/", s.Slug, settings.DomainSuffix, settings.ProxyPort)
 }

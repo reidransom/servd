@@ -52,8 +52,12 @@ func LogPath(slug string) string { return logPath(slug) }
 
 // Start launches the site's dev server detached. It is a no-op (no error) if
 // the site is already running.
-func Start(site config.Site, settings config.Settings, st *state.State) error {
-	if e, ok := st.Get(site.Slug); ok && state.ProcessAlive(e.PID) {
+func Start(site config.Site, settings config.Settings) error {
+	st, err := state.Load()
+	if err != nil {
+		return err
+	}
+	if e, ok := st.Get(site.Slug); ok && state.EntryAlive(e) {
 		return nil
 	}
 	res, err := launcher.Resolve(site, settings)
@@ -112,20 +116,36 @@ func Start(site config.Site, settings config.Settings, st *state.State) error {
 		// Still alive — leave the Wait goroutine running; when we exit, init reaps.
 	}
 
-	return st.Set(state.Entry{
-		Slug:      site.Slug,
-		PID:       pid,
-		PGID:      pgid,
-		Port:      site.Port,
-		Cmd:       res.Cmd,
-		Log:       logPath(site.Slug),
-		StartedAt: time.Now(),
+	return state.Mutate(func(s *state.State) error {
+		if e, ok := s.Get(site.Slug); ok && state.EntryAlive(e) && e.PID != pid {
+			// Someone else started this site while we were spawning; keep
+			// theirs and tear ours down.
+			signalGroup(pgid, pid, syscall.SIGTERM)
+			return nil
+		}
+		s.Entries[site.Slug] = state.Entry{
+			Slug:      site.Slug,
+			PID:       pid,
+			PGID:      pgid,
+			Port:      site.Port,
+			Cmd:       res.Cmd,
+			Log:       logPath(site.Slug),
+			StartedAt: time.Now(),
+		}
+		return nil
 	})
 }
 
 // Stop signals the site's process group (SIGTERM, then SIGKILL after a grace
 // period) and clears its state entry. No-op if not running.
-func Stop(slug string, st *state.State) error {
+//
+// The state lock is only taken for the final entry removal — never across the
+// signal/poll window.
+func Stop(slug string) error {
+	st, err := state.Load()
+	if err != nil {
+		return err
+	}
 	e, ok := st.Get(slug)
 	if !ok {
 		return nil
@@ -135,14 +155,23 @@ func Stop(slug string, st *state.State) error {
 	// Wait up to ~5s for graceful exit, then force-kill.
 	deadline := time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) {
-		if !state.ProcessAlive(e.PID) {
-			return st.Delete(slug)
+		if !state.EntryAlive(e) {
+			return state.Delete(slug)
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
 	signalGroup(e.PGID, e.PID, syscall.SIGKILL)
-	time.Sleep(200 * time.Millisecond)
-	return st.Delete(slug)
+
+	// Confirm the kill landed before dropping the entry; a survivor (e.g.
+	// stuck in uninterruptible sleep) keeps its entry so `up` can't double-start.
+	deadline = time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if !state.EntryAlive(e) {
+			return state.Delete(slug)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return fmt.Errorf("%s (pid %d) survived SIGKILL; keeping its state entry", slug, e.PID)
 }
 
 // signalGroup signals the process group if pgid is valid, else the pid.
@@ -156,17 +185,17 @@ func signalGroup(pgid, pid int, sig syscall.Signal) {
 }
 
 // Restart stops then starts the site.
-func Restart(site config.Site, settings config.Settings, st *state.State) error {
-	if err := Stop(site.Slug, st); err != nil {
+func Restart(site config.Site, settings config.Settings) error {
+	if err := Stop(site.Slug); err != nil {
 		return err
 	}
-	return Start(site, settings, st)
+	return Start(site, settings)
 }
 
 // StatusOf reports the runtime status of a site given current state.
 func StatusOf(site config.Site, st *state.State) Status {
 	e, ok := st.Get(site.Slug)
-	if !ok || !state.ProcessAlive(e.PID) {
+	if !ok || !state.EntryAlive(e) {
 		return Stopped
 	}
 	if portAccepting(site.Port) {
@@ -201,7 +230,7 @@ func portAccepting(port int) bool {
 // Uptime returns how long the site has been running, or 0 if stopped.
 func Uptime(slug string, st *state.State) time.Duration {
 	e, ok := st.Get(slug)
-	if !ok || !state.ProcessAlive(e.PID) {
+	if !ok || !state.EntryAlive(e) {
 		return 0
 	}
 	return time.Since(e.StartedAt)

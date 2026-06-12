@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
-	"runtime"
 	"time"
 
+	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/supervisor"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +18,7 @@ func newUpCmd() *cobra.Command {
 		Use:   "up [slug...]",
 		Short: "Start one or more sites (use --all for every site)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, st, err := load()
+			settings, reg, _, err := load()
 			if err != nil {
 				return err
 			}
@@ -32,7 +31,7 @@ func newUpCmd() *cobra.Command {
 				return nil
 			}
 			for _, s := range sites {
-				if err := supervisor.Start(s, settings, st); err != nil {
+				if err := supervisor.Start(s, settings); err != nil {
 					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
 					continue
 				}
@@ -51,7 +50,7 @@ func newDownCmd() *cobra.Command {
 		Use:   "down [slug...]",
 		Short: "Stop one or more sites (use --all for every site)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, reg, st, err := load()
+			_, reg, _, err := load()
 			if err != nil {
 				return err
 			}
@@ -61,7 +60,7 @@ func newDownCmd() *cobra.Command {
 				return err
 			}
 			for _, s := range sites {
-				if err := supervisor.Stop(s.Slug, st); err != nil {
+				if err := supervisor.Stop(s.Slug); err != nil {
 					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
 					continue
 				}
@@ -89,11 +88,22 @@ func newRestartCmd() *cobra.Command {
 				return err
 			}
 			for _, s := range sites {
-				if err := supervisor.Restart(s, settings, st); err != nil {
+				if err := supervisor.Restart(s, settings); err != nil {
 					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
 					continue
 				}
 				fmt.Printf("  %-20s restarted on :%d\n", s.Slug, s.Port)
+			}
+			if all {
+				skipped := 0
+				for _, s := range reg.Sites {
+					if !s.Enabled && supervisor.StatusOf(s, st) != supervisor.Stopped {
+						skipped++
+					}
+				}
+				if skipped > 0 {
+					fmt.Printf("  (skipped %d disabled-but-running site(s); restart them by slug)\n", skipped)
+				}
 			}
 			return nil
 		},
@@ -121,27 +131,51 @@ func newLogsCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("no logs yet for %q", args[0])
 			}
-			defer f.Close()
+			defer func() { f.Close() }()
 			if _, err := io.Copy(os.Stdout, f); err != nil {
 				return err
 			}
 			if !follow {
 				return nil
 			}
-			// Tail: keep reading appended bytes.
+			// Tail: keep reading appended bytes, reopening if the file is
+			// replaced and rewinding if it is truncated in place.
 			r := bufio.NewReader(f)
 			for {
 				line, err := r.ReadString('\n')
 				if len(line) > 0 {
 					fmt.Print(line)
 				}
-				if err == io.EOF {
-					time.Sleep(300 * time.Millisecond)
+				if err == nil {
 					continue
 				}
-				if err != nil {
+				if err != io.EOF {
 					return err
 				}
+
+				// Logical read offset = underlying position minus unread buffer.
+				offset, serr := f.Seek(0, io.SeekCurrent)
+				if serr == nil {
+					offset -= int64(r.Buffered())
+				}
+				fi, ferr := f.Stat()
+				di, derr := os.Stat(path)
+				switch {
+				case ferr == nil && derr == nil && !os.SameFile(fi, di):
+					// Rotated: a new file lives at path; follow it from the top.
+					if nf, oerr := os.Open(path); oerr == nil {
+						f.Close()
+						f = nf
+						r = bufio.NewReader(f)
+					}
+				case serr == nil && derr == nil && di.Size() < offset:
+					// Truncated in place: rewind.
+					if _, err := f.Seek(0, io.SeekStart); err != nil {
+						return err
+					}
+					r = bufio.NewReader(f)
+				}
+				time.Sleep(300 * time.Millisecond)
 			}
 		},
 	}
@@ -163,24 +197,9 @@ func newOpenCmd() *cobra.Command {
 			if s == nil {
 				return fmt.Errorf("unknown site %q", args[0])
 			}
-			url := siteURL(*s, settings)
+			url := settings.SiteURL(*s)
 			fmt.Println(url)
-			return openBrowser(url)
+			return app.OpenBrowser(url)
 		},
 	}
-}
-
-// openBrowser opens a URL in the default browser (best effort).
-func openBrowser(url string) error {
-	var bin string
-	var args []string
-	switch runtime.GOOS {
-	case "darwin":
-		bin, args = "open", []string{url}
-	case "windows":
-		bin, args = "cmd", []string{"/c", "start", url}
-	default:
-		bin, args = "xdg-open", []string{url}
-	}
-	return exec.Command(bin, args...).Start()
 }

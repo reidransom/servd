@@ -24,9 +24,12 @@ func anyExists(dir string, names ...string) bool {
 	return false
 }
 
+// lookPath is exec.LookPath, swappable in tests.
+var lookPath = exec.LookPath
+
 // onPath reports whether a binary is resolvable on PATH.
 func onPath(bin string) bool {
-	_, err := exec.LookPath(bin)
+	_, err := lookPath(bin)
 	return err == nil
 }
 
@@ -144,20 +147,39 @@ func detectMake(dir string) (cmd, kind string, ok bool) {
 }
 
 // hasRecipe reports whether a make/just file declares a target/recipe named
-// `target` (a line beginning with "<target>:" or "<target> ...:").
+// `target` — a column-0 line like "serve:", "serve: deps" or "serve arg:".
+// Variable assignments ("serve = x", "serve := x", "serve ?= x") don't count.
+// Limitation: just recipes whose default arguments contain '=' before the
+// colon are not recognized.
 func hasRecipe(path, target string) bool {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return false
 	}
-	for _, line := range strings.Split(string(data), "\n") {
-		t := strings.TrimSpace(line)
-		if t == target+":" || strings.HasPrefix(t, target+":") || strings.HasPrefix(t, target+" ") {
-			// Guard against matching variable assignments like "serve = x".
-			if strings.Contains(t, ":") {
-				return true
-			}
+	for _, raw := range strings.Split(string(data), "\n") {
+		// Targets are declared at column 0; indented lines are recipe bodies.
+		if raw == "" || raw[0] == ' ' || raw[0] == '\t' || raw[0] == '#' {
+			continue
 		}
+		line := strings.TrimRight(raw, " \t\r")
+		if !strings.HasPrefix(line, target+":") &&
+			!strings.HasPrefix(line, target+" ") &&
+			!strings.HasPrefix(line, target+"\t") {
+			continue
+		}
+		colon := strings.IndexByte(line, ':')
+		if colon < 0 {
+			continue
+		}
+		// '=' before the colon ("serve ?= a:b") or right after the colon run
+		// ("serve := x", "serve ::= x") marks a variable assignment.
+		if eq := strings.IndexByte(line, '='); eq >= 0 && eq < colon {
+			continue
+		}
+		if strings.HasPrefix(strings.TrimLeft(line[colon:], ":"), "=") {
+			continue
+		}
+		return true
 	}
 	return false
 }

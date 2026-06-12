@@ -97,3 +97,20 @@ resolves to.
 Servers are launched **detached** in their own process groups, so they keep
 running after the CLI or TUI exits; `servd down` signals the whole group.
 The reverse proxy passes through websocket upgrades, so live-reload / HMR works.
+
+## Development
+
+```sh
+go build ./... && go vet ./... && go test ./... -race
+```
+
+## Proxy and the Host header
+
+The proxy rewrites the `Host` header to the backend's own address
+(e.g. `127.0.0.1:4001`), so dev servers with host allowlists (Vite 5+, Next,
+Rails host authorization) accept proxied requests out of the box. The original
+host is still available to the backend via `X-Forwarded-Host` / `X-Forwarded-Proto`.
+
+If a site builds absolute URLs from `Host` and needs the nip.io address
+instead, set `preserve_host = true` on its `[[site]]` entry in `sites.toml` —
+and add the nip.io hostname to that dev server's own allowed-hosts setting.

@@ -28,33 +28,38 @@ type Resolved struct {
 	Dir  string // working directory (the project path)
 }
 
-// detector is one named auto-detection rule.
-type detector struct {
-	fn func(dir string) (cmd, kind string, ok bool)
+// detectors are tried in order; the first that claims the dir wins.
+var detectors = []func(dir string) (cmd, kind string, ok bool){
+	detectJigyll,
+	detectHugo,
+	detectNode,
+	detectJust,
+	detectMake,
+	detectStatic,
 }
 
-// detectors are tried in order; the first that claims the dir wins.
-var detectors = []detector{
-	{detectJigyll},
-	{detectHugo},
-	{detectNode},
-	{detectJust},
-	{detectMake},
-	{detectStatic},
+// resolveDir resolves a directory without a manual override: Procfile first,
+// then the auto-detectors. The returned cmd still contains {port}/{host}
+// placeholders.
+func resolveDir(dir string) (cmd, kind string, ok bool) {
+	if entries := readProcfile(dir); len(entries) > 0 {
+		if e, found := webProcess(entries); found {
+			return e.Cmd, "procfile", true
+		}
+	}
+	for _, detect := range detectors {
+		if cmd, kind, ok := detect(dir); ok {
+			return cmd, kind, true
+		}
+	}
+	return "", "", false
 }
 
 // Servable reports whether a directory can be resolved to a launch command
 // without a manual override (used by scan to decide what to register).
 func Servable(dir string) bool {
-	if len(readProcfile(dir)) > 0 {
-		return true
-	}
-	for _, d := range detectors {
-		if _, _, ok := d.fn(dir); ok {
-			return true
-		}
-	}
-	return false
+	_, _, ok := resolveDir(dir)
+	return ok
 }
 
 // Resolve produces the launch spec for a site, applying the precedence order.
@@ -68,18 +73,9 @@ func Resolve(site config.Site, settings config.Settings) (Resolved, error) {
 		return Resolved{Cmd: subst(site.Cmd, host, port), Kind: "manual", Dir: dir}, nil
 	}
 
-	// 2. Procfile.
-	if entries := readProcfile(dir); len(entries) > 0 {
-		if e, ok := webProcess(entries); ok {
-			return Resolved{Cmd: subst(e.Cmd, host, port), Kind: "procfile", Dir: dir}, nil
-		}
-	}
-
-	// 3. Auto-detect.
-	for _, d := range detectors {
-		if cmd, kind, ok := d.fn(dir); ok {
-			return Resolved{Cmd: subst(cmd, host, port), Kind: kind, Dir: dir}, nil
-		}
+	// 2. Procfile, then auto-detect.
+	if cmd, kind, ok := resolveDir(dir); ok {
+		return Resolved{Cmd: subst(cmd, host, port), Kind: kind, Dir: dir}, nil
 	}
 
 	return Resolved{}, fmt.Errorf("no launcher could serve %s (add a Procfile or use --cmd)", dir)

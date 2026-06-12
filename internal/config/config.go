@@ -9,11 +9,14 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
 
 	toml "github.com/pelletier/go-toml/v2"
+
+	"github.com/reidransom/servd/internal/flock"
 )
 
 // Settings holds global servd configuration.
@@ -37,6 +40,11 @@ type Site struct {
 	Enabled  bool   `toml:"enabled"`
 	Cmd      string `toml:"cmd,omitempty"`      // manual launch override (highest precedence)
 	Launcher string `toml:"launcher,omitempty"` // recorded resolver kind, e.g. "jigyll", "procfile"
+	// PreserveHost forwards the original (nip.io) Host header to the backend
+	// instead of rewriting it to the backend's own address. Only needed by
+	// servers that build absolute URLs from Host; such servers must then
+	// allowlist the nip.io hostname themselves.
+	PreserveHost bool `toml:"preserve_host,omitempty"`
 }
 
 // Registry is the on-disk list of sites (sites.toml).
@@ -76,6 +84,11 @@ func StateDir() string {
 
 // LogDir is where per-site logfiles are written.
 func LogDir() string { return filepath.Join(StateDir(), "logs") }
+
+// SiteURL is the nip.io URL a site is reachable at through the proxy.
+func (s Settings) SiteURL(site Site) string {
+	return fmt.Sprintf("http://%s.%s:%d/", site.Slug, s.DomainSuffix, s.ProxyPort)
+}
 
 func settingsPath() string { return filepath.Join(ConfigDir(), "config.toml") }
 func registryPath() string { return filepath.Join(ConfigDir(), "sites.toml") }
@@ -122,7 +135,7 @@ func SaveSettings(s Settings) error {
 	if err != nil {
 		return err
 	}
-	return writeAtomic(settingsPath(), data)
+	return WriteAtomic(settingsPath(), data)
 }
 
 // LoadRegistry reads sites.toml; a missing file yields an empty registry.
@@ -141,6 +154,23 @@ func LoadRegistry() (*Registry, error) {
 	return r, nil
 }
 
+// MutateRegistry loads sites.toml, applies fn and saves the result, all
+// under an exclusive file lock. All registry writers must go through here so
+// concurrent servd processes (CLI, TUI) can't lose each other's updates.
+// Keep fn fast — don't stop/start servers while holding the lock.
+func MutateRegistry(fn func(*Registry) error) error {
+	return flock.WithLock(registryPath(), func() error {
+		r, err := LoadRegistry()
+		if err != nil {
+			return err
+		}
+		if err := fn(r); err != nil {
+			return err
+		}
+		return r.Save()
+	})
+}
+
 // Save writes the registry to sites.toml atomically (sorted by slug).
 func (r *Registry) Save() error {
 	sort.Slice(r.Sites, func(i, j int) bool { return r.Sites[i].Slug < r.Sites[j].Slug })
@@ -148,7 +178,7 @@ func (r *Registry) Save() error {
 	if err != nil {
 		return err
 	}
-	return writeAtomic(registryPath(), data)
+	return WriteAtomic(registryPath(), data)
 }
 
 // Find returns a pointer to the site with the given slug, or nil.
@@ -181,17 +211,9 @@ func (r *Registry) HasPort(port int) bool {
 	return false
 }
 
-// NextFreePort returns the lowest unused port at or above start.
-func (r *Registry) NextFreePort(start int) int {
-	p := start
-	for r.HasPort(p) {
-		p++
-	}
-	return p
-}
-
-// writeAtomic writes data to path via a temp file + rename, creating parents.
-func writeAtomic(path string, data []byte) error {
+// WriteAtomic writes data to path via a temp file + rename, creating parents.
+// Atomic, not durable: there is no fsync before the rename.
+func WriteAtomic(path string, data []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}

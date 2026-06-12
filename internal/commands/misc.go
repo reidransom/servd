@@ -2,12 +2,15 @@ package commands
 
 import (
 	"fmt"
+	"io/fs"
 	"net"
 	"net/http"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/tui"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +46,7 @@ func newDoctorCmd() *cobra.Command {
 			}
 
 			fmt.Println("Proxy port:")
-			if portFree(settings.BindHost, settings.ProxyPort) {
+			if netcheck.PortFree(settings.BindHost, settings.ProxyPort) {
 				fmt.Printf("  ✓ :%d is free\n", settings.ProxyPort)
 			} else {
 				fmt.Printf("  i :%d is in use (proxy may already be running)\n", settings.ProxyPort)
@@ -52,7 +55,7 @@ func newDoctorCmd() *cobra.Command {
 			fmt.Println("Assigned ports:")
 			conflicts := 0
 			for _, s := range reg.Sites {
-				if !portFree(settings.BindHost, s.Port) {
+				if !netcheck.PortFree(settings.BindHost, s.Port) {
 					conflicts++
 				}
 			}
@@ -77,17 +80,9 @@ func newDoctorCmd() *cobra.Command {
 	}
 }
 
-func portFree(host string, port int) bool {
-	ln, err := net.Listen("tcp", net.JoinHostPort(host, strconv.Itoa(port)))
-	if err != nil {
-		return false
-	}
-	ln.Close()
-	return true
-}
-
 // newStaticCmd is the hidden built-in static file server used by the "static"
-// launcher fallback. It serves --dir on --host:--port.
+// launcher fallback. It serves --dir on --host:--port, refusing dot-prefixed
+// paths (.env, .git, …) so a project dir doesn't leak secrets.
 func newStaticCmd() *cobra.Command {
 	var host, dir string
 	var port int
@@ -98,7 +93,7 @@ func newStaticCmd() *cobra.Command {
 			addr := net.JoinHostPort(host, strconv.Itoa(port))
 			srv := &http.Server{
 				Addr:         addr,
-				Handler:      http.FileServer(http.Dir(dir)),
+				Handler:      http.FileServer(dotHidingFS{http.Dir(dir)}),
 				ReadTimeout:  30 * time.Second,
 				WriteTimeout: 30 * time.Second,
 			}
@@ -109,4 +104,45 @@ func newStaticCmd() *cobra.Command {
 	c.Flags().IntVar(&port, "port", 0, "listen port")
 	c.Flags().StringVar(&dir, "dir", ".", "directory to serve")
 	return c
+}
+
+// dotHidingFS wraps an http.FileSystem and hides dot-prefixed files and
+// directories from both direct requests and directory listings.
+type dotHidingFS struct{ fs http.FileSystem }
+
+// containsDotSegment reports whether any path segment starts with a dot.
+// http.FileServer cleans the URL path before calling Open, and the
+// http.FileSystem API always uses forward slashes.
+func containsDotSegment(name string) bool {
+	for _, part := range strings.Split(name, "/") {
+		if strings.HasPrefix(part, ".") {
+			return true
+		}
+	}
+	return false
+}
+
+func (d dotHidingFS) Open(name string) (http.File, error) {
+	if containsDotSegment(name) {
+		return nil, fs.ErrPermission // FileServer renders 403
+	}
+	f, err := d.fs.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return dotHidingFile{f}, nil
+}
+
+// dotHidingFile filters dotfiles out of directory listings.
+type dotHidingFile struct{ http.File }
+
+func (f dotHidingFile) Readdir(count int) ([]fs.FileInfo, error) {
+	entries, err := f.File.Readdir(count)
+	out := entries[:0]
+	for _, e := range entries {
+		if !strings.HasPrefix(e.Name(), ".") {
+			out = append(out, e)
+		}
+	}
+	return out, err
 }

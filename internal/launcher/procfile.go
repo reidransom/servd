@@ -2,7 +2,9 @@ package launcher
 
 import (
 	"bufio"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -19,8 +21,7 @@ type procEntry struct {
 // or nil if none exists.
 func readProcfile(dir string) []procEntry {
 	for _, name := range procfileNames {
-		path := dir + string(os.PathSeparator) + name
-		f, err := os.Open(path)
+		f, err := os.Open(filepath.Join(dir, name))
 		if err != nil {
 			continue
 		}
@@ -32,7 +33,7 @@ func readProcfile(dir string) []procEntry {
 }
 
 // parseProcfile parses "name: command" lines, ignoring blanks and # comments.
-func parseProcfile(r interface{ Read([]byte) (int, error) }) []procEntry {
+func parseProcfile(r io.Reader) []procEntry {
 	var entries []procEntry
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
