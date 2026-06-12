@@ -69,7 +69,7 @@ func Start(site config.Site, settings config.Settings) error {
 	if err != nil {
 		return err
 	}
-	defer logf.Close()
+	defer func() { _ = logf.Close() }()
 
 	header := fmt.Sprintf("\n=== servd starting %q at %s ===\n$ %s\n",
 		site.Slug, time.Now().Format(time.RFC3339), res.Cmd)

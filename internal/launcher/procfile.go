@@ -26,7 +26,7 @@ func readProcfile(dir string) []procEntry {
 			continue
 		}
 		entries := parseProcfile(f)
-		f.Close()
+		_ = f.Close()
 		return entries
 	}
 	return nil

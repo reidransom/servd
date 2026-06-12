@@ -131,7 +131,7 @@ func newLogsCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("no logs yet for %q", args[0])
 			}
-			defer func() { f.Close() }()
+			defer func() { _ = f.Close() }()
 			if _, err := io.Copy(os.Stdout, f); err != nil {
 				return err
 			}
@@ -164,7 +164,7 @@ func newLogsCmd() *cobra.Command {
 				case ferr == nil && derr == nil && !os.SameFile(fi, di):
 					// Rotated: a new file lives at path; follow it from the top.
 					if nf, oerr := os.Open(path); oerr == nil {
-						f.Close()
+						_ = f.Close()
 						f = nf
 						r = bufio.NewReader(f)
 					}

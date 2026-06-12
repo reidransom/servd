@@ -178,14 +178,14 @@ func newStatusCmd() *cobra.Command {
 				return nil
 			}
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
-			fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tENABLED\tSTATUS\tUPTIME\tURL")
+			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tENABLED\tSTATUS\tUPTIME\tURL")
 			for _, s := range reg.Sites {
 				status := supervisor.StatusOf(s, st)
 				up := ""
 				if d := supervisor.Uptime(s.Slug, st); d > 0 {
 					up = app.FmtDuration(d)
 				}
-				fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\t%s\n",
+				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\t%s\n",
 					s.Slug, s.Port, app.Dash(s.Launcher), enabledLabel(s.Enabled), status, app.Dash(up), settings.SiteURL(s))
 			}
 			return tw.Flush()

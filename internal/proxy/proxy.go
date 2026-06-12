@@ -72,8 +72,8 @@ func (s *Server) buildProxy(site config.Site) *httputil.ReverseProxy {
 		},
 		ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
 			w.WriteHeader(http.StatusBadGateway)
-			fmt.Fprintf(w, "servd: %q is registered but not responding on port %d.\n", slug, port)
-			fmt.Fprintf(w, "Start it with: servd up %s\n\n(%v)\n", slug, err)
+			_, _ = fmt.Fprintf(w, "servd: %q is registered but not responding on port %d.\n", slug, port)
+			_, _ = fmt.Fprintf(w, "Start it with: servd up %s\n\n(%v)\n", slug, err)
 		},
 	}
 }
