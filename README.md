@@ -1,16 +1,24 @@
 # servd
 
+[![CI](https://github.com/reidransom/servd/actions/workflows/ci.yml/badge.svg)](https://github.com/reidransom/servd/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/reidransom/servd)](https://goreportcard.com/report/github.com/reidransom/servd)
+[![Go Reference](https://pkg.go.dev/badge/github.com/reidransom/servd.svg)](https://pkg.go.dev/github.com/reidransom/servd)
+![Go Version](https://img.shields.io/github/go-mod/go-version/reidransom/servd)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Run and manage many local dev servers at once.
 
 `servd` discovers your web projects, runs each one's dev server on a stable
-port, and reverse-proxies them as friendly nip.io subdomains — so a folder of
+port, and reverse-proxies them as friendly [nip.io](https://nip.io) subdomains — so a folder of
 client sites becomes `http://acme.127.0.0.1.nip.io:8080/`,
 `http://blog.127.0.0.1.nip.io:8080/`, and so on, all managed from one CLI or an
 interactive TUI.
 
-It is **not tied to any one generator.** jigyll/Jekyll is just one of several
-detectors; Node, Hugo, just/make recipes, plain static dirs, and any project
-with a `Procfile` work too.
+It is **not tied to any one generator.**
+[jigyll](https://github.com/reidransom/jigyll)/[Jekyll](https://jekyllrb.com)
+is just one of several detectors; [Node](https://nodejs.org),
+[Hugo](https://gohugo.io), [just](https://github.com/casey/just)/[make](https://www.gnu.org/software/make/)
+recipes, plain static dirs, and any project with a `Procfile` work too.
 
 ## Install
 
@@ -44,13 +52,15 @@ For each site, servd resolves a launch command in this order (first match wins):
 
 1. **Manual override** — a command pinned with `servd add --cmd "…"`.
 2. **`Procfile`** (or `Procfile.dev`) — the `web:` process, run with `$PORT`
-   and `$HOST` exported (foreman/Heroku convention). The universal escape hatch.
+   and `$HOST` exported ([foreman](https://github.com/ddollar/foreman)/[Heroku
+   convention](https://devcenter.heroku.com/articles/procfile)). The universal
+   escape hatch.
 3. **Auto-detection:**
    | Detector | Trigger | Command |
    |---|---|---|
    | jigyll / Jekyll | `_config.yml` | `jigyll serve -s . -H {host} -P {port} -w` |
    | Hugo | `hugo.toml` / content dir | `hugo serve --bind {host} -p {port}` |
-   | Node | `package.json` dev/serve/start script | `npm run <script>` (+`--port` for vite/next/astro) |
+   | Node | `package.json` dev/serve/start script | `npm run <script>` (+`--port` for [vite](https://vite.dev)/[next](https://nextjs.org)/[astro](https://astro.build)) |
    | just | `justfile` with `serve` recipe | `just serve` |
    | make | `Makefile` with `serve` target | `make serve PORT={port}` |
    | static | an `index.html` | built-in file server (no dependency) |
@@ -108,9 +118,14 @@ go build ./... && go vet ./... && go test ./... -race
 
 The proxy rewrites the `Host` header to the backend's own address
 (e.g. `127.0.0.1:4001`), so dev servers with host allowlists (Vite 5+, Next,
-Rails host authorization) accept proxied requests out of the box. The original
+[Rails](https://rubyonrails.org) host authorization) accept proxied requests
+out of the box. The original
 host is still available to the backend via `X-Forwarded-Host` / `X-Forwarded-Proto`.
 
 If a site builds absolute URLs from `Host` and needs the nip.io address
 instead, set `preserve_host = true` on its `[[site]]` entry in `sites.toml` —
 and add the nip.io hostname to that dev server's own allowed-hosts setting.
+
+---
+
+[MIT licensed](LICENSE). Maintained by [r2ware](https://r2ware.dev).
