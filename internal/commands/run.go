@@ -18,7 +18,7 @@ func newUpCmd() *cobra.Command {
 		Use:   "up [slug...]",
 		Short: "Start one or more sites (use --all for every site)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, _, err := load()
+			settings, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -50,7 +50,7 @@ func newDownCmd() *cobra.Command {
 		Use:   "down [slug...]",
 		Short: "Stop one or more sites (use --all for every site)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, reg, _, err := load()
+			_, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -79,7 +79,7 @@ func newRestartCmd() *cobra.Command {
 		Use:   "restart [slug...]",
 		Short: "Restart one or more sites",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, st, err := load()
+			settings, reg, st, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -119,7 +119,7 @@ func newLogsCmd() *cobra.Command {
 		Short: "Show a site's server output",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, reg, _, err := load()
+			_, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -189,7 +189,7 @@ func newOpenCmd() *cobra.Command {
 		Short: "Open a site's nip.io URL in the browser",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, _, err := load()
+			settings, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}

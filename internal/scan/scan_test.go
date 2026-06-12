@@ -54,8 +54,8 @@ func TestScan(t *testing.T) {
 	root := t.TempDir()
 	mkSite(t, root, "alpha")
 	mkSite(t, root, "beta")
-	mkSite(t, root, "node_modules")  // skipped name
-	mkSite(t, root, ".hidden")       // dot dir skipped
+	mkSite(t, root, "node_modules")   // skipped name
+	mkSite(t, root, ".hidden")        // dot dir skipped
 	mkSite(t, root, "d1", "d2", "d3") // depth 3: beyond maxDepth
 
 	reg := &config.Registry{}

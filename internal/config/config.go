@@ -96,7 +96,8 @@ func registryPath() string { return filepath.Join(ConfigDir(), "sites.toml") }
 // RegistryPath exposes the sites.toml path (used by the proxy to watch mtime).
 func RegistryPath() string { return registryPath() }
 
-// LoadSettings reads config.toml, falling back to defaults for missing fields.
+// LoadSettings reads config.toml, falling back to defaults for missing fields
+// (unmarshaling into a pre-filled Settings leaves absent keys at their default).
 func LoadSettings() (Settings, error) {
 	s := DefaultSettings()
 	data, err := os.ReadFile(settingsPath())
@@ -108,23 +109,6 @@ func LoadSettings() (Settings, error) {
 	}
 	if err := toml.Unmarshal(data, &s); err != nil {
 		return s, err
-	}
-	// Re-fill any zero values from defaults.
-	d := DefaultSettings()
-	if s.ProjectsDir == "" {
-		s.ProjectsDir = d.ProjectsDir
-	}
-	if s.PortRangeStart == 0 {
-		s.PortRangeStart = d.PortRangeStart
-	}
-	if s.ProxyPort == 0 {
-		s.ProxyPort = d.ProxyPort
-	}
-	if s.DomainSuffix == "" {
-		s.DomainSuffix = d.DomainSuffix
-	}
-	if s.BindHost == "" {
-		s.BindHost = d.BindHost
 	}
 	return s, nil
 }

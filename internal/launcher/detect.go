@@ -194,11 +194,11 @@ func detectStatic(dir string) (cmd, kind string, ok bool) {
 	if err != nil {
 		self = "servd"
 	}
-	return shellQuote(self) + " __static --host {host} --port {port} --dir .", "static", true
+	return ShellQuote(self) + " __static --host {host} --port {port} --dir .", "static", true
 }
 
-// shellQuote wraps s in single quotes, escaping embedded single quotes, so it
+// ShellQuote wraps s in single quotes, escaping embedded single quotes, so it
 // survives `sh -c`.
-func shellQuote(s string) string {
+func ShellQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }

@@ -164,7 +164,7 @@ func TestDetectStatic(t *testing.T) {
 }
 
 func TestShellQuote(t *testing.T) {
-	if got := shellQuote("/a b/it's"); got != `'/a b/it'\''s'` {
-		t.Errorf("shellQuote: got %q", got)
+	if got := ShellQuote("/a b/it's"); got != `'/a b/it'\''s'` {
+		t.Errorf("ShellQuote: got %q", got)
 	}
 }

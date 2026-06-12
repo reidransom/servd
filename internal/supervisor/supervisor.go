@@ -8,7 +8,6 @@ package supervisor
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -19,6 +18,7 @@ import (
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
+	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/state"
 )
 
@@ -42,13 +42,10 @@ func (s Status) String() string {
 	}
 }
 
-// logPath returns the per-site logfile path.
-func logPath(slug string) string {
+// LogPath returns the per-site logfile path.
+func LogPath(slug string) string {
 	return filepath.Join(config.LogDir(), slug+".log")
 }
-
-// LogPath exposes the logfile path for a slug (used by `servd logs`).
-func LogPath(slug string) string { return logPath(slug) }
 
 // Start launches the site's dev server detached. It is a no-op (no error) if
 // the site is already running.
@@ -68,7 +65,7 @@ func Start(site config.Site, settings config.Settings) error {
 	if err := os.MkdirAll(config.LogDir(), 0o755); err != nil {
 		return err
 	}
-	logf, err := os.OpenFile(logPath(site.Slug), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	logf, err := os.OpenFile(LogPath(site.Slug), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}
@@ -107,7 +104,7 @@ func Start(site config.Site, settings config.Settings) error {
 	go func() { waited <- cmd.Wait() }()
 	select {
 	case werr := <-waited:
-		tail := lastLines(logPath(site.Slug), 12)
+		tail := lastLines(LogPath(site.Slug), 12)
 		if tail != "" {
 			return fmt.Errorf("%s exited on startup (%v):\n%s", site.Slug, werr, tail)
 		}
@@ -129,7 +126,7 @@ func Start(site config.Site, settings config.Settings) error {
 			PGID:      pgid,
 			Port:      site.Port,
 			Cmd:       res.Cmd,
-			Log:       logPath(site.Slug),
+			Log:       LogPath(site.Slug),
 			StartedAt: time.Now(),
 		}
 		return nil
@@ -150,28 +147,29 @@ func Stop(slug string) error {
 	if !ok {
 		return nil
 	}
+	// SIGTERM with a grace period, then force-kill. A SIGKILL survivor (e.g.
+	// stuck in uninterruptible sleep) keeps its entry so `up` can't double-start.
 	signalGroup(e.PGID, e.PID, syscall.SIGTERM)
-
-	// Wait up to ~5s for graceful exit, then force-kill.
-	deadline := time.Now().Add(5 * time.Second)
-	for time.Now().Before(deadline) {
-		if !state.EntryAlive(e) {
-			return state.Delete(slug)
-		}
-		time.Sleep(100 * time.Millisecond)
+	if waitDead(e, 5*time.Second) {
+		return state.Delete(slug)
 	}
 	signalGroup(e.PGID, e.PID, syscall.SIGKILL)
+	if waitDead(e, 2*time.Second) {
+		return state.Delete(slug)
+	}
+	return fmt.Errorf("%s (pid %d) survived SIGKILL; keeping its state entry", slug, e.PID)
+}
 
-	// Confirm the kill landed before dropping the entry; a survivor (e.g.
-	// stuck in uninterruptible sleep) keeps its entry so `up` can't double-start.
-	deadline = time.Now().Add(2 * time.Second)
+// waitDead polls until e's process dies or the timeout elapses.
+func waitDead(e state.Entry, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		if !state.EntryAlive(e) {
-			return state.Delete(slug)
+			return true
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	return fmt.Errorf("%s (pid %d) survived SIGKILL; keeping its state entry", slug, e.PID)
+	return false
 }
 
 // signalGroup signals the process group if pgid is valid, else the pid.
@@ -198,7 +196,7 @@ func StatusOf(site config.Site, st *state.State) Status {
 	if !ok || !state.EntryAlive(e) {
 		return Stopped
 	}
-	if portAccepting(site.Port) {
+	if netcheck.PortAccepting("127.0.0.1", site.Port) {
 		return Running
 	}
 	return Starting
@@ -215,16 +213,6 @@ func lastLines(path string, n int) string {
 		lines = lines[len(lines)-n:]
 	}
 	return strings.Join(lines, "\n")
-}
-
-// portAccepting reports whether something is listening on 127.0.0.1:port.
-func portAccepting(port int) bool {
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), 200*time.Millisecond)
-	if err != nil {
-		return false
-	}
-	conn.Close()
-	return true
 }
 
 // Uptime returns how long the site has been running, or 0 if stopped.

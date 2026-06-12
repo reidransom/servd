@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/proxy"
 	"github.com/spf13/cobra"
 )
@@ -12,7 +13,7 @@ func newProxyCmd() *cobra.Command {
 		Use:   "proxy",
 		Short: "Run the nip.io reverse proxy (foreground)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, _, _, err := load()
+			settings, _, _, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -30,7 +31,7 @@ func newProxyUpCmd() *cobra.Command {
 		Use:   "up",
 		Short: "Start the reverse proxy in the background",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, _, st, err := load()
+			settings, _, st, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -67,7 +68,7 @@ func newProxyStatusCmd() *cobra.Command {
 		Use:   "status",
 		Short: "Show whether the reverse proxy is running",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, _, st, err := load()
+			settings, _, st, err := app.Load()
 			if err != nil {
 				return err
 			}

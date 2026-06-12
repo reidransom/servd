@@ -236,6 +236,31 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// action marks the model busy with a status line and runs fn asynchronously,
+// delivering its actionDoneMsg back into Update.
+func (m *model) action(status string, fn func() actionDoneMsg) (tea.Model, tea.Cmd) {
+	m.busy = true
+	m.status = status
+	return m, func() tea.Msg { return fn() }
+}
+
+// bulkAction applies do to each site, reporting the success count and the
+// first error encountered.
+func bulkAction(verb string, sites []config.Site, do func(config.Site) error) actionDoneMsg {
+	n := 0
+	var firstErr error
+	for _, s := range sites {
+		if err := do(s); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
+		}
+		n++
+	}
+	return actionDoneMsg{verb: verb, n: n, bulk: true, err: firstErr}
+}
+
 func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.mode == modeLogs {
 		switch msg.String() {
@@ -253,79 +278,44 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	case "s":
 		if s := m.selectedSite(); s != nil && !m.busy {
-			site := *s
-			m.busy = true
-			m.status = "starting " + site.Slug + "…"
-			settings := m.settings
-			return m, func() tea.Msg {
-				err := supervisor.Start(site, settings)
-				return actionDoneMsg{verb: "started", slug: site.Slug, err: err}
-			}
+			site, settings := *s, m.settings
+			return m.action("starting "+site.Slug+"…", func() actionDoneMsg {
+				return actionDoneMsg{verb: "started", slug: site.Slug, err: supervisor.Start(site, settings)}
+			})
 		}
 	case "x":
 		if s := m.selectedSite(); s != nil && !m.busy {
 			slug := s.Slug
-			m.busy = true
-			m.status = "stopping " + slug + "…"
-			return m, func() tea.Msg {
-				err := supervisor.Stop(slug)
-				return actionDoneMsg{verb: "stopped", slug: slug, err: err}
-			}
+			return m.action("stopping "+slug+"…", func() actionDoneMsg {
+				return actionDoneMsg{verb: "stopped", slug: slug, err: supervisor.Stop(slug)}
+			})
 		}
 	case "r":
 		if s := m.selectedSite(); s != nil && !m.busy {
-			site := *s
-			m.busy = true
-			m.status = "restarting " + site.Slug + "…"
-			settings := m.settings
-			return m, func() tea.Msg {
-				err := supervisor.Restart(site, settings)
-				return actionDoneMsg{verb: "restarted", slug: site.Slug, err: err}
-			}
+			site, settings := *s, m.settings
+			return m.action("restarting "+site.Slug+"…", func() actionDoneMsg {
+				return actionDoneMsg{verb: "restarted", slug: site.Slug, err: supervisor.Restart(site, settings)}
+			})
 		}
 	case "a":
 		if !m.busy {
-			sites := append([]config.Site(nil), m.reg.Sites...)
-			settings := m.settings
-			m.busy = true
-			m.status = "starting enabled sites…"
-			return m, func() tea.Msg {
-				n := 0
-				var firstErr error
-				for _, s := range sites {
-					if !s.Enabled {
-						continue
-					}
-					if err := supervisor.Start(s, settings); err != nil {
-						if firstErr == nil {
-							firstErr = err
-						}
-						continue
-					}
-					n++
+			var sites []config.Site
+			for _, s := range m.reg.Sites {
+				if s.Enabled {
+					sites = append(sites, s)
 				}
-				return actionDoneMsg{verb: "started", n: n, bulk: true, err: firstErr}
 			}
+			settings := m.settings
+			return m.action("starting enabled sites…", func() actionDoneMsg {
+				return bulkAction("started", sites, func(s config.Site) error { return supervisor.Start(s, settings) })
+			})
 		}
 	case "X":
 		if !m.busy {
 			sites := append([]config.Site(nil), m.reg.Sites...)
-			m.busy = true
-			m.status = "stopping all…"
-			return m, func() tea.Msg {
-				n := 0
-				var firstErr error
-				for _, s := range sites {
-					if err := supervisor.Stop(s.Slug); err != nil {
-						if firstErr == nil {
-							firstErr = err
-						}
-						continue
-					}
-					n++
-				}
-				return actionDoneMsg{verb: "stopped", n: n, bulk: true, err: firstErr}
-			}
+			return m.action("stopping all…", func() actionDoneMsg {
+				return bulkAction("stopped", sites, func(s config.Site) error { return supervisor.Stop(s.Slug) })
+			})
 		}
 	case "e":
 		if s := m.selectedSite(); s != nil {
@@ -373,25 +363,20 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if m.busy {
 			break
 		}
-		running := m.proxyRunning
-		settings := m.settings
-		m.busy = true
+		running, settings := m.proxyRunning, m.settings
+		status, verb := "starting proxy…", "proxy started"
 		if running {
-			m.status = "stopping proxy…"
-		} else {
-			m.status = "starting proxy…"
+			status, verb = "stopping proxy…", "proxy stopped"
 		}
-		return m, func() tea.Msg {
+		return m.action(status, func() actionDoneMsg {
 			var err error
-			verb := "proxy started"
 			if running {
-				verb = "proxy stopped"
 				err = proxy.StopBackground()
 			} else {
 				err = proxy.StartBackground(settings)
 			}
 			return actionDoneMsg{verb: verb, err: err}
-		}
+		})
 	case "l":
 		if s := m.selectedSite(); s != nil {
 			m.mode = modeLogs

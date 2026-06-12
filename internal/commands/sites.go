@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"text/tabwriter"
 
 	"github.com/reidransom/servd/internal/app"
@@ -122,13 +123,7 @@ func newRmCmd() *cobra.Command {
 			// Stop outside the registry lock — it can take several seconds.
 			_ = supervisor.Stop(slug)
 			err = config.MutateRegistry(func(reg *config.Registry) error {
-				out := reg.Sites[:0]
-				for _, s := range reg.Sites {
-					if s.Slug != slug {
-						out = append(out, s)
-					}
-				}
-				reg.Sites = out
+				reg.Sites = slices.DeleteFunc(reg.Sites, func(s config.Site) bool { return s.Slug == slug })
 				return nil
 			})
 			if err != nil {
@@ -146,7 +141,7 @@ func newWhichCmd() *cobra.Command {
 		Short: "Show the resolved launch command for a site",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, _, err := load()
+			settings, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -174,7 +169,7 @@ func newStatusCmd() *cobra.Command {
 		Aliases: []string{"ls"},
 		Short:   "List sites with their port, URL, launcher and live status",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, st, err := load()
+			settings, reg, st, err := app.Load()
 			if err != nil {
 				return err
 			}

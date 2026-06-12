@@ -174,7 +174,7 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 	} else {
 		b.WriteString("<ul>")
 		for _, site := range sites {
-			u := fmt.Sprintf("http://%s.%s:%d/", site.Slug, s.settings.DomainSuffix, s.settings.ProxyPort)
+			u := s.settings.SiteURL(site)
 			b.WriteString("<li><a href=\"" + html.EscapeString(u) + "\">" + html.EscapeString(site.Slug) + "</a> ")
 			b.WriteString(fmt.Sprintf(`<span class="port">:%d</span> `, site.Port))
 			if site.Launcher != "" {

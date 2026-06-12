@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/tui"
 	"github.com/spf13/cobra"
@@ -30,7 +31,7 @@ func newDoctorCmd() *cobra.Command {
 		Use:   "doctor",
 		Short: "Check tools, ports and nip.io resolution",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, _, err := load()
+			settings, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}

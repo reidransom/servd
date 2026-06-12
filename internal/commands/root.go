@@ -4,9 +4,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
-	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/tui"
 	"github.com/spf13/cobra"
 )
@@ -47,11 +45,6 @@ func newRootCmd() *cobra.Command {
 		newStaticCmd(),
 	)
 	return root
-}
-
-// load reads settings, registry and reconciled runtime state.
-func load() (config.Settings, *config.Registry, *state.State, error) {
-	return app.Load()
 }
 
 // selectSites resolves command args (slugs) plus an --all flag into sites.
