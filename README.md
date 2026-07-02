@@ -91,10 +91,17 @@ resolves to.
 | `servd doctor` | check tools, ports and nip.io resolution |
 | `servd` / `servd tui` | interactive dashboard |
 
+The dashboard is a split view: the site list on the left, and a live tail of
+the highlighted site's log on the right, led by the `$ command` that started
+(or would start) it. Moving the selection switches the log panel; `tab` moves
+focus to the log so `↑/↓` scroll it (scroll up to pause the tail, scroll back to
+the bottom to resume following).
+
 ### TUI keys
 
-`↑/↓` move · `s` start · `x` stop · `r` restart · `a` start-all · `X` stop-all ·
-`e` enable/disable · `l` logs · `o` open · `p` toggle proxy · `S` rescan · `q` quit
+`↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
+`a` start-all · `X` stop-all · `e` enable/disable · `o` open · `p` toggle proxy ·
+`S` rescan · `q` quit
 
 ## Files
 

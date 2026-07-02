@@ -15,6 +15,7 @@ import (
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/scan"
 	"github.com/reidransom/servd/internal/state"
@@ -31,11 +32,11 @@ func Run() error {
 	return err
 }
 
-type mode int
+type focus int
 
 const (
-	modeTable mode = iota
-	modeLogs
+	focusList focus = iota
+	focusLog
 )
 
 type tickMsg struct{}
@@ -70,8 +71,9 @@ type model struct {
 
 	table    table.Model
 	slugs    []string // parallel to table rows
-	mode     mode
-	logSlug  string
+	focus    focus
+	logSlug  string            // site the log panel is currently showing
+	cmdCache map[string]string // slug -> resolved launch command (for stopped sites)
 	viewport viewport.Model
 
 	proxyRunning bool
@@ -89,7 +91,18 @@ var (
 	offStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	statusStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#bb9af7"))
 	errStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("203"))
+
+	boxStyle      = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240"))
+	boxFocusStyle = boxStyle.BorderForeground(lipgloss.Color("#7aa2f7"))
 )
+
+// box returns the bordered-box style for a pane, highlighted when focused.
+func box(focused bool) lipgloss.Style {
+	if focused {
+		return boxFocusStyle
+	}
+	return boxStyle
+}
 
 func newModel() (*model, error) {
 	settings, reg, st, err := app.Load()
@@ -97,12 +110,9 @@ func newModel() (*model, error) {
 		return nil, err
 	}
 	cols := []table.Column{
-		{Title: "SLUG", Width: 20},
-		{Title: "PORT", Width: 6},
-		{Title: "LAUNCHER", Width: 12},
-		{Title: "EN", Width: 4},
-		{Title: "STATUS", Width: 9},
-		{Title: "UPTIME", Width: 8},
+		{Title: "SLUG", Width: 16},
+		{Title: "PORT", Width: 5},
+		{Title: "", Width: 2}, // status glyph
 	}
 	t := table.New(
 		table.WithColumns(cols),
@@ -114,8 +124,9 @@ func newModel() (*model, error) {
 	s.Selected = s.Selected.Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("#7aa2f7"))
 	t.SetStyles(s)
 
-	m := &model{settings: settings, reg: reg, st: st, table: t, viewport: viewport.New(80, 20)}
+	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, viewport: viewport.New(80, 20)}
 	m.applyStatuses(buildStatuses(reg, st))
+	m.syncLogSelection()
 	return m, nil
 }
 
@@ -126,16 +137,14 @@ func buildStatuses(reg *config.Registry, st *state.State) statusesMsg {
 	rows := make([]table.Row, 0, len(reg.Sites))
 	slugs := make([]string, 0, len(reg.Sites))
 	for _, s := range reg.Sites {
-		stat := supervisor.StatusOf(s, st)
-		up := ""
-		if d := supervisor.Uptime(s.Slug, st); d > 0 {
-			up = app.FmtDuration(d)
+		glyph := "○"
+		switch supervisor.StatusOf(s, st) {
+		case supervisor.Running:
+			glyph = "●"
+		case supervisor.Starting:
+			glyph = "◐"
 		}
-		en := "✓"
-		if !s.Enabled {
-			en = "·"
-		}
-		rows = append(rows, table.Row{s.Slug, strconv.Itoa(s.Port), app.Dash(s.Launcher), en, stat.String(), app.Dash(up)})
+		rows = append(rows, table.Row{s.Slug, strconv.Itoa(s.Port), glyph})
 		slugs = append(slugs, s.Slug)
 	}
 	return statusesMsg{reg: reg, st: st, rows: rows, slugs: slugs, proxyRunning: running}
@@ -175,6 +184,36 @@ func (m *model) applyStatuses(msg statusesMsg) {
 	m.table.SetCursor(cur)
 }
 
+// sidebarWidth is the rendered width of the site-list table (fixed columns +
+// lipgloss cell padding), used to size the log viewport so the two bordered
+// boxes tile exactly across the terminal.
+func (m *model) sidebarWidth() int {
+	return lipgloss.Width(m.table.View())
+}
+
+// logCmd returns the shell command that launched (or would launch) the site
+// shown in the log panel: the live command when it's running, otherwise the
+// resolved launch command. Resolution hits the filesystem, so it's cached.
+func (m *model) logCmd() string {
+	if m.logSlug == "" {
+		return ""
+	}
+	if e, ok := m.st.Get(m.logSlug); ok && e.Cmd != "" {
+		return e.Cmd
+	}
+	if c, ok := m.cmdCache[m.logSlug]; ok {
+		return c
+	}
+	c := ""
+	if s := m.reg.Find(m.logSlug); s != nil {
+		if res, err := launcher.Resolve(*s, m.settings); err == nil {
+			c = res.Cmd
+		}
+	}
+	m.cmdCache[m.logSlug] = c
+	return c
+}
+
 func (m *model) selectedSite() *config.Site {
 	if len(m.slugs) == 0 {
 		return nil
@@ -192,18 +231,22 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
-		// Table mode renders 5 lines outside the table: title + blank (2),
-		// selected-site URL (1), proxy/status (1), help (1).
-		m.table.SetHeight(max(5, msg.Height-5))
-		m.viewport.Width = msg.Width
-		// Logs mode renders 1 line outside the viewport: the title/help header.
-		m.viewport.Height = max(5, msg.Height-1)
+		// Rows rendered outside the panes: title (1), footer detail (1),
+		// help (1) = 3. Each bordered box also eats 2 rows (top+bottom border),
+		// so the panes' inner content gets height-3-2.
+		inner := max(5, msg.Height-5)
+		m.table.SetHeight(inner)
+		// The sidebar box hugs the table's rendered width; both boxes add 2 cols
+		// of border, so the log viewport gets whatever's left.
+		m.viewport.Width = max(20, msg.Width-m.sidebarWidth()-4)
+		// One row inside the log box is the "$ command" header, so the viewport
+		// gets inner-1 and both boxes still render `inner` content rows.
+		m.viewport.Height = max(4, inner-1)
 		return m, nil
 
 	case tickMsg:
-		if m.mode == modeLogs {
-			m.loadLog()
-		}
+		m.syncLogSelection() // swap the panel if the highlighted slug changed
+		m.loadLog()          // tail the selected site's log
 		return m, tea.Batch(refreshCmd(), tick())
 
 	case statusesMsg:
@@ -228,9 +271,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleKey(msg)
 	}
 
-	// Delegate to the active widget.
+	// Delegate to the focused widget.
 	var cmd tea.Cmd
-	if m.mode == modeLogs {
+	if m.focus == focusLog {
 		m.viewport, cmd = m.viewport.Update(msg)
 	} else {
 		m.table, cmd = m.table.Update(msg)
@@ -264,20 +307,16 @@ func bulkAction(verb string, sites []config.Site, do func(config.Site) error) ac
 }
 
 func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if m.mode == modeLogs {
-		switch msg.String() {
-		case "q", "esc", "l":
-			m.mode = modeTable
-			return m, nil
-		}
-		var cmd tea.Cmd
-		m.viewport, cmd = m.viewport.Update(msg)
-		return m, cmd
-	}
-
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Quit
+	case "tab":
+		if m.focus == focusList {
+			m.focus = focusLog
+		} else {
+			m.focus = focusList
+		}
+		return m, nil
 	case "s":
 		if s := m.selectedSite(); s != nil && !m.busy {
 			site, settings := *s, m.settings
@@ -360,6 +399,7 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.status = fmt.Sprintf("scan: +%d site(s)", len(added))
+		m.cmdCache = map[string]string{}
 		return m, refreshCmd()
 	case "p":
 		if m.busy {
@@ -379,54 +419,102 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 			return actionDoneMsg{verb: verb, err: err}
 		})
-	case "l":
-		if s := m.selectedSite(); s != nil {
-			m.mode = modeLogs
-			m.logSlug = s.Slug
-			m.loadLog()
-		}
 	}
 
+	// Unhandled keys go to the focused widget.
+	if m.focus == focusLog {
+		var cmd tea.Cmd
+		m.viewport, cmd = m.viewport.Update(msg)
+		return m, cmd
+	}
 	var cmd tea.Cmd
 	m.table, cmd = m.table.Update(msg)
+	m.syncLogSelection() // re-point the panel if the cursor moved
 	return m, cmd
 }
 
-func (m *model) loadLog() {
-	data, err := os.ReadFile(supervisor.LogPath(m.logSlug))
-	if err != nil {
-		m.viewport.SetContent("(no logs yet for " + m.logSlug + ")")
+// syncLogSelection points the log panel at the highlighted site, resetting
+// scroll to the bottom when the selection actually changed.
+func (m *model) syncLogSelection() {
+	slug := ""
+	if s := m.selectedSite(); s != nil {
+		slug = s.Slug
+	}
+	if slug == m.logSlug {
 		return
 	}
-	m.viewport.SetContent(string(data))
+	m.logSlug = slug
+	m.loadLog()
 	m.viewport.GotoBottom()
 }
 
+// loadLog reads the selected site's logfile into the viewport. It preserves the
+// user's scroll position unless they were already at the bottom, in which case
+// it stays pinned there (tail/follow).
+func (m *model) loadLog() {
+	if m.logSlug == "" {
+		m.viewport.SetContent(dimStyle.Render("(no site selected)"))
+		return
+	}
+	follow := m.viewport.AtBottom()
+	data, err := os.ReadFile(supervisor.LogPath(m.logSlug))
+	if err != nil {
+		m.viewport.SetContent(dimStyle.Render("(no logs yet for " + m.logSlug + ")"))
+		return
+	}
+	m.viewport.SetContent(string(data))
+	if follow {
+		m.viewport.GotoBottom()
+	}
+}
+
 func (m *model) View() string {
-	if m.mode == modeLogs {
-		head := titleStyle.Render("logs: "+m.logSlug) + "  " + helpStyle.Render("↑/↓ scroll · q/l back")
-		return head + "\n" + m.viewport.View()
-	}
-
 	var b strings.Builder
-	b.WriteString(titleStyle.Render("servd") + dimStyle.Render(" — local dev servers") + "\n\n")
 
-	if len(m.reg.Sites) == 0 {
-		b.WriteString(dimStyle.Render("No sites registered. Press ") + "S" + dimStyle.Render(" to scan ") + m.settings.ProjectsDir + "\n\n")
-	} else {
-		b.WriteString(m.table.View() + "\n")
-	}
-
-	// Selected site URL.
-	if s := m.selectedSite(); s != nil {
-		b.WriteString(dimStyle.Render("→ ") + m.settings.SiteURL(*s) + "\n")
-	}
-
-	// Proxy line.
+	// Title row: name on the left, proxy status on the right.
+	left := titleStyle.Render("servd") + dimStyle.Render(" — local dev servers")
+	var right string
 	if m.proxyRunning {
-		b.WriteString(okStyle.Render("● proxy on") + dimStyle.Render(fmt.Sprintf(" :%d  *.%s", m.settings.ProxyPort, m.settings.DomainSuffix)))
+		right = okStyle.Render("● proxy on") + dimStyle.Render(fmt.Sprintf(" :%d *.%s", m.settings.ProxyPort, m.settings.DomainSuffix))
 	} else {
-		b.WriteString(offStyle.Render("○ proxy off") + dimStyle.Render("  press p to start"))
+		right = offStyle.Render("○ proxy off") + dimStyle.Render("  press p")
+	}
+	b.WriteString(rowLR(left, right, m.width) + "\n")
+
+	// Panes: site list on the left, live log tail on the right.
+	var sidebar string
+	if len(m.reg.Sites) == 0 {
+		hint := dimStyle.Render("No sites.\nPress S to scan:\n" + m.settings.ProjectsDir)
+		sidebar = box(m.focus == focusList).Width(m.sidebarWidth()).Height(m.viewport.Height).Render(hint)
+	} else {
+		sidebar = box(m.focus == focusList).Render(m.table.View())
+	}
+	// The log pane leads with the command that started the site, then its tail.
+	cmd := m.logCmd()
+	if cmd == "" {
+		cmd = "(unknown)"
+	}
+	header := lipgloss.NewStyle().MaxWidth(m.viewport.Width).Render(dimStyle.Render("$ ") + cmd)
+	logPane := box(m.focus == focusLog).Render(header + "\n" + m.viewport.View())
+	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, sidebar, logPane) + "\n")
+
+	// Footer detail: selected-site URL + the launcher/uptime/enabled facts the
+	// sidebar no longer shows, then any transient status message.
+	if s := m.selectedSite(); s != nil {
+		b.WriteString(dimStyle.Render("→ ") + m.settings.SiteURL(*s))
+		var meta []string
+		if s.Launcher != "" {
+			meta = append(meta, s.Launcher)
+		}
+		if d := supervisor.Uptime(s.Slug, m.st); d > 0 {
+			meta = append(meta, "up "+app.FmtDuration(d))
+		}
+		if !s.Enabled {
+			meta = append(meta, "disabled")
+		}
+		if len(meta) > 0 {
+			b.WriteString(dimStyle.Render("  (" + strings.Join(meta, " · ") + ")"))
+		}
 	}
 	if m.status != "" {
 		style := statusStyle
@@ -436,8 +524,18 @@ func (m *model) View() string {
 		b.WriteString("   " + style.Render(m.status))
 	}
 	b.WriteString("\n")
-	b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/disable · l logs · o open · p proxy · S scan · q quit"))
+	b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · S scan · tab focus · q quit"))
 	return b.String()
+}
+
+// rowLR lays out left- and right-justified segments across width, accounting
+// for ANSI styling when measuring.
+func rowLR(left, right string, width int) string {
+	gap := width - lipgloss.Width(left) - lipgloss.Width(right)
+	if gap < 1 {
+		gap = 1
+	}
+	return left + strings.Repeat(" ", gap) + right
 }
 
 // firstLine truncates a (possibly multi-line) error message for the status bar.
