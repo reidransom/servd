@@ -192,9 +192,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
-		m.table.SetHeight(max(5, msg.Height-7))
+		// Table mode renders 5 lines outside the table: title + blank (2),
+		// selected-site URL (1), proxy/status (1), help (1).
+		m.table.SetHeight(max(5, msg.Height-5))
 		m.viewport.Width = msg.Width
-		m.viewport.Height = max(5, msg.Height-5)
+		// Logs mode renders 1 line outside the viewport: the title/help header.
+		m.viewport.Height = max(5, msg.Height-1)
 		return m, nil
 
 	case tickMsg:
