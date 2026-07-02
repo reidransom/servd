@@ -28,7 +28,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	_, err = tea.NewProgram(m, tea.WithAltScreen()).Run()
+	_, err = tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
 	return err
 }
 
@@ -271,6 +271,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		return m.handleKey(msg)
+
+	case tea.MouseMsg:
+		return m.handleMouse(msg)
 	}
 
 	// Delegate to the focused widget.
@@ -433,6 +436,49 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	m.table, cmd = m.table.Update(msg)
 	m.syncLogSelection() // re-point the panel if the cursor moved
 	return m, cmd
+}
+
+// firstRowY is the terminal row of the first site row in the sidebar: the
+// title (1) + the box's top border (1) + the table header (1) sit above it.
+const firstRowY = 3
+
+// handleMouse routes clicks and wheel events to the pane under the pointer:
+// clicking a site row selects it (and shows its log), clicking either pane
+// focuses it, and the wheel scrolls whichever pane it's over.
+func (m *model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	overLog := msg.X >= m.sidebarWidth()
+
+	switch msg.Button {
+	case tea.MouseButtonWheelUp, tea.MouseButtonWheelDown:
+		if overLog {
+			var cmd tea.Cmd
+			m.viewport, cmd = m.viewport.Update(msg)
+			return m, cmd
+		}
+		// The table itself ignores mouse events, so drive its cursor directly;
+		// moving it re-points the log panel via syncLogSelection.
+		if msg.Button == tea.MouseButtonWheelUp {
+			m.table.MoveUp(1)
+		} else {
+			m.table.MoveDown(1)
+		}
+		m.syncLogSelection()
+		return m, nil
+	}
+
+	if msg.Button != tea.MouseButtonLeft || msg.Action != tea.MouseActionPress {
+		return m, nil
+	}
+	if overLog {
+		m.focus = focusLog
+		return m, nil
+	}
+	m.focus = focusList
+	if idx := msg.Y - firstRowY; idx >= 0 && idx < len(m.slugs) {
+		m.table.SetCursor(idx)
+		m.syncLogSelection()
+	}
+	return m, nil
 }
 
 // syncLogSelection points the log panel at the highlighted site, resetting
