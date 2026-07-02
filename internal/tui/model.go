@@ -89,6 +89,8 @@ var (
 	helpStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	okStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("42"))
 	offStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	followStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("42"))
+	pausedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#e0af68"))
 	statusStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#bb9af7"))
 	errStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("203"))
 
@@ -494,7 +496,17 @@ func (m *model) View() string {
 	if cmd == "" {
 		cmd = "(unknown)"
 	}
-	header := lipgloss.NewStyle().MaxWidth(m.viewport.Width).Render(dimStyle.Render("$ ") + cmd)
+	// Tail indicator: green LIVE when pinned to the bottom (new lines stream in),
+	// amber scroll-percent when the user has scrolled back into history.
+	var badge string
+	if m.viewport.AtBottom() {
+		badge = followStyle.Render("▼ LIVE")
+	} else {
+		badge = pausedStyle.Render(fmt.Sprintf("↑ %d%%", int(m.viewport.ScrollPercent()*100)))
+	}
+	cmdCell := lipgloss.NewStyle().MaxWidth(max(1, m.viewport.Width-lipgloss.Width(badge)-1)).
+		Render(dimStyle.Render("$ ") + cmd)
+	header := rowLR(cmdCell, badge, m.viewport.Width)
 	logPane := box(m.focus == focusLog).Render(header + "\n" + m.viewport.View())
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, sidebar, logPane) + "\n")
 
