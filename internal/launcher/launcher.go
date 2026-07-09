@@ -4,13 +4,17 @@
 // Resolution order (first match wins):
 //
 //  1. Manual override — a non-empty Cmd on the site (set via `servd add --cmd`).
-//  2. Procfile / Procfile.dev — the "web" process (or first), run via $PORT/$HOST.
-//  3. Auto-detected convention — jigyll, hugo, node, just, make, static.
+//  2. .servd.toml — a `cmd = "..."` declared in the project directory itself.
+//  3. Procfile / Procfile.dev — the "web" process (or first), run via $PORT/$HOST.
+//  4. Launcher rules — declarative match-and-run rules, tried in order: user
+//     rules from ~/.config/servd/launchers.toml first, then the built-in
+//     defaults embedded from defaults.toml (jigyll, hugo, node, just, make,
+//     static). See the Rule type; `servd launchers` prints the effective set.
 //
 // Port/host injection is unified across all kinds: the supervisor always
 // exports PORT and HOST into the child environment, and this package also
 // substitutes {port}/{host} placeholders in template commands. Procfiles use
-// $PORT; detectors use {port} flags; both work.
+// $PORT; rules use {port} flags; both work.
 package launcher
 
 import (
@@ -28,31 +32,19 @@ type Resolved struct {
 	Dir  string // working directory (the project path)
 }
 
-// detectors are tried in order; the first that claims the dir wins.
-var detectors = []func(dir string) (cmd, kind string, ok bool){
-	detectJigyll,
-	detectHugo,
-	detectNode,
-	detectJust,
-	detectMake,
-	detectStatic,
-}
-
-// resolveDir resolves a directory without a manual override: Procfile first,
-// then the auto-detectors. The returned cmd still contains {port}/{host}
-// placeholders.
+// resolveDir resolves a directory without a manual override: .servd.toml,
+// then Procfile, then the launcher rules. The returned cmd still contains
+// {port}/{host} placeholders.
 func resolveDir(dir string) (cmd, kind string, ok bool) {
+	if cmd, ok := readProjectCmd(dir); ok {
+		return cmd, "project", true
+	}
 	if entries := readProcfile(dir); len(entries) > 0 {
 		if e, found := webProcess(entries); found {
 			return e.Cmd, "procfile", true
 		}
 	}
-	for _, detect := range detectors {
-		if cmd, kind, ok := detect(dir); ok {
-			return cmd, kind, true
-		}
-	}
-	return "", "", false
+	return matchRules(dir, EffectiveRules())
 }
 
 // Servable reports whether a directory can be resolved to a launch command
@@ -73,7 +65,7 @@ func Resolve(site config.Site, settings config.Settings) (Resolved, error) {
 		return Resolved{Cmd: subst(site.Cmd, host, port), Kind: "manual", Dir: dir}, nil
 	}
 
-	// 2. Procfile, then auto-detect.
+	// 2. .servd.toml, Procfile, then the launcher rules.
 	if cmd, kind, ok := resolveDir(dir); ok {
 		return Resolved{Cmd: subst(cmd, host, port), Kind: kind, Dir: dir}, nil
 	}

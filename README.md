@@ -51,12 +51,17 @@ Then visit `http://<slug>.127.0.0.1.nip.io:8080/` for any site, or
 For each site, servd resolves a launch command in this order (first match wins):
 
 1. **Manual override** — a command pinned with `servd add --cmd "…"`.
-2. **`Procfile`** (or `Procfile.dev`) — the `web:` process, run with `$PORT`
+2. **`.servd.toml`** in the project directory — a one-line
+   `cmd = "bundle exec middleman serve -p {port}"` lets any project declare how
+   to serve itself, next to its code.
+3. **`Procfile`** (or `Procfile.dev`) — the `web:` process, run with `$PORT`
    and `$HOST` exported ([foreman](https://github.com/ddollar/foreman)/[Heroku
    convention](https://devcenter.heroku.com/articles/procfile)). The universal
    escape hatch.
-3. **Auto-detection:**
-   | Detector | Trigger | Command |
+4. **Launcher rules** — declarative match-and-run rules, tried in order. Your
+   own rules from `~/.config/servd/launchers.toml` come first, then the
+   built-in defaults:
+   | Rule | Trigger | Command |
    |---|---|---|
    | jigyll / Jekyll | `_config.yml` | `jigyll serve -s . -H {host} -P {port} -w` |
    | Hugo | `hugo.toml` / content dir | `hugo serve --bind {host} -p {port}` |
@@ -66,9 +71,48 @@ For each site, servd resolves a launch command in this order (first match wins):
    | static | an `index.html` | built-in file server (no dependency) |
 
 `PORT` and `HOST` are always exported to the child, and `{port}`/`{host}`
-placeholders are substituted — so Procfiles and detected commands share one
+placeholders are substituted — so Procfiles and rule commands share one
 port-injection mechanism. Run `servd which <slug>` to see exactly what a project
 resolves to.
+
+### Custom launcher rules
+
+The built-in table above is data, not code — every rule is defined in the same
+TOML format you can write yourself. `servd launchers` prints the effective rule
+set; copy any rule into `~/.config/servd/launchers.toml` to change it (same
+`name` replaces the built-in, `disabled = true` turns it off), or add rules for
+tools servd has never heard of:
+
+```toml
+[[launcher]]
+name = "middleman"
+matches = { file = "Gemfile", regex = "middleman" }   # file content regex
+bin = "middleman"                                     # required on PATH
+cmd = "bundle exec middleman serve -p {port}"
+
+[[launcher]]
+name = "static"        # replace the built-in fallback file server
+exists = ["index.html"]
+bin = "python3"
+cmd = "python3 -m http.server -b {host} {port}"
+```
+
+User rules are always tried before the built-ins, in file order. A rule matches
+a directory when **all** of its predicates hold; list values match **any-of**:
+
+| Predicate | Meaning |
+|---|---|
+| `exists = ["hugo.*"]` | any file matches (globs ok) |
+| `dirs = ["content"]` | any directory matches (globs ok) |
+| `bin = "hugo"` | binary is on `PATH` |
+| `recipe = { files = ["justfile"], target = "serve" }` | make/just file declares the target |
+| `matches = { file = "Gemfile", regex = "…" }` | file content matches the regex |
+| `npm_script = ["dev", "serve"]` | `package.json` has one of these scripts |
+
+In `cmd`, `{port}`/`{host}` are substituted at launch, `{script}` is the
+matched `npm_script` entry, and `{self}` is the servd binary itself. For dev
+servers that ignore `$PORT`, `port_flag = " -- --port {port}"` is appended when
+any `port_flag_deps` entry appears in `package.json` dependencies.
 
 ## Commands
 
@@ -78,6 +122,7 @@ resolves to.
 | `servd add <path> [--slug] [--port] [--cmd]` | register one project |
 | `servd rm <slug>` | stop and unregister a site |
 | `servd which <slug>` | show the resolved launch command |
+| `servd launchers` | print the effective launcher rules (yours + built-ins) |
 | `servd status` (alias `ls`) | table of every site with live status |
 | `servd up [slug…] [--all]` | start sites (`--all` skips disabled ones) |
 | `servd down [slug…] [--all]` | stop sites (`--all` stops everything) |
@@ -108,6 +153,8 @@ the bottom to resume following).
 - `~/.config/servd/config.toml` — settings (`projects_dir`, `port_range_start`,
   `proxy_port`, `domain_suffix`, `bind_host`, `default_enabled`)
 - `~/.config/servd/sites.toml` — the site registry
+- `~/.config/servd/launchers.toml` — your launcher rules (optional, see above)
+- `<project>/.servd.toml` — per-project launch command (optional)
 - `~/.local/state/servd/state.json` — live pids/ports (self-healing)
 - `~/.local/state/servd/logs/<slug>.log` — per-site server output
 

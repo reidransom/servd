@@ -22,6 +22,7 @@ func testSettings() config.Settings {
 }
 
 func TestResolveManualOverridesProcfile(t *testing.T) {
+	isolateConfig(t)
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "Procfile"), []byte("web: from-procfile"), 0o644); err != nil {
 		t.Fatal(err)
@@ -37,6 +38,7 @@ func TestResolveManualOverridesProcfile(t *testing.T) {
 }
 
 func TestResolveProcfile(t *testing.T) {
+	isolateConfig(t)
 	dir := t.TempDir()
 	procfile := "worker: node worker.js\nweb: npm start\n"
 	if err := os.WriteFile(filepath.Join(dir, "Procfile"), []byte(procfile), 0o644); err != nil {
@@ -52,6 +54,7 @@ func TestResolveProcfile(t *testing.T) {
 }
 
 func TestResolveNothingServable(t *testing.T) {
+	isolateConfig(t)
 	dir := t.TempDir()
 	_, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
 	if err == nil {
@@ -59,5 +62,33 @@ func TestResolveNothingServable(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "--cmd") {
 		t.Errorf("error should mention --cmd escape hatch: %v", err)
+	}
+}
+
+func TestResolveProjectConfigBeatsProcfile(t *testing.T) {
+	isolateConfig(t)
+	dir := t.TempDir()
+	writeFile(t, dir, "Procfile", "web: from-procfile")
+	writeFile(t, dir, ".servd.toml", `cmd = "from-project -p {port}"`)
+	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Kind != "project" || res.Cmd != "from-project -p 4001" {
+		t.Errorf("got kind=%q cmd=%q, want .servd.toml override", res.Kind, res.Cmd)
+	}
+}
+
+func TestResolveProjectConfigInvalidFallsThrough(t *testing.T) {
+	isolateConfig(t)
+	dir := t.TempDir()
+	writeFile(t, dir, ".servd.toml", "not toml [[[")
+	writeFile(t, dir, "Procfile", "web: from-procfile")
+	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Kind != "procfile" || res.Cmd != "from-procfile" {
+		t.Errorf("got kind=%q cmd=%q, want procfile fallback", res.Kind, res.Cmd)
 	}
 }

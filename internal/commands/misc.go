@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/reidransom/servd/internal/app"
+	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/tui"
 	"github.com/spf13/cobra"
@@ -26,6 +27,24 @@ func newTUICmd() *cobra.Command {
 	}
 }
 
+// newLaunchersCmd prints the effective launcher rules — the user's
+// launchers.toml entries followed by the surviving built-ins — in the same
+// TOML format, so any rule can be copied into launchers.toml and tweaked.
+func newLaunchersCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "launchers",
+		Short: "Print the effective launcher rules (launchers.toml + built-ins)",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			out, err := launcher.MarshalRules(launcher.EffectiveRules())
+			if err != nil {
+				return err
+			}
+			fmt.Print(string(out))
+			return nil
+		},
+	}
+}
+
 func newDoctorCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "doctor",
@@ -37,8 +56,8 @@ func newDoctorCmd() *cobra.Command {
 			}
 			ok := true
 
-			fmt.Println("Detector tools:")
-			for _, bin := range []string{"jigyll", "jekyll", "hugo", "node", "npm", "just", "make"} {
+			fmt.Println("Launcher tools:")
+			for _, bin := range launcher.Tools(launcher.EffectiveRules()) {
 				if p, err := exec.LookPath(bin); err == nil {
 					fmt.Printf("  ✓ %-7s %s\n", bin, p)
 				} else {
