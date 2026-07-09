@@ -101,7 +101,7 @@ the bottom to resume following).
 
 `↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
 `a` start-all · `X` stop-all · `e` enable/disable · `o` open · `p` toggle proxy ·
-`S` rescan · `q` quit
+`S` rescan · `A` add a site (type a path, `tab` completes) · `q` quit
 
 ## Files
 

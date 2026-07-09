@@ -4,11 +4,13 @@ package tui
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -37,6 +39,13 @@ type focus int
 const (
 	focusList focus = iota
 	focusLog
+)
+
+type mode int
+
+const (
+	modeNormal mode = iota
+	modeAdd
 )
 
 type tickMsg struct{}
@@ -81,6 +90,10 @@ type model struct {
 	height       int
 	status       string // transient status line
 	busy         bool   // an async action is in flight
+
+	mode       mode            // normal dashboard vs. the add-site modal
+	addInput   textinput.Model // path entry for the add-site modal
+	addMatches []string        // last tab-completion candidates, shown under the field
 }
 
 var (
@@ -312,9 +325,23 @@ func bulkAction(verb string, sites []config.Site, do func(config.Site) error) ac
 }
 
 func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// The add-site modal captures all keys while it's open.
+	if m.mode == modeAdd {
+		return m.handleAddKey(msg)
+	}
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Quit
+	case "A":
+		m.mode = modeAdd
+		ti := textinput.New()
+		ti.Placeholder = "~/clients/newthing"
+		ti.Prompt = ""
+		ti.Focus()
+		m.addInput = ti
+		m.addMatches = nil
+		m.status = ""
+		return m, nil
 	case "tab":
 		if m.focus == focusList {
 			m.focus = focusLog
@@ -438,6 +465,124 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// handleAddKey drives the add-site modal: esc cancels, enter submits the typed
+// path (deriving slug/port/command like `servd add <path>`), and every other
+// key edits the path field.
+func (m *model) handleAddKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc":
+		m.mode = modeNormal
+		m.status = ""
+		return m, nil
+	case "tab":
+		completed, matches := completePath(m.addInput.Value())
+		m.addInput.SetValue(completed)
+		m.addInput.CursorEnd()
+		// Only worth listing when the completion is ambiguous.
+		if len(matches) > 1 {
+			m.addMatches = matches
+		} else {
+			m.addMatches = nil
+		}
+		return m, nil
+	case "enter":
+		path := strings.TrimSpace(m.addInput.Value())
+		if path == "" {
+			m.status = "ERROR: a path is required"
+			return m, nil
+		}
+		var site config.Site
+		err := config.MutateRegistry(func(reg *config.Registry) error {
+			var err error
+			site, err = scan.AddSite(reg, m.settings, scan.AddParams{Path: expandHome(path)})
+			return err
+		})
+		if err != nil {
+			m.status = "ERROR: " + firstLine(err.Error())
+			return m, nil // keep the modal open so the user can fix the path
+		}
+		m.mode = modeNormal
+		m.cmdCache = map[string]string{}
+		m.status = "added " + site.Slug
+		return m, refreshCmd()
+	}
+	m.addMatches = nil // any edit invalidates the last completion list
+	var cmd tea.Cmd
+	m.addInput, cmd = m.addInput.Update(msg)
+	return m, cmd
+}
+
+// completePath does shell-style filesystem completion of a partially-typed
+// directory path (sites are directories, so files are ignored). It returns the
+// path extended to the longest common prefix of the matching entries — with a
+// trailing slash when the match is a single directory, so the user can keep
+// descending — along with the list of matching entry names.
+func completePath(input string) (string, []string) {
+	p := expandHome(input)
+
+	// Determine the directory to list and the prefix to match within it.
+	dir, prefix := filepath.Dir(p), filepath.Base(p)
+	if input == "" || strings.HasSuffix(input, "/") {
+		dir, prefix = strings.TrimRight(p, "/"), ""
+		if dir == "" {
+			dir = "/"
+		}
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return input, nil
+	}
+	var matches []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		// Hide dotfiles unless the user has started typing one.
+		if strings.HasPrefix(name, ".") && !strings.HasPrefix(prefix, ".") {
+			continue
+		}
+		if strings.HasPrefix(name, prefix) {
+			matches = append(matches, name)
+		}
+	}
+	if len(matches) == 0 {
+		return input, nil
+	}
+
+	lcp := matches[0]
+	for _, m := range matches[1:] {
+		lcp = commonPrefix(lcp, m)
+	}
+	completed := filepath.Join(dir, lcp)
+	if len(matches) == 1 {
+		completed += string(filepath.Separator) // unique dir: allow descending
+	}
+	return completed, matches
+}
+
+// commonPrefix returns the longest shared leading substring of a and b.
+func commonPrefix(a, b string) string {
+	n := min(len(a), len(b))
+	i := 0
+	for i < n && a[i] == b[i] {
+		i++
+	}
+	return a[:i]
+}
+
+// expandHome replaces a leading ~ or ~/ with the user's home directory. The CLI
+// relies on the shell for this; the TUI has no shell, so it expands here.
+func expandHome(path string) string {
+	if path == "~" || strings.HasPrefix(path, "~/") {
+		if home, err := os.UserHomeDir(); err == nil {
+			return filepath.Join(home, path[1:])
+		}
+	}
+	return path
+}
+
 // firstRowY is the terminal row of the first site row in the sidebar: the
 // title (1) + the box's top border (1) + the table header (1) sit above it.
 const firstRowY = 3
@@ -446,6 +591,9 @@ const firstRowY = 3
 // clicking a site row selects it (and shows its log), clicking either pane
 // focuses it, and the wheel scrolls whichever pane it's over.
 func (m *model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	if m.mode == modeAdd {
+		return m, nil // the modal owns the screen; ignore clicks underneath
+	}
 	overLog := msg.X >= m.sidebarWidth()
 
 	switch msg.Button {
@@ -517,6 +665,10 @@ func (m *model) loadLog() {
 }
 
 func (m *model) View() string {
+	if m.mode == modeAdd {
+		return m.addView()
+	}
+
 	var b strings.Builder
 
 	// Title row: name on the left, proxy status on the right.
@@ -582,8 +734,33 @@ func (m *model) View() string {
 		b.WriteString("   " + style.Render(m.status))
 	}
 	b.WriteString("\n")
-	b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · S scan · tab focus · q quit"))
+	b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · S scan · A add · tab focus · q quit"))
 	return b.String()
+}
+
+// addView renders the centered add-site modal: a titled box with the path
+// field, a hint line, and any error status.
+func (m *model) addView() string {
+	title := titleStyle.Render("add site")
+	field := dimStyle.Render("path  ") + m.addInput.View()
+	hint := helpStyle.Render("tab complete · enter add · esc cancel")
+	body := title + "\n\n" + field + "\n\n" + hint
+	// Show ambiguous tab-completion candidates (folder names only), truncated.
+	if len(m.addMatches) > 0 {
+		const maxShown = 8
+		shown := m.addMatches
+		suffix := ""
+		if len(shown) > maxShown {
+			shown = shown[:maxShown]
+			suffix = fmt.Sprintf(" … +%d", len(m.addMatches)-maxShown)
+		}
+		body += "\n" + dimStyle.Render(strings.Join(shown, "  ")+suffix)
+	}
+	if strings.HasPrefix(m.status, "ERROR:") {
+		body += "\n" + errStyle.Render(m.status)
+	}
+	modal := boxStyle.Width(max(40, m.width/2)).Render(body)
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, modal)
 }
 
 // rowLR lays out left- and right-justified segments across width, accounting

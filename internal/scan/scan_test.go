@@ -86,6 +86,56 @@ func TestScan(t *testing.T) {
 	}
 }
 
+func TestAddSite(t *testing.T) {
+	root := t.TempDir()
+	mkSite(t, root, "gamma")
+	dir := filepath.Join(root, "gamma")
+
+	reg := &config.Registry{}
+	site, err := AddSite(reg, testSettings(), AddParams{Path: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if site.Slug != "gamma" || site.Port != 42101 || site.Launcher == "" {
+		t.Errorf("got %+v, want slug=gamma port=42101 launcher!=\"\"", site)
+	}
+	if len(reg.Sites) != 1 {
+		t.Fatalf("registry: got %d sites", len(reg.Sites))
+	}
+
+	// Duplicate path is rejected.
+	if _, err := AddSite(reg, testSettings(), AddParams{Path: dir}); err == nil {
+		t.Error("duplicate path: want error, got nil")
+	}
+	// Duplicate slug (different path) is rejected.
+	mkSite(t, root, "other")
+	if _, err := AddSite(reg, testSettings(), AddParams{Path: filepath.Join(root, "other"), Slug: "gamma"}); err == nil {
+		t.Error("duplicate slug: want error, got nil")
+	}
+}
+
+func TestAddSiteUndetectable(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "empty")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	reg := &config.Registry{}
+	// No servable markers and no command → error.
+	if _, err := AddSite(reg, testSettings(), AddParams{Path: dir}); err == nil {
+		t.Error("undetectable dir without cmd: want error, got nil")
+	}
+	// An explicit command makes it registrable.
+	site, err := AddSite(reg, testSettings(), AddParams{Path: dir, Cmd: "python -m http.server {port}"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if site.Cmd == "" {
+		t.Errorf("got %+v, want Cmd preserved", site)
+	}
+}
+
 func TestWalkDoesNotDescendIntoProjects(t *testing.T) {
 	root := t.TempDir()
 	mkSite(t, root, "proj")

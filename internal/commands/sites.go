@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"slices"
 	"text/tabwriter"
 
@@ -63,39 +62,17 @@ func newAddCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			abs, err := filepath.Abs(args[0])
-			if err != nil {
-				return err
-			}
 			var site config.Site
 			err = config.MutateRegistry(func(reg *config.Registry) error {
-				if reg.FindByPath(abs) != nil {
-					return fmt.Errorf("%s is already registered", abs)
-				}
-				if slug == "" {
-					slug = scan.Slugify(filepath.Base(abs))
-				}
-				if reg.Find(slug) != nil {
-					return fmt.Errorf("slug %q already in use", slug)
-				}
-				if port == 0 {
-					port = scan.NextFreePort(reg, settings)
-				} else if reg.HasPort(port) {
-					return fmt.Errorf("port %d already assigned", port)
-				}
-				site = config.Site{Slug: slug, Path: abs, Port: port, Enabled: settings.DefaultEnabled || enable, Cmd: cmdline}
-				if res, err := launcher.Resolve(site, settings); err == nil {
-					site.Launcher = res.Kind
-				} else if cmdline == "" {
-					return fmt.Errorf("cannot determine how to serve %s; pass --cmd: %w", abs, err)
-				}
-				reg.Sites = append(reg.Sites, site)
-				return nil
+				site, err = scan.AddSite(reg, settings, scan.AddParams{
+					Path: args[0], Slug: slug, Port: port, Cmd: cmdline, Enable: enable,
+				})
+				return err
 			})
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Added %s :%d (%s) enabled=%v\n  %s\n", site.Slug, site.Port, site.Launcher, site.Enabled, abs)
+			fmt.Printf("Added %s :%d (%s) enabled=%v\n  %s\n", site.Slug, site.Port, site.Launcher, site.Enabled, site.Path)
 			return nil
 		},
 	}

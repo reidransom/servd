@@ -3,6 +3,7 @@
 package scan
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -54,6 +55,52 @@ func Scan(root string, reg *config.Registry, settings config.Settings) ([]Result
 		added = append(added, Result{Slug: slug, Path: dir, Port: port, Kind: res.Kind})
 	}
 	return added, nil
+}
+
+// AddParams are the inputs to AddSite. A zero-value Slug, Port or Cmd means
+// "derive it" (slug from the folder name, port from NextFreePort, command from
+// launcher auto-detection).
+type AddParams struct {
+	Path   string
+	Slug   string
+	Cmd    string
+	Port   int
+	Enable bool
+}
+
+// AddSite registers one project in reg, defaulting the slug and port and
+// resolving the launcher, applying the same dup/validation checks as the
+// `servd add` CLI. The caller supplies the lock via config.MutateRegistry and
+// is responsible for saving the registry. Returns the created site.
+func AddSite(reg *config.Registry, settings config.Settings, in AddParams) (config.Site, error) {
+	abs, err := filepath.Abs(in.Path)
+	if err != nil {
+		return config.Site{}, err
+	}
+	if reg.FindByPath(abs) != nil {
+		return config.Site{}, fmt.Errorf("%s is already registered", abs)
+	}
+	slug := in.Slug
+	if slug == "" {
+		slug = Slugify(filepath.Base(abs))
+	}
+	if reg.Find(slug) != nil {
+		return config.Site{}, fmt.Errorf("slug %q already in use", slug)
+	}
+	port := in.Port
+	if port == 0 {
+		port = NextFreePort(reg, settings)
+	} else if reg.HasPort(port) {
+		return config.Site{}, fmt.Errorf("port %d already assigned", port)
+	}
+	site := config.Site{Slug: slug, Path: abs, Port: port, Enabled: settings.DefaultEnabled || in.Enable, Cmd: in.Cmd}
+	if res, err := launcher.Resolve(site, settings); err == nil {
+		site.Launcher = res.Kind
+	} else if in.Cmd == "" {
+		return config.Site{}, fmt.Errorf("cannot determine how to serve %s; pass a command: %w", abs, err)
+	}
+	reg.Sites = append(reg.Sites, site)
+	return site, nil
 }
 
 // walk returns directories at depth 0..maxDepth under root, where each level is
