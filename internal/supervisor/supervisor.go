@@ -182,6 +182,37 @@ func signalGroup(pgid, pid int, sig syscall.Signal) {
 	_ = syscall.Kill(pid, sig)
 }
 
+// WaitReady blocks until the site's port accepts connections, its process
+// dies, or the timeout elapses. Nil means Running; any error carries the log
+// tail so callers can show why the server never came up.
+func WaitReady(site config.Site, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for {
+		st, err := state.Load()
+		if err != nil {
+			return err
+		}
+		switch StatusOf(site, st) {
+		case Running:
+			return nil
+		case Stopped:
+			return waitErr(site.Slug, "exited before accepting connections")
+		}
+		if time.Now().After(deadline) {
+			return waitErr(site.Slug, fmt.Sprintf("still not accepting connections on :%d after %s", site.Port, timeout))
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+}
+
+// waitErr builds a WaitReady failure, appending the site's log tail if any.
+func waitErr(slug, msg string) error {
+	if tail := lastLines(LogPath(slug), 12); tail != "" {
+		return fmt.Errorf("%s %s:\n%s", slug, msg, tail)
+	}
+	return fmt.Errorf("%s %s", slug, msg)
+}
+
 // Restart stops then starts the site.
 func Restart(site config.Site, settings config.Settings) error {
 	if err := Stop(site.Slug); err != nil {

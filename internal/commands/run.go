@@ -8,12 +8,14 @@ import (
 	"time"
 
 	"github.com/reidransom/servd/internal/app"
+	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 	"github.com/spf13/cobra"
 )
 
 func newUpCmd() *cobra.Command {
-	var all bool
+	var all, wait, jsonOut bool
+	var timeout time.Duration
 	c := &cobra.Command{
 		Use:   "up [slug...]",
 		Short: "Start one or more sites (use --all for every site)",
@@ -26,21 +28,64 @@ func newUpCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if all && len(sites) == 0 {
+			if all && len(sites) == 0 && !jsonOut {
 				fmt.Println("No enabled sites to start (all are disabled).")
 				return nil
 			}
+			type upResult struct {
+				siteInfo
+				Error string `json:"error,omitempty"`
+			}
+			results := make([]upResult, 0, len(sites))
+			failed := 0
 			for _, s := range sites {
-				if err := supervisor.Start(s, settings); err != nil {
-					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
-					continue
+				err := supervisor.Start(s, settings)
+				if err == nil && wait {
+					err = supervisor.WaitReady(s, timeout)
 				}
-				fmt.Printf("  %-20s started on :%d\n", s.Slug, s.Port)
+				if jsonOut {
+					// Reload state so the result carries the fresh pid/status.
+					st, lerr := state.Load()
+					if lerr != nil {
+						return lerr
+					}
+					r := upResult{siteInfo: newSiteInfo(settings, s, st)}
+					if err != nil {
+						r.Error = err.Error()
+					}
+					results = append(results, r)
+				}
+				switch {
+				case err != nil:
+					failed++
+					if !jsonOut {
+						fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
+					}
+				case jsonOut:
+				case wait:
+					fmt.Printf("  %-20s ready on :%d\n", s.Slug, s.Port)
+				default:
+					fmt.Printf("  %-20s started on :%d\n", s.Slug, s.Port)
+				}
+			}
+			if jsonOut {
+				if err := printJSON(results); err != nil {
+					return err
+				}
+			}
+			// --wait/--json callers (scripts, agents) need the exit code to
+			// mean something; the bare human command keeps its old behavior
+			// of reporting per-site errors without failing the whole run.
+			if failed > 0 && (wait || jsonOut) {
+				return fmt.Errorf("%d site(s) failed to start", failed)
 			}
 			return nil
 		},
 	}
 	c.Flags().BoolVar(&all, "all", false, "start every registered site")
+	c.Flags().BoolVar(&wait, "wait", false, "block until each server accepts connections (exit non-zero on failure)")
+	c.Flags().DurationVar(&timeout, "timeout", 30*time.Second, "per-site readiness timeout (with --wait)")
+	c.Flags().BoolVar(&jsonOut, "json", false, "emit machine-readable JSON results")
 	return c
 }
 

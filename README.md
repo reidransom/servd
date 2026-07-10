@@ -123,8 +123,8 @@ any `port_flag_deps` entry appears in `package.json` dependencies.
 | `servd rm <slug>` | stop and unregister a site |
 | `servd which <slug>` | show the resolved launch command |
 | `servd launchers` | print the effective launcher rules (yours + built-ins) |
-| `servd status` (alias `ls`) | table of every site with live status |
-| `servd up [slug…] [--all]` | start sites (`--all` skips disabled ones) |
+| `servd status` (alias `ls`) | table of every site with live status (`--json` for machines) |
+| `servd up [slug…] [--all]` | start sites (`--all` skips disabled ones; `--wait`/`--json` for scripts) |
 | `servd down [slug…] [--all]` | stop sites (`--all` stops everything) |
 | `servd restart [slug…] [--all]` | restart sites (`--all` skips disabled ones) |
 | `servd enable <slug…>` | enable sites so `up --all` starts them |
@@ -147,6 +147,34 @@ the bottom to resume following).
 `↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
 `a` start-all · `X` stop-all · `e` enable/disable · `o` open · `p` toggle proxy ·
 `S` rescan · `A` add a site (type a path, `tab` completes) · `q` quit
+
+## Agents and scripts
+
+Coding agents (and shell scripts) shouldn't have to parse tables or babysit
+long-running processes. Two flags give them a structured interface:
+
+```sh
+servd status --json            # everything an agent needs to discover servers
+servd up acme --wait --json    # start, block until the port accepts, report
+```
+
+`status --json` prints one object: `proxy` (`running`, `accepting`, `pid`,
+`port`, `url`) plus a `sites` array where each site carries `slug`, `path`,
+`port`, `url` (through the proxy), `direct_url` (straight to the dev server),
+`enabled`, `launcher`, `status` (`stopped` | `starting` | `running`), and — when
+live — `pid`, `cmd`, `log`, `started_at`, `uptime_seconds`. Match your project
+by `path` to find its slug, then hit `direct_url` (or `url` if the proxy is
+accepting).
+
+`up --wait` polls until the server actually accepts connections (default
+`--timeout 30s`), and exits non-zero — with the log tail in the error — if the
+process dies or never binds. With `--json` the per-site results (including any
+`error`) go to stdout as an array. Servers are already detached by default, so
+`up` never needs backgrounding tricks; a second `up` on a running site is a
+no-op.
+
+Use these instead of reading `state.json` directly — the file's format is
+internal and may change.
 
 ## Files
 

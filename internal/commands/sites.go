@@ -141,6 +141,7 @@ func newWhichCmd() *cobra.Command {
 }
 
 func newStatusCmd() *cobra.Command {
+	var jsonOut bool
 	c := &cobra.Command{
 		Use:     "status",
 		Aliases: []string{"ls"},
@@ -149,6 +150,16 @@ func newStatusCmd() *cobra.Command {
 			settings, reg, st, err := app.Load()
 			if err != nil {
 				return err
+			}
+			if jsonOut {
+				infos := make([]siteInfo, 0, len(reg.Sites))
+				for _, s := range reg.Sites {
+					infos = append(infos, newSiteInfo(settings, s, st))
+				}
+				return printJSON(struct {
+					Proxy proxyInfo  `json:"proxy"`
+					Sites []siteInfo `json:"sites"`
+				}{newProxyInfo(settings, st), infos})
 			}
 			if len(reg.Sites) == 0 {
 				fmt.Println("No sites registered. Run `servd scan`.")
@@ -168,6 +179,7 @@ func newStatusCmd() *cobra.Command {
 			return tw.Flush()
 		},
 	}
+	c.Flags().BoolVar(&jsonOut, "json", false, "emit machine-readable JSON (proxy + sites)")
 	return c
 }
 
