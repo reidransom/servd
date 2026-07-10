@@ -3,6 +3,7 @@ package tui
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -49,6 +50,40 @@ func TestAddModalRegistersSite(t *testing.T) {
 	}
 	if s := reg.Find("widget"); s == nil {
 		t.Fatalf("site not registered; registry = %+v", reg.Sites)
+	}
+}
+
+// TestHelpToggle checks that h hides the help bar and gives its row to the
+// panes, and that a second press restores both.
+func TestHelpToggle(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+
+	if !strings.Contains(m.View(), "s start") {
+		t.Fatal("help bar missing from initial view")
+	}
+	shown := m.table.Height()
+
+	m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
+	if strings.Contains(m.View(), "s start") {
+		t.Error("help bar still visible after h")
+	}
+	if got := m.table.Height(); got != shown+1 {
+		t.Errorf("table height = %d after hiding help, want %d", got, shown+1)
+	}
+
+	m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
+	if !strings.Contains(m.View(), "s start") {
+		t.Error("help bar not restored by second h")
+	}
+	if got := m.table.Height(); got != shown {
+		t.Errorf("table height = %d after restoring help, want %d", got, shown)
 	}
 }
 

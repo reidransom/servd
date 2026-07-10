@@ -90,6 +90,7 @@ type model struct {
 	height       int
 	status       string // transient status line
 	busy         bool   // an async action is in flight
+	showHelp     bool   // help bar visible (toggled with h)
 
 	mode       mode            // normal dashboard vs. the add-site modal
 	addInput   textinput.Model // path entry for the add-site modal
@@ -139,7 +140,7 @@ func newModel() (*model, error) {
 	s.Selected = s.Selected.Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("#7aa2f7"))
 	t.SetStyles(s)
 
-	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, viewport: viewport.New(80, 20)}
+	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, viewport: viewport.New(80, 20), showHelp: true}
 	m.applyStatuses(buildStatuses(reg, st))
 	m.syncLogSelection()
 	return m, nil
@@ -199,6 +200,30 @@ func (m *model) applyStatuses(msg statusesMsg) {
 	m.table.SetCursor(cur)
 }
 
+// resize recomputes the pane dimensions from the terminal size and which
+// footer rows are visible. Called on WindowSizeMsg and when the help bar is
+// toggled (hiding it gives its row back to the panes).
+func (m *model) resize() {
+	if m.width == 0 && m.height == 0 {
+		return // no WindowSizeMsg yet; keep the constructor defaults
+	}
+	// Rows rendered outside the panes: title (1), footer detail (1), and the
+	// help bar (1) when shown. Each bordered box also eats 2 rows (top+bottom
+	// border), so the panes' inner content gets height minus all of that.
+	chrome := 4
+	if m.showHelp {
+		chrome++
+	}
+	inner := max(5, m.height-chrome)
+	m.table.SetHeight(inner)
+	// The sidebar box hugs the table's rendered width; both boxes add 2 cols
+	// of border, so the log viewport gets whatever's left.
+	m.viewport.Width = max(20, m.width-m.sidebarWidth()-4)
+	// One row inside the log box is the "$ command" header, so the viewport
+	// gets inner-1 and both boxes still render `inner` content rows.
+	m.viewport.Height = max(4, inner-1)
+}
+
 // sidebarWidth is the rendered width of the site-list table (fixed columns +
 // lipgloss cell padding), used to size the log viewport so the two bordered
 // boxes tile exactly across the terminal.
@@ -246,17 +271,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
-		// Rows rendered outside the panes: title (1), footer detail (1),
-		// help (1) = 3. Each bordered box also eats 2 rows (top+bottom border),
-		// so the panes' inner content gets height-3-2.
-		inner := max(5, msg.Height-5)
-		m.table.SetHeight(inner)
-		// The sidebar box hugs the table's rendered width; both boxes add 2 cols
-		// of border, so the log viewport gets whatever's left.
-		m.viewport.Width = max(20, msg.Width-m.sidebarWidth()-4)
-		// One row inside the log box is the "$ command" header, so the viewport
-		// gets inner-1 and both boxes still render `inner` content rows.
-		m.viewport.Height = max(4, inner-1)
+		m.resize()
 		return m, nil
 
 	case tickMsg:
@@ -348,6 +363,10 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		} else {
 			m.focus = focusList
 		}
+		return m, nil
+	case "h":
+		m.showHelp = !m.showHelp
+		m.resize()
 		return m, nil
 	case "s":
 		if s := m.selectedSite(); s != nil && !m.busy {
@@ -733,8 +752,10 @@ func (m *model) View() string {
 		}
 		b.WriteString("   " + style.Render(m.status))
 	}
-	b.WriteString("\n")
-	b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · S scan · A add · tab focus · q quit"))
+	if m.showHelp {
+		b.WriteString("\n")
+		b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · S scan · A add · tab focus · h help · q quit"))
+	}
 	return b.String()
 }
 
