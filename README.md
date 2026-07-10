@@ -50,7 +50,9 @@ Then visit `http://<slug>.127.0.0.1.nip.io:8080/` for any site, or
 
 For each site, servd resolves a launch command in this order (first match wins):
 
-1. **Manual override** — a command pinned with `servd add --cmd "…"`.
+1. **Manual override** — a command pinned at registration, either quoted
+   (`servd add . --cmd "…"`) or unquoted after `--`
+   (`servd add . -- bundle exec middleman serve -p {port}`).
 2. **`.servd.toml`** in the project directory — a one-line
    `cmd = "bundle exec middleman serve -p {port}"` lets any project declare how
    to serve itself, next to its code.
@@ -119,7 +121,7 @@ any `port_flag_deps` entry appears in `package.json` dependencies.
 | Command | Purpose |
 |---|---|
 | `servd scan [dir]` | discover servable projects under `dir` (or the configured projects dir) |
-| `servd add <path> [--slug] [--port] [--cmd]` | register one project |
+| `servd add <path> [--slug] [--port] [--cmd] [-- <command>…]` | register one project |
 | `servd rm <slug>` | stop and unregister a site |
 | `servd which <slug>` | show the resolved launch command |
 | `servd launchers` | print the effective launcher rules (yours + built-ins) |

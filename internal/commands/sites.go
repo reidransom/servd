@@ -54,10 +54,28 @@ func newAddCmd() *cobra.Command {
 	var port int
 	var enable bool
 	c := &cobra.Command{
-		Use:   "add <path>",
+		Use:   "add <path> [-- <command>...]",
 		Short: "Register a single project",
-		Args:  cobra.ExactArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			// Exactly one <path>; anything after `--` is the launch command.
+			if dash := cmd.ArgsLenAtDash(); dash >= 0 {
+				if dash != 1 {
+					return fmt.Errorf("expected exactly one <path> before --, got %d", dash)
+				}
+				if len(args) == dash {
+					return fmt.Errorf("no command given after --")
+				}
+				return nil
+			}
+			return cobra.ExactArgs(1)(cmd, args)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if dash := cmd.ArgsLenAtDash(); dash >= 0 {
+				if cmdline != "" {
+					return fmt.Errorf("use either --cmd or a trailing -- command, not both")
+				}
+				cmdline = launcher.ShellJoin(args[dash:])
+			}
 			settings, err := config.LoadSettings()
 			if err != nil {
 				return err
@@ -78,7 +96,7 @@ func newAddCmd() *cobra.Command {
 	}
 	c.Flags().StringVar(&slug, "slug", "", "slug (defaults to folder name)")
 	c.Flags().IntVar(&port, "port", 0, "port (defaults to next free)")
-	c.Flags().StringVar(&cmdline, "cmd", "", "manual launch command (overrides detection; {port}/{host} allowed)")
+	c.Flags().StringVar(&cmdline, "cmd", "", "manual launch command (overrides detection; {port}/{host} allowed; or pass it after --)")
 	c.Flags().BoolVar(&enable, "enable", false, "enable the site immediately (overrides default_enabled)")
 	return c
 }

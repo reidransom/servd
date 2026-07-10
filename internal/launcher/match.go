@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -119,4 +120,22 @@ func selfExe() string {
 // survives `sh -c`.
 func ShellQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
+// shellSafe matches tokens that need no quoting under `sh -c`. Braces are
+// allowed so {port}/{host} placeholders stay readable in stored commands.
+var shellSafe = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./{}-]+$`)
+
+// ShellJoin joins argv tokens into a single command line for `sh -c`,
+// quoting only the tokens that need it.
+func ShellJoin(argv []string) string {
+	parts := make([]string, len(argv))
+	for i, a := range argv {
+		if shellSafe.MatchString(a) {
+			parts[i] = a
+		} else {
+			parts[i] = ShellQuote(a)
+		}
+	}
+	return strings.Join(parts, " ")
 }
