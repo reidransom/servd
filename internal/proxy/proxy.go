@@ -170,7 +170,7 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 	b.WriteString(`li{margin:.4rem 0}.port{color:#888;font-size:.85em}.kind{color:#aaa;font-size:.8em}</style></head><body>`)
 	b.WriteString(`<h1>servd &mdash; local sites</h1>`)
 	if len(sites) == 0 {
-		b.WriteString(`<p>No sites registered yet. Run <code>servd scan</code>.</p>`)
+		b.WriteString(`<p>No sites registered yet. Run <code>servd add /path/to/project</code>.</p>`)
 	} else {
 		b.WriteString("<ul>")
 		for _, site := range sites {

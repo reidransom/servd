@@ -29,18 +29,18 @@ go install github.com/reidransom/servd/cmd/servd@latest
 ## Quick start
 
 ```sh
-servd scan ~/clients      # discover projects, assign ports + slugs
-servd enable acme blog    # pick which sites you're working on (see below)
+servd add ~/clients/acme  # detect the launcher, assign a port + slug
+servd enable acme         # include the site in bulk commands (see below)
 servd up --all            # start every *enabled* dev server
 servd proxy up            # start the nip.io reverse proxy on :8080
 servd                     # open the interactive dashboard (TUI)
 ```
 
-By default, **scanned sites are registered disabled** — `up --all` only starts
-sites you've explicitly `servd enable`d. This keeps a big folder of clients from
-all spinning up at once. To start a single site regardless, name it:
+By default, **new sites are registered disabled** — `up --all` only starts sites
+you've explicitly `servd enable`d. This prevents newly registered projects from
+starting in bulk until you opt in. To start a single site regardless, name it:
 `servd up acme`. To make new sites enabled by default, set
-`default_enabled = true` in `config.toml` (or use `servd add --enable`).
+`default_enabled = true` in `config.toml` (or use `servd add --enable <path>`).
 
 Then visit `http://<slug>.127.0.0.1.nip.io:8080/` for any site, or
 `http://127.0.0.1:8080/` for a landing page listing them all. nip.io resolves
@@ -120,7 +120,6 @@ any `port_flag_deps` entry appears in `package.json` dependencies.
 
 | Command | Purpose |
 |---|---|
-| `servd scan [dir]` | discover servable projects under `dir` (or the configured projects dir) |
 | `servd add <path> [--slug] [--port] [--cmd] [-- <command>…]` | register one project |
 | `servd rm <slug>` | stop and unregister a site |
 | `servd which <slug>` | show the resolved launch command |

@@ -14,41 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newScanCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "scan [dir]",
-		Short: "Discover servable projects and add them to the registry",
-		Args:  cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, err := config.LoadSettings()
-			if err != nil {
-				return err
-			}
-			root := settings.ProjectsDir
-			if len(args) == 1 {
-				root = args[0]
-			}
-			var added []scan.Result
-			err = config.MutateRegistry(func(reg *config.Registry) error {
-				added, err = scan.Scan(root, reg, settings)
-				return err
-			})
-			if err != nil {
-				return err
-			}
-			if len(added) == 0 {
-				fmt.Printf("No new projects found under %s.\n", root)
-				return nil
-			}
-			fmt.Printf("Added %d site(s):\n", len(added))
-			for _, a := range added {
-				fmt.Printf("  %-20s :%d  %s\n", a.Slug, a.Port, a.Path)
-			}
-			return nil
-		},
-	}
-}
-
 func newAddCmd() *cobra.Command {
 	var slug, cmdline string
 	var port int
@@ -180,7 +145,7 @@ func newStatusCmd() *cobra.Command {
 				}{newProxyInfo(settings, st), infos})
 			}
 			if len(reg.Sites) == 0 {
-				fmt.Println("No sites registered. Run `servd scan`.")
+				fmt.Println("No sites registered. Run `servd add <path>`.")
 				return nil
 			}
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
