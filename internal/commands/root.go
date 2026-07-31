@@ -18,7 +18,7 @@ func newRootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "servd",
 		Short:         "Run and manage many local dev servers at once",
-		Long:          "servd discovers web projects, runs each dev server on a stable port,\nand reverse-proxies them as <slug>.127.0.0.1.nip.io subdomains.",
+		Long:          "servd runs registered web projects on stable ports\nand reverse-proxies them as <slug>.127.0.0.1.nip.io subdomains.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		// Bare `servd` launches the TUI.

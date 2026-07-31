@@ -21,14 +21,13 @@ import (
 
 // Settings holds global servd configuration.
 type Settings struct {
-	ProjectsDir    string `toml:"projects_dir"`
 	PortRangeStart int    `toml:"port_range_start"`
 	ProxyPort      int    `toml:"proxy_port"`
 	DomainSuffix   string `toml:"domain_suffix"`
 	BindHost       string `toml:"bind_host"`
-	// DefaultEnabled controls whether newly scanned/added sites start out
-	// enabled. Defaults to false: discovery registers sites but leaves them
-	// disabled until you `servd enable` the ones you want `up --all` to run.
+	// DefaultEnabled controls whether newly added sites start out enabled.
+	// Defaults to false: registration leaves sites disabled until you `servd
+	// enable` the ones you want `up --all` to run.
 	DefaultEnabled bool `toml:"default_enabled"`
 }
 
@@ -54,9 +53,7 @@ type Registry struct {
 
 // DefaultSettings returns settings with sane defaults filled in.
 func DefaultSettings() Settings {
-	home, _ := os.UserHomeDir()
 	return Settings{
-		ProjectsDir:    filepath.Join(home, "clients"),
 		PortRangeStart: 4001,
 		ProxyPort:      8080,
 		DomainSuffix:   "127.0.0.1.nip.io",

@@ -9,7 +9,7 @@ import (
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
-	"github.com/reidransom/servd/internal/scan"
+	"github.com/reidransom/servd/internal/registration"
 	"github.com/reidransom/servd/internal/supervisor"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +47,7 @@ func newAddCmd() *cobra.Command {
 			}
 			var site config.Site
 			err = config.MutateRegistry(func(reg *config.Registry) error {
-				site, err = scan.AddSite(reg, settings, scan.AddParams{
+				site, err = registration.AddSite(reg, settings, registration.AddParams{
 					Path: args[0], Slug: slug, Port: port, Cmd: cmdline, Enable: enable,
 				})
 				return err

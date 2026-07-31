@@ -1,5 +1,5 @@
-// Package netcheck has small TCP port probes shared by scan, doctor and the
-// proxy control code.
+// Package netcheck has small TCP port probes shared by site registration,
+// doctor, and the proxy control code.
 package netcheck
 
 import (

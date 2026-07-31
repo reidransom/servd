@@ -47,13 +47,6 @@ func resolveDir(dir string) (cmd, kind string, ok bool) {
 	return matchRules(dir, EffectiveRules())
 }
 
-// Servable reports whether a directory can be resolved to a launch command
-// without a manual override (used by scan to decide what to register).
-func Servable(dir string) bool {
-	_, _, ok := resolveDir(dir)
-	return ok
-}
-
 // Resolve produces the launch spec for a site, applying the precedence order.
 func Resolve(site config.Site, settings config.Settings) (Resolved, error) {
 	dir := site.Path

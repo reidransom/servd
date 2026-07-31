@@ -8,8 +8,8 @@
 
 Run and manage many local dev servers at once.
 
-`servd` discovers your web projects, runs each one's dev server on a stable
-port, and reverse-proxies them as friendly [nip.io](https://nip.io) subdomains — so a folder of
+`servd` runs your registered web projects on stable ports and reverse-proxies
+them as friendly [nip.io](https://nip.io) subdomains — so a folder of
 client sites becomes `http://acme.127.0.0.1.nip.io:8080/`,
 `http://blog.127.0.0.1.nip.io:8080/`, and so on, all managed from one CLI or an
 interactive TUI.
@@ -147,7 +147,7 @@ the bottom to resume following).
 
 `↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
 `a` start-all · `X` stop-all · `e` enable/disable · `o` open · `p` toggle proxy ·
-`S` rescan · `A` add a site (type a path, `tab` completes) ·
+`A` add a site (type a path, `tab` completes) ·
 `h` show/hide this key help · `q` quit
 
 ## Agents and scripts
@@ -180,8 +180,8 @@ internal and may change.
 
 ## Files
 
-- `~/.config/servd/config.toml` — settings (`projects_dir`, `port_range_start`,
-  `proxy_port`, `domain_suffix`, `bind_host`, `default_enabled`)
+- `~/.config/servd/config.toml` — settings (`port_range_start`, `proxy_port`,
+  `domain_suffix`, `bind_host`, `default_enabled`)
 - `~/.config/servd/sites.toml` — the site registry
 - `~/.config/servd/launchers.toml` — your launcher rules (optional, see above)
 - `<project>/.servd.toml` — per-project launch command (optional)

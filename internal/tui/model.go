@@ -19,7 +19,7 @@ import (
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/proxy"
-	"github.com/reidransom/servd/internal/scan"
+	"github.com/reidransom/servd/internal/registration"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 )
@@ -438,20 +438,6 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			_ = app.OpenBrowser(m.settings.SiteURL(*s))
 			m.status = "opened " + s.Slug
 		}
-	case "S":
-		var added []scan.Result
-		err := config.MutateRegistry(func(reg *config.Registry) error {
-			var err error
-			added, err = scan.Scan(m.settings.ProjectsDir, reg, m.settings)
-			return err
-		})
-		if err != nil {
-			m.status = "ERROR: " + firstLine(err.Error())
-			return m, nil
-		}
-		m.status = fmt.Sprintf("scan: +%d site(s)", len(added))
-		m.cmdCache = map[string]string{}
-		return m, refreshCmd()
 	case "p":
 		if m.busy {
 			break
@@ -513,7 +499,7 @@ func (m *model) handleAddKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		var site config.Site
 		err := config.MutateRegistry(func(reg *config.Registry) error {
 			var err error
-			site, err = scan.AddSite(reg, m.settings, scan.AddParams{Path: expandHome(path)})
+			site, err = registration.AddSite(reg, m.settings, registration.AddParams{Path: expandHome(path)})
 			return err
 		})
 		if err != nil {
@@ -703,7 +689,7 @@ func (m *model) View() string {
 	// Panes: site list on the left, live log tail on the right.
 	var sidebar string
 	if len(m.reg.Sites) == 0 {
-		hint := dimStyle.Render("No sites.\nPress S to scan:\n" + m.settings.ProjectsDir)
+		hint := dimStyle.Render("No sites.\nPress A to add a site.")
 		sidebar = box(m.focus == focusList).Width(m.sidebarWidth()).Height(m.viewport.Height).Render(hint)
 	} else {
 		sidebar = box(m.focus == focusList).Render(m.table.View())
@@ -754,7 +740,7 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · S scan · A add · tab focus · h help · q quit"))
+		b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · A add · tab focus · h help · q quit"))
 	}
 	return b.String()
 }
