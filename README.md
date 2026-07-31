@@ -124,7 +124,7 @@ any `port_flag_deps` entry appears in `package.json` dependencies.
 | `servd rm <slug>` | stop and unregister a site |
 | `servd which <slug>` | show the resolved launch command |
 | `servd launchers` | print the effective launcher rules (yours + built-ins) |
-| `servd status` (alias `ls`) | table of every site with live status (`--json` for machines) |
+| `servd status [slug]` (alias `ls`) | table of every site, or one named site, with live status (`--json` for machines) |
 | `servd up [slug…] [--all]` | start sites (`--all` skips disabled ones; `--wait`/`--json` for scripts) |
 | `servd down [slug…] [--all]` | stop sites (`--all` stops everything) |
 | `servd restart [slug…] [--all]` | restart sites (`--all` skips disabled ones) |
@@ -157,12 +157,12 @@ long-running processes. Two flags give them a structured interface:
 
 ```sh
 servd status --json            # everything an agent needs to discover servers
-servd up acme --wait --json    # start, block until the port accepts, report
+servd status acme --json       # status for one known server
 ```
 
 `status --json` prints one object: `proxy` (`running`, `accepting`, `pid`,
-`port`, `url`) plus a `sites` array where each site carries `slug`, `path`,
-`port`, `url` (through the proxy), `direct_url` (straight to the dev server),
+`port`, `url`) plus a `sites` array (containing only the requested site when a
+slug is supplied) where each site carries `slug`, `path`, `port`, `url` (through the proxy), `direct_url` (straight to the dev server),
 `enabled`, `launcher`, `status` (`stopped` | `starting` | `running`), and — when
 live — `pid`, `cmd`, `log`, `started_at`, `uptime_seconds`. Match your project
 by `path` to find its slug, then hit `direct_url` (or `url` if the proxy is

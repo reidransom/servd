@@ -130,17 +130,22 @@ func newWhichCmd() *cobra.Command {
 func newStatusCmd() *cobra.Command {
 	var jsonOut bool
 	c := &cobra.Command{
-		Use:     "status",
+		Use:     "status [slug]",
 		Aliases: []string{"ls"},
 		Short:   "List sites with their port, URL, launcher and live status",
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
 			if err != nil {
 				return err
 			}
+			sites, err := statusSites(reg, args)
+			if err != nil {
+				return err
+			}
 			if jsonOut {
-				infos := make([]siteInfo, 0, len(reg.Sites))
-				for _, s := range reg.Sites {
+				infos := make([]siteInfo, 0, len(sites))
+				for _, s := range sites {
 					infos = append(infos, newSiteInfo(settings, s, st))
 				}
 				return printJSON(struct {
@@ -148,13 +153,13 @@ func newStatusCmd() *cobra.Command {
 					Sites []siteInfo `json:"sites"`
 				}{newProxyInfo(settings, st), infos})
 			}
-			if len(reg.Sites) == 0 {
+			if len(sites) == 0 {
 				fmt.Println("No sites registered. Run `servd add <path>`.")
 				return nil
 			}
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
 			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tENABLED\tSTATUS\tUPTIME\tURL")
-			for _, s := range reg.Sites {
+			for _, s := range sites {
 				status := supervisor.StatusOf(s, st)
 				up := ""
 				if d := supervisor.Uptime(s.Slug, st); d > 0 {
@@ -168,6 +173,16 @@ func newStatusCmd() *cobra.Command {
 	}
 	c.Flags().BoolVar(&jsonOut, "json", false, "emit machine-readable JSON (proxy + sites)")
 	return c
+}
+func statusSites(reg *config.Registry, args []string) ([]config.Site, error) {
+	if len(args) == 0 {
+		return reg.Sites, nil
+	}
+	s := reg.Find(args[0])
+	if s == nil {
+		return nil, fmt.Errorf("unknown site %q (try `servd status`)", args[0])
+	}
+	return []config.Site{*s}, nil
 }
 
 // newEnableCmd and newDisableCmd flip the registry `enabled` flag. Disabled
