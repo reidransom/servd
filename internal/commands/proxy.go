@@ -34,13 +34,16 @@ func newProxyUpCmd() *cobra.Command {
 		Use:   "up",
 		Short: "Start the reverse proxy in the background",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, _, st, err := app.Load()
+			settings, registry, st, err := app.Load()
 			if err != nil {
 				return err
 			}
 			if running, pid := proxy.Running(st); running {
 				fmt.Printf("Proxy already running (pid %d) on :%d.\n", pid, settings.Hostnames.HTTPPort)
 				return nil
+			}
+			if err := syncHostsForProxy(settings, registry); err != nil {
+				return err
 			}
 			if err := proxy.StartBackground(settings); err != nil {
 				return err

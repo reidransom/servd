@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/reidransom/servd/internal/app"
+	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/hostsfile"
 	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/tui"
@@ -81,17 +83,58 @@ func newDoctorCmd() *cobra.Command {
 			}
 			fmt.Printf("  %d site(s) registered, %d port(s) currently bound\n", len(reg.Sites), conflicts)
 
+			fmt.Println("Primary hostname resolution:")
+			if len(reg.Sites) == 0 {
+				fmt.Println("  · no sites registered")
+			} else {
+				for _, site := range reg.Sites {
+					hostname, err := settings.PrimaryHostname(site)
+					if err != nil {
+						return fmt.Errorf("site %q: %w", site.Slug, err)
+					}
+					result, err := hostsfile.CheckResolution(hostname)
+					if err == nil && result.Loopback {
+						fmt.Printf("  ✓ %s -> %v\n", hostname, result.Addresses)
+						continue
+					}
+					if hostsfile.NeedsHostsFile(settings.Hostnames.TLDs, "") {
+						ok = false
+						fmt.Printf("  ✗ %s does not resolve to loopback; run: sudo servd hosts sync\n", hostname)
+					} else {
+						fmt.Printf("  · %s does not resolve to loopback (try: sudo servd hosts sync)\n", hostname)
+					}
+				}
+			}
+
+			if !settings.Hostnames.LAN && hostsfile.NeedsHostsFile(settings.Hostnames.TLDs, "") {
+				fmt.Println("Hosts-file sync:")
+				desired, err := primaryHostnames(settings, reg)
+				if err != nil {
+					return err
+				}
+				managed, err := hostsfile.ManagedHostnames()
+				if err != nil {
+					ok = false
+					fmt.Printf("  ✗ could not read %s: %v\n", hostsfile.Path(), err)
+				} else if sameHostnames(desired, managed) {
+					fmt.Printf("  ✓ %d hostname(s) synced\n", len(desired))
+				} else if settings.Hostnames.HostsMode == config.HostsNever {
+					fmt.Println("  · synchronization disabled by hostnames.hosts_mode = \"never\"")
+				} else {
+					ok = false
+					fmt.Printf("  ✗ %d hostname(s) expected; run: sudo servd hosts sync\n", len(desired))
+				}
+			}
+
 			if settings.Hostnames.NipIO {
-				fmt.Println("nip.io resolution:")
+				fmt.Println("nip.io fallback resolution:")
 				host := "test." + settings.Hostnames.NipIOSuffix
 				if addrs, err := net.LookupHost(host); err == nil && len(addrs) > 0 {
 					fmt.Printf("  ✓ %s -> %v\n", host, addrs)
 				} else {
-					ok = false
-					fmt.Printf("  ✗ could not resolve %s (check internet/DNS): %v\n", host, err)
+					fmt.Printf("  · could not resolve optional fallback %s: %v\n", host, err)
 				}
 			}
-			fmt.Printf("Primary hostname routing is configured for %v; verify DNS or hosts setup for custom TLDs.\n", settings.Hostnames.TLDs)
 
 			if ok {
 				fmt.Println("\nAll essential checks passed.")
