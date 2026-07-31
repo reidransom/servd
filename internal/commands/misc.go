@@ -48,7 +48,7 @@ func newLaunchersCmd() *cobra.Command {
 func newDoctorCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "doctor",
-		Short: "Check tools, ports and nip.io resolution",
+		Short: "Check tools, ports and hostname resolution",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, _, err := app.Load()
 			if err != nil {
@@ -66,10 +66,10 @@ func newDoctorCmd() *cobra.Command {
 			}
 
 			fmt.Println("Proxy port:")
-			if netcheck.PortFree(settings.BindHost, settings.ProxyPort) {
-				fmt.Printf("  ✓ :%d is free\n", settings.ProxyPort)
+			if netcheck.PortFree(settings.BindHost, settings.Hostnames.HTTPPort) {
+				fmt.Printf("  ✓ :%d is free\n", settings.Hostnames.HTTPPort)
 			} else {
-				fmt.Printf("  i :%d is in use (proxy may already be running)\n", settings.ProxyPort)
+				fmt.Printf("  i :%d is in use (proxy may already be running)\n", settings.Hostnames.HTTPPort)
 			}
 
 			fmt.Println("Assigned ports:")
@@ -81,14 +81,17 @@ func newDoctorCmd() *cobra.Command {
 			}
 			fmt.Printf("  %d site(s) registered, %d port(s) currently bound\n", len(reg.Sites), conflicts)
 
-			fmt.Println("nip.io resolution:")
-			host := "test." + settings.DomainSuffix
-			if addrs, err := net.LookupHost(host); err == nil && len(addrs) > 0 {
-				fmt.Printf("  ✓ %s -> %v\n", host, addrs)
-			} else {
-				ok = false
-				fmt.Printf("  ✗ could not resolve %s (check internet/DNS): %v\n", host, err)
+			if settings.Hostnames.NipIO {
+				fmt.Println("nip.io resolution:")
+				host := "test." + settings.Hostnames.NipIOSuffix
+				if addrs, err := net.LookupHost(host); err == nil && len(addrs) > 0 {
+					fmt.Printf("  ✓ %s -> %v\n", host, addrs)
+				} else {
+					ok = false
+					fmt.Printf("  ✗ could not resolve %s (check internet/DNS): %v\n", host, err)
+				}
 			}
+			fmt.Printf("Primary hostname routing is configured for %v; verify DNS or hosts setup for custom TLDs.\n", settings.Hostnames.TLDs)
 
 			if ok {
 				fmt.Println("\nAll essential checks passed.")

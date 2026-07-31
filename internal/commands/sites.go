@@ -15,9 +15,9 @@ import (
 )
 
 func newAddCmd() *cobra.Command {
-	var slug, cmdline string
+	var slug, hostPrefix, cmdline string
 	var port int
-	var enable bool
+	var enable, noWorktreePrefix bool
 	c := &cobra.Command{
 		Use:   "add <path> [-- <command>...]",
 		Short: "Register a single project",
@@ -48,18 +48,22 @@ func newAddCmd() *cobra.Command {
 			var site config.Site
 			err = config.MutateRegistry(func(reg *config.Registry) error {
 				site, err = registration.AddSite(reg, settings, registration.AddParams{
-					Path: args[0], Slug: slug, Port: port, Cmd: cmdline, Enable: enable,
+					Path: args[0], Slug: slug, HostPrefix: hostPrefix, NoWorktreePrefix: noWorktreePrefix,
+					Port: port, Cmd: cmdline, Enable: enable,
 				})
 				return err
 			})
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Added %s :%d (%s) enabled=%v\n  %s\n", site.Slug, site.Port, site.Launcher, site.Enabled, site.Path)
+			fmt.Printf("Added %s :%d (%s) enabled=%v\n  %s\n  %s\n  direct: http://127.0.0.1:%d/\n",
+				site.Slug, site.Port, site.Launcher, site.Enabled, site.Path, settings.SiteURL(site), site.Port)
 			return nil
 		},
 	}
-	c.Flags().StringVar(&slug, "slug", "", "slug (defaults to folder name)")
+	c.Flags().StringVar(&slug, "slug", "", "stable CLI slug (defaults to inferred project name)")
+	c.Flags().StringVar(&hostPrefix, "host-prefix", "", "hostname prefix for a linked worktree")
+	c.Flags().BoolVar(&noWorktreePrefix, "no-worktree-prefix", false, "do not derive a hostname prefix from a linked worktree")
 	c.Flags().IntVar(&port, "port", 0, "port (defaults to next free)")
 	c.Flags().StringVar(&cmdline, "cmd", "", "manual launch command (overrides detection; {port}/{host} allowed; or pass it after --)")
 	c.Flags().BoolVar(&enable, "enable", false, "enable the site immediately (overrides default_enabled)")

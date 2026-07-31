@@ -36,7 +36,7 @@ func TestShellJoin(t *testing.T) {
 }
 
 func testSettings() config.Settings {
-	return config.Settings{BindHost: "127.0.0.1", PortRangeStart: 42101, ProxyPort: 42100}
+	return config.Settings{BindHost: "127.0.0.1", PortRangeStart: 42101, Hostnames: config.HostnameSettings{HTTPPort: 42100}}
 }
 
 func TestResolveManualOverridesProcfile(t *testing.T) {

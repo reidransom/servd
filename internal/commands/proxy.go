@@ -11,14 +11,17 @@ import (
 func newProxyCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "proxy",
-		Short: "Run the nip.io reverse proxy (foreground)",
+		Short: "Run the native hostname router (foreground)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, _, _, err := app.Load()
 			if err != nil {
 				return err
 			}
-			fmt.Printf("servd proxy listening on %s:%d — sites at http://<slug>.%s:%d/\n",
-				settings.BindHost, settings.ProxyPort, settings.DomainSuffix, settings.ProxyPort)
+			fmt.Printf("servd proxy listening on %s:%d — sites at %s\n",
+				settings.BindHost, settings.Hostnames.HTTPPort, settings.PrimaryURLPattern())
+			if fallback, ok := settings.FallbackURLPattern(); ok {
+				fmt.Printf("nip.io fallback: %s\n", fallback)
+			}
 			return proxy.New(settings).ListenAndServe()
 		},
 	}
@@ -36,14 +39,16 @@ func newProxyUpCmd() *cobra.Command {
 				return err
 			}
 			if running, pid := proxy.Running(st); running {
-				fmt.Printf("Proxy already running (pid %d) on :%d.\n", pid, settings.ProxyPort)
+				fmt.Printf("Proxy already running (pid %d) on :%d.\n", pid, settings.Hostnames.HTTPPort)
 				return nil
 			}
 			if err := proxy.StartBackground(settings); err != nil {
 				return err
 			}
-			fmt.Printf("Proxy started on :%d — sites at http://<slug>.%s:%d/\n",
-				settings.ProxyPort, settings.DomainSuffix, settings.ProxyPort)
+			fmt.Printf("Proxy started on :%d — sites at %s\n", settings.Hostnames.HTTPPort, settings.PrimaryURLPattern())
+			if fallback, ok := settings.FallbackURLPattern(); ok {
+				fmt.Printf("nip.io fallback: %s\n", fallback)
+			}
 			return nil
 		},
 	}
@@ -75,9 +80,9 @@ func newProxyStatusCmd() *cobra.Command {
 			running, pid := proxy.Running(st)
 			switch {
 			case running && proxy.Accepting(settings):
-				fmt.Printf("running (pid %d) on :%d\n", pid, settings.ProxyPort)
+				fmt.Printf("running (pid %d) on :%d\n", pid, settings.Hostnames.HTTPPort)
 			case running:
-				fmt.Printf("starting (pid %d), not yet accepting on :%d\n", pid, settings.ProxyPort)
+				fmt.Printf("starting (pid %d), not yet accepting on :%d\n", pid, settings.Hostnames.HTTPPort)
 			default:
 				fmt.Println("stopped")
 			}

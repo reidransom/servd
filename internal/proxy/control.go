@@ -23,7 +23,7 @@ func proxySite(settings config.Settings) (config.Site, error) {
 	}
 	return config.Site{
 		Slug: Slug,
-		Port: settings.ProxyPort,
+		Port: settings.Hostnames.HTTPPort,
 		Cmd:  launcher.ShellQuote(self) + " proxy",
 	}, nil
 }
@@ -52,7 +52,7 @@ func Running(st *state.State) (bool, int) {
 	return false, 0
 }
 
-// Accepting reports whether the proxy port is accepting connections.
+// Accepting reports whether the active HTTP listener is accepting connections.
 func Accepting(settings config.Settings) bool {
-	return netcheck.PortAccepting(settings.BindHost, settings.ProxyPort)
+	return netcheck.PortAccepting(settings.BindHost, settings.Hostnames.HTTPPort)
 }

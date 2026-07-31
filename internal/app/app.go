@@ -18,6 +18,9 @@ func Load() (config.Settings, *config.Registry, *state.State, error) {
 	if err != nil {
 		return settings, nil, nil, fmt.Errorf("loading settings: %w", err)
 	}
+	if err := settings.Validate(); err != nil {
+		return settings, nil, nil, fmt.Errorf("validating settings: %w", err)
+	}
 	reg, err := config.LoadRegistry()
 	if err != nil {
 		return settings, nil, nil, fmt.Errorf("loading registry: %w", err)

@@ -3,30 +3,17 @@ package registration
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/reidransom/servd/internal/config"
 )
 
-func TestSlugify(t *testing.T) {
-	cases := []struct{ in, want string }{
-		{"My Site!", "my-site"},
-		{"acme", "acme"},
-		{"--x--", "x"},
-		{"client_2 (new)", "client-2-new"},
-		{"日本語", "site"},
-		{"", "site"},
-	}
-	for _, c := range cases {
-		if got := Slugify(c.in); got != c.want {
-			t.Errorf("Slugify(%q) = %q, want %q", c.in, got, c.want)
-		}
-	}
-}
-
 func testSettings() config.Settings {
-	// High port range so host-port probes don't collide with real services.
-	return config.Settings{PortRangeStart: 42101, ProxyPort: 42100, BindHost: "127.0.0.1"}
+	settings := config.DefaultSettings()
+	settings.PortRangeStart = 42101
+	settings.Hostnames.HTTPPort = 42100
+	return settings
 }
 
 func mkSite(t *testing.T, root string, parts ...string) {
@@ -57,14 +44,56 @@ func TestAddSite(t *testing.T) {
 		t.Fatalf("registry: got %d sites", len(reg.Sites))
 	}
 
-	// Duplicate path is rejected.
 	if _, err := AddSite(reg, testSettings(), AddParams{Path: dir}); err == nil {
 		t.Error("duplicate path: want error, got nil")
 	}
-	// Duplicate slug (different path) is rejected.
 	mkSite(t, root, "other")
 	if _, err := AddSite(reg, testSettings(), AddParams{Path: filepath.Join(root, "other"), Slug: "gamma"}); err == nil {
 		t.Error("duplicate slug: want error, got nil")
+	}
+}
+
+func TestAddSiteInfersPackageName(t *testing.T) {
+	root := t.TempDir()
+	mkSite(t, root, "directory-name")
+	dir := filepath.Join(root, "directory-name")
+	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"@scope/Acme App"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	site, err := AddSite(&config.Registry{}, testSettings(), AddParams{Path: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if site.Slug != "acme-app" {
+		t.Fatalf("slug = %q, want package-derived acme-app", site.Slug)
+	}
+}
+
+func TestAddSiteValidatesSlugAndHostPrefix(t *testing.T) {
+	root := t.TempDir()
+	mkSite(t, root, "site")
+	dir := filepath.Join(root, "site")
+	settings := testSettings()
+
+	site, err := AddSite(&config.Registry{}, settings, AddParams{Path: dir, Slug: "acme", HostPrefix: "auth"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if site.Slug != "acme" || site.HostPrefix != "auth" {
+		t.Fatalf("site identity = %+v", site)
+	}
+	if _, err := AddSite(&config.Registry{}, settings, AddParams{Path: dir, Slug: "Acme App"}); err == nil || !strings.Contains(err.Error(), "try \"acme-app\"") {
+		t.Fatalf("invalid explicit slug error = %v", err)
+	}
+	if _, err := AddSite(&config.Registry{}, settings, AddParams{Path: dir, HostPrefix: "auth", NoWorktreePrefix: true}); err == nil {
+		t.Fatal("conflicting prefix options succeeded")
+	}
+	withoutPrefix, err := AddSite(&config.Registry{}, settings, AddParams{Path: dir, NoWorktreePrefix: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if withoutPrefix.HostPrefix != "" {
+		t.Fatalf("suppressed prefix = %q", withoutPrefix.HostPrefix)
 	}
 }
 
@@ -76,11 +105,9 @@ func TestAddSiteUndetectable(t *testing.T) {
 	}
 
 	reg := &config.Registry{}
-	// No servable markers and no command → error.
 	if _, err := AddSite(reg, testSettings(), AddParams{Path: dir}); err == nil {
 		t.Error("undetectable dir without cmd: want error, got nil")
 	}
-	// An explicit command makes it registrable.
 	site, err := AddSite(reg, testSettings(), AddParams{Path: dir, Cmd: "python -m http.server {port}"})
 	if err != nil {
 		t.Fatal(err)

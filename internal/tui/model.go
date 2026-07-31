@@ -680,7 +680,10 @@ func (m *model) View() string {
 	left := titleStyle.Render("servd") + dimStyle.Render(" — local dev servers")
 	var right string
 	if m.proxyRunning {
-		right = okStyle.Render("● proxy on") + dimStyle.Render(fmt.Sprintf(" :%d *.%s", m.settings.ProxyPort, m.settings.DomainSuffix))
+		right = okStyle.Render("● proxy on") + dimStyle.Render(fmt.Sprintf(" :%d %s", m.settings.Hostnames.HTTPPort, m.settings.PrimaryURLPattern()))
+		if _, enabled := m.settings.FallbackURLPattern(); enabled {
+			right += dimStyle.Render(" + nip.io")
+		}
 	} else {
 		right = offStyle.Render("○ proxy off") + dimStyle.Render("  press p")
 	}

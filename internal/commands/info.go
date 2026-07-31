@@ -19,7 +19,8 @@ type siteInfo struct {
 	Slug          string     `json:"slug"`
 	Path          string     `json:"path"`
 	Port          int        `json:"port"`
-	URL           string     `json:"url"`        // via the reverse proxy (needs proxy.accepting)
+	URL           string     `json:"url"` // via the reverse proxy (needs proxy.accepting)
+	FallbackURL   string     `json:"fallback_url,omitempty"`
 	DirectURL     string     `json:"direct_url"` // straight to the dev server's port
 	Enabled       bool       `json:"enabled"`
 	Launcher      string     `json:"launcher,omitempty"`
@@ -34,11 +35,14 @@ type siteInfo struct {
 // proxyInfo describes the background reverse proxy in --json output. running
 // is "pid alive"; accepting is the stronger "port answers connections".
 type proxyInfo struct {
-	Running   bool   `json:"running"`
-	Accepting bool   `json:"accepting"`
-	PID       int    `json:"pid,omitempty"`
-	Port      int    `json:"port"`
-	URL       string `json:"url"`
+	Running            bool     `json:"running"`
+	Accepting          bool     `json:"accepting"`
+	PID                int      `json:"pid,omitempty"`
+	Port               int      `json:"port"`
+	PrimaryURLPattern  string   `json:"primary_url_pattern"`
+	FallbackURLPattern string   `json:"fallback_url_pattern,omitempty"`
+	TLDs               []string `json:"tlds"`
+	NipIO              bool     `json:"nip_io"`
 }
 
 func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteInfo {
@@ -53,6 +57,9 @@ func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteI
 		Status:    supervisor.StatusOf(s, st).String(),
 		Log:       supervisor.LogPath(s.Slug),
 	}
+	if fallback, ok := settings.FallbackURL(s); ok {
+		info.FallbackURL = fallback
+	}
 	if e, ok := st.Get(s.Slug); ok && state.EntryAlive(e) {
 		info.PID = e.PID
 		info.Cmd = e.Cmd
@@ -65,13 +72,19 @@ func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteI
 
 func newProxyInfo(settings config.Settings, st *state.State) proxyInfo {
 	running, pid := proxy.Running(st)
-	return proxyInfo{
-		Running:   running,
-		Accepting: proxy.Accepting(settings),
-		PID:       pid,
-		Port:      settings.ProxyPort,
-		URL:       fmt.Sprintf("http://127.0.0.1:%d/", settings.ProxyPort),
+	info := proxyInfo{
+		Running:           running,
+		Accepting:         proxy.Accepting(settings),
+		PID:               pid,
+		Port:              settings.Hostnames.HTTPPort,
+		PrimaryURLPattern: settings.PrimaryURLPattern(),
+		TLDs:              append([]string(nil), settings.Hostnames.TLDs...),
+		NipIO:             settings.Hostnames.NipIO,
 	}
+	if fallback, ok := settings.FallbackURLPattern(); ok {
+		info.FallbackURLPattern = fallback
+	}
+	return info
 }
 
 // printJSON writes v to stdout, indented, with a trailing newline.

@@ -50,8 +50,11 @@ func TestNewSiteInfo(t *testing.T) {
 	if di.Status != "stopped" || di.PID != 0 || di.StartedAt != nil {
 		t.Errorf("dead site info = %+v, want stopped with no pid/started_at", di)
 	}
-	if want := fmt.Sprintf("http://dead.%s:%d/", settings.DomainSuffix, settings.ProxyPort); di.URL != want {
+	if want := settings.SiteURL(dead); di.URL != want {
 		t.Errorf("dead URL = %q, want %q", di.URL, want)
+	}
+	if want, ok := settings.FallbackURL(dead); !ok || di.FallbackURL != want {
+		t.Errorf("dead fallback URL = %q, want %q", di.FallbackURL, want)
 	}
 	// omitempty must drop the runtime fields entirely for stopped sites.
 	data, err := json.Marshal(di)
@@ -64,6 +67,15 @@ func TestNewSiteInfo(t *testing.T) {
 		}
 	}
 
+	settings.Hostnames.NipIO = false
+	withoutFallback, err := json.Marshal(newSiteInfo(settings, dead, st))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(withoutFallback), `"fallback_url"`) {
+		t.Errorf("disabled fallback still appears in JSON: %s", withoutFallback)
+	}
+
 	li := newSiteInfo(settings, live, st)
 	if li.Status != "running" {
 		t.Errorf("live status = %q, want running", li.Status)
@@ -73,5 +85,22 @@ func TestNewSiteInfo(t *testing.T) {
 	}
 	if want := fmt.Sprintf("http://127.0.0.1:%d/", port); li.DirectURL != want {
 		t.Errorf("live direct_url = %q, want %q", li.DirectURL, want)
+	}
+}
+
+func TestNewProxyInfoUsesRoutingNeutralPatterns(t *testing.T) {
+	settings := config.DefaultSettings()
+	info := newProxyInfo(settings, &state.State{})
+	if info.Port != settings.Hostnames.HTTPPort || info.PrimaryURLPattern != "http://<slug>.localhost:8080/" || info.FallbackURLPattern != "http://<slug>.127.0.0.1.nip.io:8080/" || !info.NipIO {
+		t.Fatalf("proxy info = %+v", info)
+	}
+
+	settings.Hostnames.NipIO = false
+	data, err := json.Marshal(newProxyInfo(settings, &state.State{}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), `"fallback_url_pattern"`) {
+		t.Errorf("disabled fallback pattern appears in JSON: %s", data)
 	}
 }
