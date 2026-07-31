@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -127,7 +126,6 @@ func newModel() (*model, error) {
 	}
 	cols := []table.Column{
 		{Title: "SLUG", Width: 16},
-		{Title: "PORT", Width: 5},
 		{Title: "", Width: 2}, // status glyph
 	}
 	t := table.New(
@@ -160,7 +158,7 @@ func buildStatuses(reg *config.Registry, st *state.State) statusesMsg {
 		case supervisor.Starting:
 			glyph = "◐"
 		}
-		rows = append(rows, table.Row{s.Slug, strconv.Itoa(s.Port), glyph})
+		rows = append(rows, table.Row{s.Slug, glyph})
 		slugs = append(slugs, s.Slug)
 	}
 	return statusesMsg{reg: reg, st: st, rows: rows, slugs: slugs, proxyRunning: running}

@@ -159,3 +159,26 @@ func TestAddModalKeepsOpenOnError(t *testing.T) {
 		t.Error("want an error status, got empty")
 	}
 }
+
+// TestSiteListOmitsPorts keeps backend ports out of the default TUI display.
+func TestSiteListOmitsPorts(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	reg := &config.Registry{Sites: []config.Site{{Slug: "widget", Port: 4242}}}
+	if err := reg.Save(); err != nil {
+		t.Fatal(err)
+	}
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	view := m.View()
+	if !strings.Contains(view, "widget") {
+		t.Fatal("site slug missing from TUI")
+	}
+	if strings.Contains(view, "PORT") || strings.Contains(view, "4242") {
+		t.Errorf("TUI shows a port:\n%s", view)
+	}
+}
