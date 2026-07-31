@@ -25,13 +25,14 @@ import (
 
 // Entry is the runtime record for one running process.
 type Entry struct {
-	Slug      string    `json:"slug"`
-	PID       int       `json:"pid"`
-	PGID      int       `json:"pgid"`
-	Port      int       `json:"port"`
-	Cmd       string    `json:"cmd"`
-	Log       string    `json:"log"`
-	StartedAt time.Time `json:"started_at"`
+	Slug          string    `json:"slug"`
+	PID           int       `json:"pid"`
+	PGID          int       `json:"pgid"`
+	Port          int       `json:"port"`
+	Cmd           string    `json:"cmd"`
+	Log           string    `json:"log"`
+	StartedAt     time.Time `json:"started_at"`
+	PublishedMDNS []string  `json:"published_mdns,omitempty"`
 }
 
 // State is the whole state.json document.

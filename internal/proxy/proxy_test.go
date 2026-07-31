@@ -72,6 +72,21 @@ func TestBuildRouteTableSupportsCustomTLDAndDetectsCollisions(t *testing.T) {
 	}
 }
 
+func TestBuildRouteTableUsesLocalHostnamesInLANMode(t *testing.T) {
+	settings := proxySettings()
+	settings.Hostnames.LAN = true
+	routes, err := buildRouteTable(settings, []config.Site{{Slug: "acme", Port: 4001}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if routes["acme.local"] == nil {
+		t.Fatal("LAN route missing")
+	}
+	if routes["acme.localhost"] != nil {
+		t.Fatal("non-LAN hostname was routed in LAN mode")
+	}
+}
+
 func TestServerRoutesExactHostsAndKeepsForwardedHeaders(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(r.Host + "|" + r.Header.Get("X-Forwarded-Host") + "|" + r.Header.Get("X-Forwarded-Proto")))

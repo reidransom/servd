@@ -30,6 +30,24 @@ func TestDefaultHostnameSettings(t *testing.T) {
 	}
 }
 
+func TestLANForcesLocalHostnames(t *testing.T) {
+	settings := DefaultSettings()
+	settings.Hostnames.TLDs = []string{"dev.example.com"}
+	settings.EnableLAN()
+	if got := settings.SiteURL(Site{Slug: "acme"}); got != "http://acme.local:8080/" {
+		t.Fatalf("LAN SiteURL = %q", got)
+	}
+
+	writeConfig(t, "[hostnames]\nlan = true\ntlds = [\"dev.example.com\"]\n")
+	loaded, err := LoadSettings()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := loaded.Hostnames.TLDs; len(got) != 1 || got[0] != "local" {
+		t.Fatalf("loaded LAN TLDs = %v, want [local]", got)
+	}
+}
+
 func TestSiteURLsUsePrimaryAndFallbackHostnames(t *testing.T) {
 	site := Site{Slug: "acme", HostPrefix: "auth"}
 	settings := DefaultSettings()

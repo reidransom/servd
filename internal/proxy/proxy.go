@@ -16,6 +16,8 @@
 package proxy
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"html"
 	"log"
@@ -24,13 +26,16 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/signal"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/mdns"
 )
 
 // Server is a running proxy instance.
@@ -42,6 +47,9 @@ type Server struct {
 	sites        []config.Site                     // for the landing page (sorted by slug)
 	regMtime     time.Time
 	lastErrMtime time.Time // mtime of the last sites.toml version we logged a reload error for
+	publisher    *mdns.Publisher
+	lanContext   context.Context
+	lanIP        string
 }
 
 // New builds a proxy server and loads the initial routing table.
@@ -53,9 +61,24 @@ func New(settings config.Settings) *Server {
 
 // ListenAndServe starts the proxy on the active HTTP listener port.
 func (s *Server) ListenAndServe() error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := s.startLAN(ctx); err != nil {
+		return err
+	}
+	defer s.stopLAN()
+
 	addr := net.JoinHostPort(s.settings.BindHost, strconv.Itoa(s.settings.Hostnames.HTTPPort))
 	srv := &http.Server{Addr: addr, Handler: s}
-	return srv.ListenAndServe()
+	go func() {
+		<-ctx.Done()
+		_ = srv.Close()
+	}()
+	err := srv.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		return nil
+	}
+	return err
 }
 
 // buildProxy creates the reverse proxy for one site.
@@ -157,6 +180,9 @@ func (s *Server) reload() {
 		s.regMtime = fi.ModTime()
 	}
 	s.mu.Unlock()
+	if err := s.reconcileMDNS(sites); err != nil {
+		log.Printf("proxy: reconcile mDNS publishers: %v", err)
+	}
 }
 
 // normalizeRequestHostname turns an inbound Host header into a route-table

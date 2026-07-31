@@ -91,6 +91,12 @@ func DefaultSettings() Settings {
 	}
 }
 
+// EnableLAN selects the .local hostname family required for mDNS publishing.
+func (s *Settings) EnableLAN() {
+	s.Hostnames.LAN = true
+	s.Hostnames.TLDs = []string{"local"}
+}
+
 // ConfigDir is ~/.config/servd (honoring XDG_CONFIG_HOME).
 func ConfigDir() string {
 	if x := os.Getenv("XDG_CONFIG_HOME"); x != "" {
@@ -133,7 +139,11 @@ func (s Settings) PrimaryHostnames(site Site) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return hostnames.ParseHostnames(base, s.Hostnames.TLDs)
+	tlds := s.Hostnames.TLDs
+	if s.Hostnames.LAN {
+		tlds = []string{"local"}
+	}
+	return hostnames.ParseHostnames(base, tlds)
 }
 
 // PrimaryHostname returns the preferred, first configured hostname.
@@ -189,8 +199,12 @@ func (s Settings) FallbackURL(site Site) (string, bool) {
 // PrimaryURLPattern returns the preferred route shape for command output.
 func (s Settings) PrimaryURLPattern() string {
 	tld := "<invalid-tld>"
-	if len(s.Hostnames.TLDs) > 0 {
-		tld = s.Hostnames.TLDs[0]
+	tlds := s.Hostnames.TLDs
+	if s.Hostnames.LAN {
+		tlds = []string{"local"}
+	}
+	if len(tlds) > 0 {
+		tld = tlds[0]
 	}
 	return hostnames.FormatURL("<slug>."+tld, s.Hostnames.HTTPPort, false) + "/"
 }
@@ -307,6 +321,9 @@ func LoadSettings() (Settings, error) {
 		*raw.DomainSuffix != "127.0.0.1.nip.io" {
 		s.Hostnames.TLDs = []string{*raw.DomainSuffix}
 	}
+	if s.Hostnames.LAN {
+		s.EnableLAN()
+	}
 	return s, s.Validate()
 }
 
@@ -315,10 +332,14 @@ func (s Settings) Validate() error {
 	if s.Hostnames.HTTPPort < 1 || s.Hostnames.HTTPPort > 65535 {
 		return fmt.Errorf("hostnames.http_port must be between 1 and 65535")
 	}
-	if len(s.Hostnames.TLDs) == 0 {
+	tlds := s.Hostnames.TLDs
+	if s.Hostnames.LAN {
+		tlds = []string{"local"}
+	}
+	if len(tlds) == 0 {
 		return errors.New("hostnames.tlds must contain at least one TLD")
 	}
-	for _, tld := range s.Hostnames.TLDs {
+	for _, tld := range tlds {
 		if err := hostnames.ValidateTLD(tld); err != nil {
 			return fmt.Errorf("hostnames.tlds: %w", err)
 		}
@@ -342,6 +363,9 @@ func (s Settings) Validate() error {
 // SaveSettings writes config.toml atomically using only the active hostname
 // model; legacy migration keys are intentionally omitted.
 func SaveSettings(s Settings) error {
+	if s.Hostnames.LAN {
+		s.EnableLAN()
+	}
 	if err := s.Validate(); err != nil {
 		return err
 	}
