@@ -21,10 +21,11 @@ func proxySite(settings config.Settings) (config.Site, error) {
 	if err != nil {
 		return config.Site{}, err
 	}
-	command := launcher.ShellQuote(self) + " proxy"
+	arguments := []string{self, "proxy"}
 	if settings.Hostnames.LAN {
-		command += " --lan"
+		arguments = append(arguments, "--lan")
 	}
+	command := launcher.ShellJoin(arguments)
 	return config.Site{
 		Slug: Slug,
 		Port: settings.Hostnames.HTTPPort,

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/reidransom/servd/internal/mdns"
 	"io/fs"
 	"net"
 	"net/http"
@@ -99,9 +100,9 @@ func newDoctorCmd() *cobra.Command {
 					}
 					if hostsfile.NeedsHostsFile(settings.Hostnames.TLDs, "") {
 						ok = false
-						fmt.Printf("  ✗ %s does not resolve to loopback; run: sudo servd hosts sync\n", hostname)
+						fmt.Printf("  ✗ %s does not resolve to loopback; %s\n", hostname, hostsSyncInstruction())
 					} else {
-						fmt.Printf("  · %s does not resolve to loopback (try: sudo servd hosts sync)\n", hostname)
+						fmt.Printf("  · %s does not resolve to loopback (%s)\n", hostname, hostsSyncInstruction())
 					}
 				}
 			}
@@ -122,7 +123,17 @@ func newDoctorCmd() *cobra.Command {
 					fmt.Println("  · synchronization disabled by hostnames.hosts_mode = \"never\"")
 				} else {
 					ok = false
-					fmt.Printf("  ✗ %d hostname(s) expected; run: sudo servd hosts sync\n", len(desired))
+					fmt.Printf("  ✗ %d hostname(s) expected; %s\n", len(desired), hostsSyncInstruction())
+				}
+			}
+
+			if settings.Hostnames.LAN {
+				fmt.Println("LAN mDNS publishing:")
+				if supported, hint := mdns.Supported(); supported {
+					fmt.Println("  ✓ platform publisher is available")
+				} else {
+					ok = false
+					fmt.Printf("  ✗ %s\n", hint)
 				}
 			}
 

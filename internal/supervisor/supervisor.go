@@ -9,11 +9,9 @@ package supervisor
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/reidransom/servd/internal/config"
@@ -75,7 +73,7 @@ func Start(site config.Site, settings config.Settings) error {
 		site.Slug, time.Now().Format(time.RFC3339), res.Cmd)
 	_, _ = logf.WriteString(header)
 
-	cmd := exec.Command("sh", "-c", res.Cmd)
+	cmd := newShellCommand(res.Cmd)
 	cmd.Dir = res.Dir
 	cmd.Env = append(os.Environ(),
 		"PORT="+strconv.Itoa(site.Port),
@@ -84,16 +82,17 @@ func Start(site config.Site, settings config.Settings) error {
 	cmd.Stdout = logf
 	cmd.Stderr = logf
 	cmd.Stdin = nil
-	// New process group so we can signal the whole tree on stop.
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	prepareCommand(cmd)
 
 	if err := cmd.Start(); err != nil {
 		return err
 	}
 	pid := cmd.Process.Pid
-	pgid, err := syscall.Getpgid(pid)
+	pgid := processGroupID(pid)
+	identity, err := state.ProcessIdentity(pid)
 	if err != nil {
-		pgid = pid
+		_ = cmd.Process.Kill()
+		return fmt.Errorf("identify process %d: %w", pid, err)
 	}
 
 	// Verify the process survives a brief grace period. A dev server that
@@ -116,14 +115,14 @@ func Start(site config.Site, settings config.Settings) error {
 	return state.Mutate(func(s *state.State) error {
 		if e, ok := s.Get(site.Slug); ok && state.EntryAlive(e) && e.PID != pid {
 			// Someone else started this site while we were spawning; keep
-			// theirs and tear ours down.
-			signalGroup(pgid, pid, syscall.SIGTERM)
+			_ = terminateProcess(state.Entry{PID: pid, PGID: pgid, Identity: identity}, false)
 			return nil
 		}
 		s.Entries[site.Slug] = state.Entry{
 			Slug:      site.Slug,
 			PID:       pid,
 			PGID:      pgid,
+			Identity:  identity,
 			Port:      site.Port,
 			Cmd:       res.Cmd,
 			Log:       LogPath(site.Slug),
@@ -133,8 +132,8 @@ func Start(site config.Site, settings config.Settings) error {
 	})
 }
 
-// Stop signals the site's process group (SIGTERM, then SIGKILL after a grace
-// period) and clears its state entry. No-op if not running.
+// Stop requests graceful termination for the site's process tree, then forces
+// termination after a grace period, and finally clears its state entry.
 //
 // The state lock is only taken for the final entry removal — never across the
 // signal/poll window.
@@ -147,17 +146,15 @@ func Stop(slug string) error {
 	if !ok {
 		return nil
 	}
-	// SIGTERM with a grace period, then force-kill. A SIGKILL survivor (e.g.
-	// stuck in uninterruptible sleep) keeps its entry so `up` can't double-start.
-	signalGroup(e.PGID, e.PID, syscall.SIGTERM)
+	_ = terminateProcess(e, false)
 	if waitDead(e, 5*time.Second) {
 		return state.Delete(slug)
 	}
-	signalGroup(e.PGID, e.PID, syscall.SIGKILL)
+	_ = terminateProcess(e, true)
 	if waitDead(e, 2*time.Second) {
 		return state.Delete(slug)
 	}
-	return fmt.Errorf("%s (pid %d) survived SIGKILL; keeping its state entry", slug, e.PID)
+	return fmt.Errorf("%s (pid %d) survived forced termination; keeping its state entry", slug, e.PID)
 }
 
 // waitDead polls until e's process dies or the timeout elapses.
@@ -170,16 +167,6 @@ func waitDead(e state.Entry, timeout time.Duration) bool {
 		time.Sleep(100 * time.Millisecond)
 	}
 	return false
-}
-
-// signalGroup signals the process group if pgid is valid, else the pid.
-func signalGroup(pgid, pid int, sig syscall.Signal) {
-	if pgid > 0 {
-		if err := syscall.Kill(-pgid, sig); err == nil {
-			return
-		}
-	}
-	_ = syscall.Kill(pid, sig)
 }
 
 // WaitReady blocks until the site's port accepts connections, its process

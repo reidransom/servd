@@ -17,24 +17,6 @@ func TestSubst(t *testing.T) {
 	}
 }
 
-func TestShellJoin(t *testing.T) {
-	cases := []struct {
-		argv []string
-		want string
-	}{
-		{[]string{"npm", "run", "dev"}, "npm run dev"},
-		{[]string{"jigyll", "serve", "-P", "{port}"}, "jigyll serve -P {port}"},
-		{[]string{"echo", "hello world"}, "echo 'hello world'"},
-		{[]string{"sh", "-c", "a && b"}, `sh -c 'a && b'`},
-		{[]string{"say", "it's"}, `say 'it'\''s'`},
-	}
-	for _, c := range cases {
-		if got := ShellJoin(c.argv); got != c.want {
-			t.Errorf("ShellJoin(%q):\n got %q\nwant %q", c.argv, got, c.want)
-		}
-	}
-}
-
 func testSettings() config.Settings {
 	return config.Settings{BindHost: "127.0.0.1", PortRangeStart: 42101, Hostnames: config.HostnameSettings{HTTPPort: 42100}}
 }

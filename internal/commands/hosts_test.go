@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/hostsfile"
 )
 
 func TestPrimaryHostnamesSortsAndDeduplicates(t *testing.T) {
@@ -29,7 +30,8 @@ func TestPrimaryHostnamesSortsAndDeduplicates(t *testing.T) {
 
 func TestHostsWriteErrorIncludesPrivilegeRemediation(t *testing.T) {
 	err := hostsWriteError(fs.ErrPermission)
-	if got := err.Error(); !strings.Contains(got, "could not update /etc/hosts: permission denied") || !strings.Contains(got, "retry with: sudo servd hosts sync") {
+	want := "could not update " + hostsfile.Path() + ": permission denied"
+	if got := err.Error(); !strings.Contains(got, want) || !strings.Contains(got, hostsPermissionInstruction()) {
 		t.Fatalf("hostsWriteError() = %q", got)
 	}
 }

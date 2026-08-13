@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"syscall"
 	"testing"
 	"time"
 )
 
 func TestEntryAlive(t *testing.T) {
 	pid := os.Getpid()
-	pgid, err := syscall.Getpgid(pid)
+	identity, err := ProcessIdentity(pid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,9 +19,9 @@ func TestEntryAlive(t *testing.T) {
 		e    Entry
 		want bool
 	}{
-		{"self with matching pgid", Entry{PID: pid, PGID: pgid}, true},
-		{"self without recorded pgid", Entry{PID: pid}, true},
-		{"pgid mismatch (recycled pid)", Entry{PID: pid, PGID: pgid + 99999}, false},
+		{"self with matching identity", Entry{PID: pid, Identity: identity}, true},
+		{"self without recorded identity", Entry{PID: pid}, true},
+		{"identity mismatch (recycled pid)", Entry{PID: pid, Identity: identity + 1}, false},
 		{"zero pid", Entry{PID: 0}, false},
 		{"negative pid", Entry{PID: -5}, false},
 	}
@@ -38,7 +37,7 @@ func TestEntryAlive(t *testing.T) {
 func TestMutateConcurrent(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	pid := os.Getpid()
-	pgid, err := syscall.Getpgid(pid)
+	identity, err := ProcessIdentity(pid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +50,7 @@ func TestMutateConcurrent(t *testing.T) {
 			defer wg.Done()
 			slug := fmt.Sprintf("site-%d", i)
 			err := Mutate(func(s *State) error {
-				s.Entries[slug] = Entry{Slug: slug, PID: pid, PGID: pgid, StartedAt: time.Now()}
+				s.Entries[slug] = Entry{Slug: slug, PID: pid, Identity: identity, StartedAt: time.Now()}
 				return nil
 			})
 			if err != nil {
@@ -73,9 +72,12 @@ func TestMutateConcurrent(t *testing.T) {
 func TestLoadReconcilesDeadEntries(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	pid := os.Getpid()
-	pgid, _ := syscall.Getpgid(pid)
-	err := Mutate(func(s *State) error {
-		s.Entries["alive"] = Entry{Slug: "alive", PID: pid, PGID: pgid}
+	identity, err := ProcessIdentity(pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Mutate(func(s *State) error {
+		s.Entries["alive"] = Entry{Slug: "alive", PID: pid, Identity: identity}
 		s.Entries["dead"] = Entry{Slug: "dead", PID: 1<<30 - 7} // unlikely to exist
 		return nil
 	})

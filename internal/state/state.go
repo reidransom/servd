@@ -16,7 +16,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"syscall"
 	"time"
 
 	"github.com/reidransom/servd/internal/config"
@@ -28,6 +27,7 @@ type Entry struct {
 	Slug          string    `json:"slug"`
 	PID           int       `json:"pid"`
 	PGID          int       `json:"pgid"`
+	Identity      uint64    `json:"identity,omitempty"`
 	Port          int       `json:"port"`
 	Cmd           string    `json:"cmd"`
 	Log           string    `json:"log"`
@@ -106,34 +106,16 @@ func (s *State) Get(slug string) (Entry, bool) {
 	return e, ok
 }
 
-// EntryAlive reports whether e's process is alive and still plausibly ours:
-// the pid exists AND its current process group matches the recorded one. This
-// guards against pid reuse (reboot, pid-counter wraparound) — a recycled pid
-// is very unlikely to also lead the same process group. A live pid whose
-// Getpgid fails is treated as dead (it vanished mid-check).
+// EntryAlive reports whether e's process is alive and still plausibly ours.
+// New entries carry an OS-specific identity to guard against PID reuse. PGID
+// remains as a compatibility check for state written by older Unix releases.
 func EntryAlive(e Entry) bool {
 	if !ProcessAlive(e.PID) {
 		return false
 	}
-	if e.PGID > 0 {
-		pgid, err := syscall.Getpgid(e.PID)
-		if err != nil || pgid != e.PGID {
-			return false
-		}
+	if e.Identity > 0 {
+		identity, err := ProcessIdentity(e.PID)
+		return err == nil && identity == e.Identity
 	}
-	return true
-}
-
-// ProcessAlive reports whether a process with the given pid exists.
-func ProcessAlive(pid int) bool {
-	if pid <= 0 {
-		return false
-	}
-	// Signal 0 performs error checking without actually sending a signal.
-	err := syscall.Kill(pid, 0)
-	if err == nil {
-		return true
-	}
-	// EPERM means the process exists but we can't signal it (still alive).
-	return errors.Is(err, syscall.EPERM)
+	return legacyEntryAlive(e)
 }

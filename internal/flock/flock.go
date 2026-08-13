@@ -5,7 +5,6 @@ package flock
 import (
 	"os"
 	"path/filepath"
-	"syscall"
 )
 
 // WithLock holds an exclusive flock on path+".lock" while fn runs. The lock
@@ -20,9 +19,9 @@ func WithLock(path string, fn func() error) error {
 		return err
 	}
 	defer func() { _ = f.Close() }()
-	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+	if err := lockFile(f); err != nil {
 		return err
 	}
-	defer func() { _ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN) }()
+	defer func() { _ = unlockFile(f) }()
 	return fn()
 }

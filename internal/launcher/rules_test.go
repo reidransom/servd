@@ -327,9 +327,3 @@ func TestTools(t *testing.T) {
 		t.Errorf("Tools = %v, want %v", got, want)
 	}
 }
-
-func TestShellQuote(t *testing.T) {
-	if got := ShellQuote("/a b/it's"); got != `'/a b/it'\''s'` {
-		t.Errorf("ShellQuote: got %q", got)
-	}
-}

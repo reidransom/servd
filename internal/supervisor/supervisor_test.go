@@ -4,7 +4,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	"syscall"
 	"testing"
 	"time"
 
@@ -36,10 +35,13 @@ func TestWaitReady(t *testing.T) {
 	defer func() { _ = ln.Close() }()
 	port := ln.Addr().(*net.TCPAddr).Port
 	site := config.Site{Slug: "ready", Port: port}
-	pgid, _ := syscall.Getpgid(os.Getpid())
+	identity, err := state.ProcessIdentity(os.Getpid())
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = state.Mutate(func(s *state.State) error {
 		s.Entries["ready"] = state.Entry{
-			Slug: "ready", PID: os.Getpid(), PGID: pgid, Port: port, StartedAt: time.Now(),
+			Slug: "ready", PID: os.Getpid(), Identity: identity, Port: port, StartedAt: time.Now(),
 		}
 		return nil
 	})
@@ -60,7 +62,7 @@ func TestWaitReady(t *testing.T) {
 	deaf := config.Site{Slug: "deaf", Port: deafPort}
 	err = state.Mutate(func(s *state.State) error {
 		s.Entries["deaf"] = state.Entry{
-			Slug: "deaf", PID: os.Getpid(), PGID: pgid, Port: deafPort, StartedAt: time.Now(),
+			Slug: "deaf", PID: os.Getpid(), Identity: identity, Port: deafPort, StartedAt: time.Now(),
 		}
 		return nil
 	})

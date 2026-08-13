@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	"syscall"
 	"testing"
 	"time"
 
@@ -30,10 +29,13 @@ func TestNewSiteInfo(t *testing.T) {
 	port := ln.Addr().(*net.TCPAddr).Port
 	live := config.Site{Slug: "live", Path: "/tmp/live", Port: port, Enabled: true}
 
-	pgid, _ := syscall.Getpgid(os.Getpid())
+	identity, err := state.ProcessIdentity(os.Getpid())
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = state.Mutate(func(s *state.State) error {
 		s.Entries["live"] = state.Entry{
-			Slug: "live", PID: os.Getpid(), PGID: pgid, Port: port,
+			Slug: "live", PID: os.Getpid(), Identity: identity, Port: port,
 			Cmd: "sleep 999", StartedAt: time.Now().Add(-time.Minute),
 		}
 		return nil

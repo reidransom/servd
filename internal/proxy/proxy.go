@@ -31,7 +31,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/reidransom/servd/internal/config"
@@ -61,7 +60,7 @@ func New(settings config.Settings) *Server {
 
 // ListenAndServe starts the proxy on the active HTTP listener port.
 func (s *Server) ListenAndServe() error {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals()...)
 	defer stop()
 	if err := s.startLAN(ctx); err != nil {
 		return err

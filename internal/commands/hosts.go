@@ -47,7 +47,7 @@ func newHostsStatusCmd() *cobra.Command {
 				return nil
 			}
 			fmt.Printf("%s: not synced (%d managed, %d expected)\n", hostsfile.Path(), len(managed), len(desired))
-			fmt.Println("run: sudo servd hosts sync")
+			fmt.Println(hostsSyncInstruction())
 			return nil
 		},
 	}
@@ -178,7 +178,7 @@ func syncHostsForProxy(settings config.Settings, registry *config.Registry) erro
 
 func hostsWriteError(err error) error {
 	if errors.Is(err, fs.ErrPermission) {
-		return fmt.Errorf("could not update %s: permission denied\nretry with: sudo servd hosts sync", hostsfile.Path())
+		return fmt.Errorf("could not update %s: permission denied\n%s", hostsfile.Path(), hostsPermissionInstruction())
 	}
 	return fmt.Errorf("could not update %s: %w", hostsfile.Path(), err)
 }
