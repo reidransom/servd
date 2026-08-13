@@ -1,0 +1,97 @@
+version: 2
+project_name: servd
+
+before:
+  hooks:
+    - go test ./...
+
+builds:
+  - id: servd
+    main: ./cmd/servd
+    binary: servd
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/reidransom/servd/internal/buildinfo.Version={{ .Version }}
+        -X github.com/reidransom/servd/internal/buildinfo.Commit={{ .Commit }}
+        -X github.com/reidransom/servd/internal/buildinfo.Date={{ .Date }}
+
+archives:
+  - id: default
+    ids:
+      - servd
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+
+brews:
+  - name: servd
+    ids:
+      - default
+    repository:
+      owner: reidransom
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/reidransom/servd
+    description: Run and manage many local dev servers at once.
+    license: MIT
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    install: |
+      bin.install "servd"
+    test: |
+      system "#{bin}/servd", "version"
+
+scoops:
+  - name: servd
+    ids:
+      - default
+    repository:
+      owner: reidransom
+      name: scoop-bucket
+      branch: main
+      token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
+    directory: bucket
+    homepage: https://github.com/reidransom/servd
+    description: Run and manage many local dev servers at once.
+    license: MIT
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com

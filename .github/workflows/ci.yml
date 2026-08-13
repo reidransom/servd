@@ -9,19 +9,90 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go vet ./...
-      - uses: golangci/golangci-lint-action@v8
+      - name: Vet
+        run: go vet ./...
+      - name: Check module files
+        run: go mod tidy -diff
+      - name: Lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          # golangci-lint v2 is required for code targeting Go 1.25.
+          version: v2.6.2
+          args: --timeout=30m --issues-exit-code=1
 
   test:
-    runs-on: ubuntu-latest
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go build ./...
-      - run: go test ./... -race -cover
+      - name: Build
+        run: go build ./cmd/servd
+      - name: Test
+        run: go test ./...
+
+  race:
+    name: Race test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test
+        run: go test ./... -race -cover
+
+  snapshot:
+    name: GoReleaser snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build snapshot
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: "~> v2"
+          args: release --snapshot --clean --skip=publish
+      - name: Verify snapshot artifacts
+        shell: bash
+        run: |
+          shopt -s nullglob
+          archives=(dist/servd_*.tar.gz dist/servd_*.zip)
+          test "${#archives[@]}" -eq 6
+          for archive in \
+            dist/servd_Darwin_x86_64.tar.gz \
+            dist/servd_Darwin_arm64.tar.gz \
+            dist/servd_Linux_x86_64.tar.gz \
+            dist/servd_Linux_arm64.tar.gz \
+            dist/servd_Windows_x86_64.zip \
+            dist/servd_Windows_arm64.zip
+          do
+            test -s "$archive"
+          done
+          test -s dist/checksums.txt
+          test "$(wc -l < dist/checksums.txt)" -eq 6

@@ -1,6 +1,7 @@
 _plans
 _plans/*
 bin/
+dist/
 servd
 *.exe
 *.exe~

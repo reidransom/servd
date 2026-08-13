@@ -89,7 +89,11 @@ func TestSupervisorChildProcess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer listener.Close()
+	defer func() {
+		if err := listener.Close(); err != nil {
+			t.Errorf("close listener: %v", err)
+		}
+	}()
 	for {
 		connection, err := listener.Accept()
 		if err != nil {
