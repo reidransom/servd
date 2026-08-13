@@ -4,6 +4,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/reidransom/servd/internal/buildinfo"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/tui"
 	"github.com/spf13/cobra"
@@ -15,17 +16,20 @@ func Execute() error {
 }
 
 func newRootCmd() *cobra.Command {
+	version := buildinfo.String()
 	root := &cobra.Command{
 		Use:           "servd",
 		Short:         "Run and manage many local dev servers at once",
 		Long:          "servd runs registered web projects on stable ports and reverse-proxies them as local hostnames.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Version:       version,
 		// Bare `servd` launches the TUI.
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return tui.Run()
 		},
 	}
+	root.SetVersionTemplate("{{.Version}}\n")
 	root.AddCommand(
 		newAddCmd(),
 		newRmCmd(),
@@ -43,6 +47,7 @@ func newRootCmd() *cobra.Command {
 		newHostsCmd(),
 		newDoctorCmd(),
 		newTUICmd(),
+		newVersionCmd(),
 		newStaticCmd(),
 	)
 	return root
