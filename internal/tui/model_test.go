@@ -51,6 +51,13 @@ func TestAddModalRegistersSite(t *testing.T) {
 	if s := reg.Find("widget"); s == nil {
 		t.Fatalf("site not registered; registry = %+v", reg.Sites)
 	}
+	data, err := os.ReadFile(config.RegistryPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "enabled") {
+		t.Fatalf("registered site persists removed enabled field:\n%s", data)
+	}
 }
 
 // TestHelpToggle checks that h hides the help bar and gives its row to the
@@ -84,6 +91,26 @@ func TestHelpToggle(t *testing.T) {
 	}
 	if got := m.table.Height(); got != shown {
 		t.Errorf("table height = %d after restoring help, want %d", got, shown)
+	}
+}
+
+func TestViewOmitsWebsiteEnablement(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	registry := &config.Registry{Sites: []config.Site{{Slug: "widget", Path: t.TempDir(), Port: 1}}}
+	m.applyStatuses(buildStatuses(registry, m.st))
+	m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+
+	view := m.View()
+	for _, text := range []string{"en/dis", "disabled"} {
+		if strings.Contains(view, text) {
+			t.Errorf("TUI view exposes removed enablement %q:\n%s", text, view)
+		}
 	}
 }
 

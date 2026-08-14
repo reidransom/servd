@@ -27,7 +27,7 @@ func TestNewSiteInfo(t *testing.T) {
 	}
 	defer func() { _ = ln.Close() }()
 	port := ln.Addr().(*net.TCPAddr).Port
-	live := config.Site{Slug: "live", Path: "/tmp/live", Port: port, Enabled: true}
+	live := config.Site{Slug: "live", Path: "/tmp/live", Port: port}
 
 	identity, err := state.ProcessIdentity(os.Getpid())
 	if err != nil {
@@ -67,6 +67,9 @@ func TestNewSiteInfo(t *testing.T) {
 		if strings.Contains(string(data), `"`+key+`"`) {
 			t.Errorf("stopped-site JSON contains %q: %s", key, data)
 		}
+	}
+	if strings.Contains(string(data), `"enabled"`) {
+		t.Errorf("site JSON contains removed enabled field: %s", data)
 	}
 
 	settings.Hostnames.NipIO = false

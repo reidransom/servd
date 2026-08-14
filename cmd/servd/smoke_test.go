@@ -66,7 +66,7 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		t.Fatalf("version = %q, want %q", strings.TrimSpace(version), want)
 	}
 
-	runSmokeCommand(t, environment, binary, "up", smokeSlug, "--wait", "--timeout", "10s")
+	runSmokeCommand(t, environment, binary, "up", "--all", "--wait", "--timeout", "10s")
 	url := fmt.Sprintf("http://127.0.0.1:%d/", port)
 	if body := fetchSmokeSite(t, url); !strings.Contains(body, fixture) {
 		t.Fatalf("GET %s = %q, want fixture content", url, body)

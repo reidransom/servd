@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -130,11 +131,63 @@ func TestSaveSettingsOmitsLegacyKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, key := range []string{"proxy_port", "domain_suffix", "sync_hosts"} {
+	for _, key := range []string{"proxy_port", "domain_suffix", "sync_hosts", "default_enabled"} {
 		if strings.Contains(string(data), key) {
 			t.Fatalf("saved settings contain legacy key %q:\n%s", key, data)
 		}
 	}
+}
+
+func TestLegacyEnablementKeysAreIgnoredAndOmittedOnSave(t *testing.T) {
+	t.Run("settings", func(t *testing.T) {
+		writeConfig(t, "default_enabled = true\n")
+		settings, err := LoadSettings()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(settings, DefaultSettings()) {
+			t.Fatalf("legacy default_enabled changed settings: %#v", settings)
+		}
+		if err := SaveSettings(settings); err != nil {
+			t.Fatal(err)
+		}
+		data, err := os.ReadFile(settingsPath())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), "default_enabled") {
+			t.Fatalf("saved settings contain default_enabled:\n%s", data)
+		}
+	})
+
+	t.Run("registry", func(t *testing.T) {
+		configHome := t.TempDir()
+		t.Setenv("XDG_CONFIG_HOME", configHome)
+		if err := os.MkdirAll(filepath.Join(configHome, "servd"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		legacy := "[[site]]\nslug = \"alpha\"\npath = \"/tmp/alpha\"\nport = 4001\nenabled = true\n\n[[site]]\nslug = \"bravo\"\npath = \"/tmp/bravo\"\nport = 4002\nenabled = false\n"
+		if err := os.WriteFile(registryPath(), []byte(legacy), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		registry, err := LoadRegistry()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(registry.Sites) != 2 || registry.Find("alpha") == nil || registry.Find("bravo") == nil {
+			t.Fatalf("legacy registry sites = %#v, want alpha and bravo", registry.Sites)
+		}
+		if err := registry.Save(); err != nil {
+			t.Fatal(err)
+		}
+		data, err := os.ReadFile(registryPath())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), "enabled") {
+			t.Fatalf("saved registry contains enabled:\n%s", data)
+		}
+	})
 }
 
 func TestSettingsValidation(t *testing.T) {
