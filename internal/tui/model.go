@@ -389,14 +389,9 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case "a":
 		if !m.busy {
-			var sites []config.Site
-			for _, s := range m.reg.Sites {
-				if s.Enabled {
-					sites = append(sites, s)
-				}
-			}
+			sites := append([]config.Site(nil), m.reg.Sites...)
 			settings := m.settings
-			return m.action("starting enabled sites…", func() actionDoneMsg {
+			return m.action("starting all sites…", func() actionDoneMsg {
 				return bulkAction("started", sites, func(s config.Site) error { return supervisor.Start(s, settings) })
 			})
 		}
@@ -406,30 +401,6 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m.action("stopping all…", func() actionDoneMsg {
 				return bulkAction("stopped", sites, func(s config.Site) error { return supervisor.Stop(s.Slug) })
 			})
-		}
-	case "e":
-		if s := m.selectedSite(); s != nil {
-			slug := s.Slug
-			var enabled bool
-			err := config.MutateRegistry(func(reg *config.Registry) error {
-				site := reg.Find(slug)
-				if site == nil {
-					return fmt.Errorf("unknown site %q", slug)
-				}
-				site.Enabled = !site.Enabled
-				enabled = site.Enabled
-				return nil
-			})
-			if err != nil {
-				m.status = "ERROR: " + firstLine(err.Error())
-				return m, nil
-			}
-			if enabled {
-				m.status = "enabled " + slug
-			} else {
-				m.status = "disabled " + slug
-			}
-			return m, refreshCmd()
 		}
 	case "o":
 		if s := m.selectedSite(); s != nil {
@@ -713,8 +684,8 @@ func (m *model) View() string {
 	logPane := box(m.focus == focusLog).Render(header + "\n" + m.viewport.View())
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, sidebar, logPane) + "\n")
 
-	// Footer detail: selected-site URL + the launcher/uptime/enabled facts the
-	// sidebar no longer shows, then any transient status message.
+	// Footer detail: selected-site URL plus launcher and uptime facts, then any
+	// transient status message.
 	if s := m.selectedSite(); s != nil {
 		b.WriteString(dimStyle.Render("→ ") + m.settings.SiteURL(*s))
 		var meta []string
@@ -723,9 +694,6 @@ func (m *model) View() string {
 		}
 		if d := supervisor.Uptime(s.Slug, m.st); d > 0 {
 			meta = append(meta, "up "+app.FmtDuration(d))
-		}
-		if !s.Enabled {
-			meta = append(meta, "disabled")
 		}
 		if len(meta) > 0 {
 			b.WriteString(dimStyle.Render("  (" + strings.Join(meta, " · ") + ")"))
@@ -740,7 +708,7 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · e en/dis · o open · p proxy · A add · tab focus · h help · q quit"))
+		b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · o open · p proxy · A add · tab focus · h help · q quit"))
 	}
 	return b.String()
 }
