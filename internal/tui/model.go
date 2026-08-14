@@ -518,18 +518,17 @@ func (m *model) handleAddKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 // completePath does shell-style filesystem completion of a partially-typed
 // directory path (sites are directories, so files are ignored). It returns the
 // path extended to the longest common prefix of the matching entries — with a
-// trailing slash when the match is a single directory, so the user can keep
-// descending — along with the list of matching entry names.
+// trailing path separator when the match is a single directory, so the user can
+// keep descending — along with the list of matching entry names.
 func completePath(input string) (string, []string) {
 	p := expandHome(input)
 
 	// Determine the directory to list and the prefix to match within it.
 	dir, prefix := filepath.Dir(p), filepath.Base(p)
-	if input == "" || strings.HasSuffix(input, "/") {
-		dir, prefix = strings.TrimRight(p, "/"), ""
-		if dir == "" {
-			dir = "/"
-		}
+	if input == "" {
+		dir, prefix = string(filepath.Separator), ""
+	} else if strings.HasSuffix(input, "/") || strings.HasSuffix(input, string(filepath.Separator)) {
+		dir, prefix = filepath.Clean(p), ""
 	}
 
 	entries, err := os.ReadDir(dir)

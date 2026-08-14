@@ -14,14 +14,20 @@ import (
 )
 
 func newShellCommand(command string) *exec.Cmd {
-	return exec.Command("cmd.exe", "/d", "/s", "/v:off", "/c", `"`+command+`"`)
+	shell := exec.Command("cmd.exe")
+	shell.Args = nil
+	shell.SysProcAttr = &syscall.SysProcAttr{
+		CmdLine: `cmd.exe /d /s /v:off /c "` + command + `"`,
+	}
+	return shell
 }
 
 func prepareCommand(command *exec.Cmd) {
-	command.SysProcAttr = &syscall.SysProcAttr{
-		CreationFlags: windows.CREATE_NEW_PROCESS_GROUP | windows.DETACHED_PROCESS,
-		HideWindow:    true,
+	if command.SysProcAttr == nil {
+		command.SysProcAttr = &syscall.SysProcAttr{}
 	}
+	command.SysProcAttr.CreationFlags = windows.CREATE_NEW_PROCESS_GROUP | windows.DETACHED_PROCESS
+	command.SysProcAttr.HideWindow = true
 }
 
 func processGroupID(int) int {
