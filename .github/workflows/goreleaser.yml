@@ -65,8 +65,8 @@ jobs:
           brew tap reidransom/tap
           brew install reidransom/tap/servd
           binary="$(brew --prefix reidransom/tap/servd)/bin/servd"
-          version="$("$binary" version)"
-          test "$version" = "$("$binary" --version)"
+          version="$("$binary" version 2>&1)"
+          test "$version" = "$("$binary" --version 2>&1)"
           expected="${GITHUB_REF_NAME#v}"
           test "${version#*version=$expected }" != "$version"
 
@@ -96,8 +96,9 @@ jobs:
           scoop bucket add reidransom https://github.com/reidransom/scoop-bucket
           scoop install reidransom/servd
           $binary = Join-Path $HOME "scoop\\shims\\servd.exe"
-          $version = & $binary version
-          if ($version -ne (& $binary --version)) {
+          $version = (& $binary version 2>&1 | Out-String).Trim()
+          $flagVersion = (& $binary --version 2>&1 | Out-String).Trim()
+          if ($version -ne $flagVersion) {
             throw "version command output differs: $version"
           }
           $expected = $env:GITHUB_REF_NAME.TrimStart("v")
