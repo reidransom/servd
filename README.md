@@ -22,8 +22,53 @@ recipes, plain static dirs, and any project with a `Procfile` work too.
 
 ## Install
 
+### Homebrew — macOS and Linux
+
+```sh
+brew install reidransom/tap/servd
+```
+
+### Scoop — Windows
+
+```powershell
+scoop bucket add reidransom https://github.com/reidransom/scoop-bucket
+scoop install reidransom/servd
+```
+
+### Release archive
+
+Download the archive for your operating system and architecture, plus
+`checksums.txt`, from the
+[latest GitHub release](https://github.com/reidransom/servd/releases/latest).
+Windows archives are ZIP files; macOS and Linux archives are tarballs. Verify
+the archive before extracting it:
+
+```sh
+# macOS or Linux: compare this hash with the matching checksums.txt entry
+shasum -a 256 servd_Darwin_arm64.tar.gz
+```
+
+```powershell
+# Windows: compare this hash with the matching checksums.txt entry
+Get-FileHash .\servd_Windows_x86_64.zip -Algorithm SHA256
+```
+
+Each archive contains `servd` (`servd.exe` on Windows), `README.md`, and
+`LICENSE`.
+
+### Go install
+
+With the Go version declared in `go.mod` or newer:
+
 ```sh
 go install github.com/reidransom/servd/cmd/servd@latest
+```
+
+Every installation method can report its exact version without reading config
+or starting the TUI:
+
+```sh
+servd version
 ```
 
 ## Quick start
@@ -135,6 +180,7 @@ any `port_flag_deps` entry appears in `package.json` dependencies.
 | `servd proxy up\|down\|status` | manage the background reverse proxy |
 | `servd proxy` | run the proxy in the foreground |
 | `servd doctor` | check tools, ports and nip.io resolution |
+| `servd version` / `servd --version` | report version, commit, and build date |
 | `servd` / `servd tui` | interactive dashboard |
 
 The dashboard is a split view: the site list on the left, and a live tail of
@@ -191,6 +237,21 @@ internal and may change.
 Servers are launched **detached** in their own process groups, so they keep
 running after the CLI or TUI exits; `servd down` signals the whole group.
 The reverse proxy passes through websocket upgrades, so live-reload / HMR works.
+
+## Platform behavior
+
+- LAN mDNS publishing is available on macOS and Linux. Windows reports it as
+  unsupported in `servd doctor`; regular loopback and nip.io routing still
+  work.
+- Hosts-file synchronization requires an elevated terminal. The hosts file is
+  `/etc/hosts` on macOS and Linux, and
+  `%SystemRoot%\System32\drivers\etc\hosts` on Windows.
+- Launcher tools such as Node, Hugo, jigyll, Jekyll, `just`, and `make` are
+  optional host dependencies. `servd doctor` reports which capabilities are
+  available.
+- User-authored commands run through `sh` on macOS and Linux and through
+  `cmd.exe` on Windows. Commands that depend on POSIX shell syntax are not
+  portable to Windows.
 
 ## Development
 

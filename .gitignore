@@ -2,7 +2,7 @@ _plans
 _plans/*
 bin/
 dist/
-servd
+/servd
 *.exe
 *.exe~
 *.dll

@@ -96,3 +96,85 @@ jobs:
           done
           test -s dist/checksums.txt
           test "$(wc -l < dist/checksums.txt)" -eq 6
+          (cd dist && sha256sum --check checksums.txt)
+          for archive in dist/*.tar.gz
+          do
+            test "$(tar -tzf "$archive" | sort | tr '\n' ' ')" = "LICENSE README.md servd "
+          done
+          for archive in dist/*.zip
+          do
+            test "$(unzip -Z1 "$archive" | sort | tr '\n' ' ')" = "LICENSE README.md servd.exe "
+          done
+      - name: Upload snapshot archives
+        uses: actions/upload-artifact@v7
+        with:
+          name: snapshot-release
+          path: |
+            dist/servd_*.tar.gz
+            dist/servd_*.zip
+            dist/checksums.txt
+          retention-days: 1
+
+  archive-smoke:
+    name: Archive smoke (${{ matrix.target }})
+    needs: snapshot
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x86_64
+            archive: servd_Linux_x86_64.tar.gz
+            format: tar
+          - os: ubuntu-24.04-arm
+            target: linux-arm64
+            archive: servd_Linux_arm64.tar.gz
+            format: tar
+          - os: macos-15-intel
+            target: darwin-x86_64
+            archive: servd_Darwin_x86_64.tar.gz
+            format: tar
+          - os: macos-latest
+            target: darwin-arm64
+            archive: servd_Darwin_arm64.tar.gz
+            format: tar
+          - os: windows-latest
+            target: windows-x86_64
+            archive: servd_Windows_x86_64.zip
+            format: zip
+          - os: windows-11-arm
+            target: windows-arm64
+            archive: servd_Windows_arm64.zip
+            format: zip
+    steps:
+      - name: Download snapshot archives
+        uses: actions/download-artifact@v8
+        with:
+          name: snapshot-release
+          path: dist
+      - name: Run archived binary
+        if: matrix.format == 'tar'
+        shell: bash
+        run: |
+          mkdir extracted
+          tar -xzf "dist/${{ matrix.archive }}" -C extracted
+          version="$(./extracted/servd version)"
+          test "$version" = "$(./extracted/servd --version)"
+          test "${version#*version=dev}" = "$version"
+          test "${version#*commit=$GITHUB_SHA}" != "$version"
+          test "${version#*date=unknown}" = "$version"
+      - name: Run archived binary
+        if: matrix.format == 'zip'
+        shell: pwsh
+        run: |
+          Expand-Archive "dist/${{ matrix.archive }}" -DestinationPath extracted
+          $version = & .\extracted\servd.exe version
+          if ($version -ne (& .\extracted\servd.exe --version)) {
+            throw "version command output differs: $version"
+          }
+          if ($version -match "version=dev" -or
+              $version -notmatch "commit=$env:GITHUB_SHA" -or
+              $version -match "date=unknown") {
+            throw "invalid snapshot metadata: $version"
+          }

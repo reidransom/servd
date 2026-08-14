@@ -1,3 +1,10 @@
+# Release procedure:
+# 1. Require a green CI run on main.
+# 2. Create and push an annotated semantic-version tag.
+# 3. Verify six platform archives and checksums.txt on the GitHub release.
+# 4. Verify the Homebrew tap and Scoop bucket commits.
+# 5. Install both packages and run `servd version`.
+#
 name: Release
 
 on:
@@ -38,3 +45,62 @@ jobs:
           # update sibling package repositories.
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           SCOOP_BUCKET_GITHUB_TOKEN: ${{ secrets.SCOOP_BUCKET_GITHUB_TOKEN }}
+
+  homebrew-smoke:
+    name: Homebrew smoke (${{ matrix.target }})
+    needs: release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: arm64
+          - os: macos-15-intel
+            target: x86_64
+    steps:
+      - name: Install released formula
+        shell: bash
+        run: |
+          brew tap reidransom/tap
+          brew install reidransom/tap/servd
+          binary="$(brew --prefix reidransom/tap/servd)/bin/servd"
+          version="$("$binary" version)"
+          test "$version" = "$("$binary" --version)"
+          expected="${GITHUB_REF_NAME#v}"
+          test "${version#*version=$expected }" != "$version"
+
+  scoop-smoke:
+    name: Scoop smoke (${{ matrix.target }})
+    needs: release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64
+          - os: windows-11-arm
+            target: arm64
+    steps:
+      - name: Install Scoop
+        shell: pwsh
+        run: |
+          if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+            Invoke-RestMethod https://get.scoop.sh | Invoke-Expression
+          }
+      - name: Install released manifest
+        shell: pwsh
+        run: |
+          scoop bucket add reidransom https://github.com/reidransom/scoop-bucket
+          scoop install reidransom/servd
+          $binary = Join-Path $HOME "scoop\\shims\\servd.exe"
+          $version = & $binary version
+          if ($version -ne (& $binary --version)) {
+            throw "version command output differs: $version"
+          }
+          $expected = $env:GITHUB_REF_NAME.TrimStart("v")
+          if ($version -notmatch [regex]::Escape("version=$expected ")) {
+            throw "installed version does not match $expected`: $version"
+          }
