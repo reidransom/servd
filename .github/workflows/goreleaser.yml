@@ -90,6 +90,7 @@ jobs:
             Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
             Invoke-RestMethod https://get.scoop.sh | Invoke-Expression
           }
+          (Join-Path $HOME "scoop\shims") | Out-File $env:GITHUB_PATH -Append
       - name: Install released manifest
         shell: pwsh
         run: |
