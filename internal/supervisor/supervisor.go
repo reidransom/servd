@@ -103,6 +103,7 @@ func Start(site config.Site, settings config.Settings) error {
 	go func() { waited <- cmd.Wait() }()
 	select {
 	case werr := <-waited:
+		_ = logf.Sync()
 		tail := lastLines(LogPath(site.Slug), 12)
 		if tail != "" {
 			return fmt.Errorf("%s exited on startup (%v):\n%s", site.Slug, werr, tail)
