@@ -20,7 +20,7 @@ jobs:
       - name: Check module files
         run: go mod tidy -diff
       - name: Lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           # golangci-lint v2 is required for code targeting Go 1.25.
           version: v2.6.2
