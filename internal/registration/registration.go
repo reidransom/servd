@@ -21,7 +21,6 @@ type AddParams struct {
 	NoWorktreePrefix bool
 	Cmd              string
 	Port             int
-	Enable           bool
 }
 
 // AddSite registers one project in reg, defaulting the slug and port and
@@ -79,7 +78,7 @@ func AddSite(reg *config.Registry, settings config.Settings, in AddParams) (conf
 	} else if reg.HasPort(port) {
 		return config.Site{}, fmt.Errorf("port %d already assigned", port)
 	}
-	site := config.Site{Slug: slug, HostPrefix: prefix, Path: abs, Port: port, Enabled: settings.DefaultEnabled || in.Enable, Cmd: in.Cmd}
+	site := config.Site{Slug: slug, HostPrefix: prefix, Path: abs, Port: port, Cmd: in.Cmd}
 	if res, err := launcher.Resolve(site, settings); err == nil {
 		site.Launcher = res.Kind
 	} else if in.Cmd == "" {
