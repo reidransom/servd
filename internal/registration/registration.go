@@ -3,12 +3,12 @@ package registration
 
 import (
 	"fmt"
-	"path/filepath"
-
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/hostnames"
 	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/netcheck"
+	"path/filepath"
+	"slices"
 )
 
 // AddParams are the inputs to AddSite. Zero-value Slug, HostPrefix, Port or
@@ -86,6 +86,16 @@ func AddSite(reg *config.Registry, settings config.Settings, in AddParams) (conf
 	}
 	reg.Sites = append(reg.Sites, site)
 	return site, nil
+}
+
+// RemoveSite removes the named site from reg. The caller supplies the lock via
+// config.MutateRegistry and is responsible for saving the registry.
+func RemoveSite(reg *config.Registry, slug string) error {
+	if reg.Find(slug) == nil {
+		return fmt.Errorf("unknown site %q", slug)
+	}
+	reg.Sites = slices.DeleteFunc(reg.Sites, func(s config.Site) bool { return s.Slug == slug })
+	return nil
 }
 
 // NextFreePort returns the lowest port at or above settings.PortRangeStart

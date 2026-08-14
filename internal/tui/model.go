@@ -402,6 +402,18 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				return bulkAction("stopped", sites, func(s config.Site) error { return supervisor.Stop(s.Slug) })
 			})
 		}
+	case "d":
+		if s := m.selectedSite(); s != nil && !m.busy {
+			slug := s.Slug
+			return m.action("removing "+slug+"…", func() actionDoneMsg {
+				// Keep the CLI's removal semantics: remove registry state even if
+				// an already-unhealthy process cannot be stopped.
+				_ = supervisor.Stop(slug)
+				return actionDoneMsg{verb: "removed", slug: slug, err: config.MutateRegistry(func(reg *config.Registry) error {
+					return registration.RemoveSite(reg, slug)
+				})}
+			})
+		}
 	case "o":
 		if s := m.selectedSite(); s != nil {
 			_ = app.OpenBrowser(m.settings.SiteURL(*s))
@@ -708,7 +720,7 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start · x stop · r restart · a all · X stop-all · o open · p proxy · A add · tab focus · h help · q quit"))
+		b.WriteString(helpStyle.Render("s start · x stop · r restart · d remove · a all · X stop-all · o open · p proxy · A add · tab focus · h help · q quit"))
 	}
 	return b.String()
 }

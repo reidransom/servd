@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 	"os"
-	"slices"
 	"text/tabwriter"
 
 	"github.com/reidransom/servd/internal/app"
@@ -86,8 +85,7 @@ func newRmCmd() *cobra.Command {
 			// Stop outside the registry lock — it can take several seconds.
 			_ = supervisor.Stop(slug)
 			err = config.MutateRegistry(func(reg *config.Registry) error {
-				reg.Sites = slices.DeleteFunc(reg.Sites, func(s config.Site) bool { return s.Slug == slug })
-				return nil
+				return registration.RemoveSite(reg, slug)
 			})
 			if err != nil {
 				return err

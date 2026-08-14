@@ -60,6 +60,38 @@ func TestAddModalRegistersSite(t *testing.T) {
 	}
 }
 
+// TestRemoveKeyRemovesSelectedSite drives the dashboard shortcut through its
+// asynchronous completion and verifies the registry no longer contains it.
+func TestRemoveKeyRemovesSelectedSite(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	if err := (&config.Registry{Sites: []config.Site{{Slug: "widget", Port: 4242}}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("d")}); cmd == nil {
+		t.Fatal("expected a remove command")
+	} else {
+		m.Update(cmd())
+	}
+
+	reg, err := config.LoadRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reg.Find("widget") != nil {
+		t.Fatalf("site still registered: %+v", reg.Sites)
+	}
+	if m.status != "removed widget" {
+		t.Errorf("status = %q, want %q", m.status, "removed widget")
+	}
+}
+
 // TestHelpToggle checks that h hides the help bar and gives its row to the
 // panes, and that a second press restores both.
 func TestHelpToggle(t *testing.T) {
