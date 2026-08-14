@@ -75,17 +75,14 @@ servd version
 
 ```sh
 servd add ~/clients/acme  # detect the launcher, assign a port + slug
-servd enable acme         # include the site in bulk commands (see below)
-servd up --all            # start every *enabled* dev server
+servd up --all            # start every registered dev server
 servd proxy up            # start the nip.io reverse proxy on :8080
 servd                     # open the interactive dashboard (TUI)
 ```
 
-By default, **new sites are registered disabled** — `up --all` only starts sites
-you've explicitly `servd enable`d. This prevents newly registered projects from
-starting in bulk until you opt in. To start a single site regardless, name it:
-`servd up acme`. To make new sites enabled by default, set
-`default_enabled = true` in `config.toml` (or use `servd add --enable <path>`).
+Every entry in `sites.toml` is managed by servd and participates in
+`up --all` and `restart --all`. To start a single registered site, name it:
+`servd up acme`.
 
 Then visit `http://<slug>.127.0.0.1.nip.io:8080/` for any site, or
 `http://127.0.0.1:8080/` for a landing page listing them all. nip.io resolves
@@ -170,11 +167,9 @@ any `port_flag_deps` entry appears in `package.json` dependencies.
 | `servd which <slug>` | show the resolved launch command |
 | `servd launchers` | print the effective launcher rules (yours + built-ins) |
 | `servd status [slug]` (alias `ls`) | table of every site, or one named site, with live status (`--json` for machines) |
-| `servd up [slug…] [--all]` | start sites (`--all` skips disabled ones; `--wait`/`--json` for scripts) |
-| `servd down [slug…] [--all]` | stop sites (`--all` stops everything) |
-| `servd restart [slug…] [--all]` | restart sites (`--all` skips disabled ones) |
-| `servd enable <slug…>` | enable sites so `up --all` starts them |
-| `servd disable <slug…>` | disable sites so `up --all` skips them (still startable by name) |
+| `servd up [slug…] [--all]` | start sites (`--all` starts every registered site; `--wait`/`--json` for scripts) |
+| `servd down [slug…] [--all]` | stop sites (`--all` stops every registered site) |
+| `servd restart [slug…] [--all]` | restart sites (`--all` restarts every registered site) |
 | `servd logs <slug> [-f]` | show / follow a site's server output |
 | `servd open <slug>` | open the nip.io URL in a browser |
 | `servd proxy up\|down\|status` | manage the background reverse proxy |
@@ -192,7 +187,7 @@ the bottom to resume following).
 ### TUI keys
 
 `↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
-`a` start-all · `X` stop-all · `e` enable/disable · `o` open · `p` toggle proxy ·
+`a` start-all · `X` stop-all · `o` open · `p` toggle proxy ·
 `A` add a site (type a path, `tab` completes) ·
 `h` show/hide this key help · `q` quit
 
@@ -209,9 +204,9 @@ servd status acme --json       # status for one known server
 `status --json` prints one object: `proxy` (`running`, `accepting`, `pid`,
 `port`, `url`) plus a `sites` array (containing only the requested site when a
 slug is supplied) where each site carries `slug`, `path`, `port`, `url` (through the proxy), `direct_url` (straight to the dev server),
-`enabled`, `launcher`, `status` (`stopped` | `starting` | `running`), and — when
-live — `pid`, `cmd`, `log`, `started_at`, `uptime_seconds`. Match your project
-by `path` to find its slug, then hit `direct_url` (or `url` if the proxy is
+`launcher`, `status` (`stopped` | `starting` | `running`), and — when live —
+`pid`, `cmd`, `log`, `started_at`, `uptime_seconds`. Match your project by
+`path` to find its slug, then hit `direct_url` (or `url` if the proxy is
 accepting).
 
 `up --wait` polls until the server actually accepts connections (default
@@ -227,12 +222,16 @@ internal and may change.
 ## Files
 
 - `~/.config/servd/config.toml` — settings (`port_range_start`, `proxy_port`,
-  `domain_suffix`, `bind_host`, `default_enabled`)
+  `domain_suffix`, `bind_host`)
 - `~/.config/servd/sites.toml` — the site registry
 - `~/.config/servd/launchers.toml` — your launcher rules (optional, see above)
 - `<project>/.servd.toml` — per-project launch command (optional)
 - `~/.local/state/servd/state.json` — live pids/ports (self-healing)
+
 - `~/.local/state/servd/logs/<slug>.log` — per-site server output
+
+Compatibility: legacy `enabled` site keys and `default_enabled` settings keys
+are ignored and may be deleted.
 
 Servers are launched **detached** in their own process groups, so they keep
 running after the CLI or TUI exits; `servd down` signals the whole group.
