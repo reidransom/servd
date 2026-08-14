@@ -157,15 +157,15 @@ func newStatusCmd() *cobra.Command {
 				return nil
 			}
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
-			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tENABLED\tSTATUS\tUPTIME\tURL")
+			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tSTATUS\tUPTIME\tURL")
 			for _, s := range sites {
 				status := supervisor.StatusOf(s, st)
 				up := ""
 				if d := supervisor.Uptime(s.Slug, st); d > 0 {
 					up = app.FmtDuration(d)
 				}
-				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\t%s\n",
-					s.Slug, s.Port, app.Dash(s.Launcher), enabledLabel(s.Enabled), status, app.Dash(up), settings.SiteURL(s))
+				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\n",
+					s.Slug, s.Port, app.Dash(s.Launcher), status, app.Dash(up), settings.SiteURL(s))
 			}
 			return tw.Flush()
 		},
@@ -182,51 +182,4 @@ func statusSites(reg *config.Registry, args []string) ([]config.Site, error) {
 		return nil, fmt.Errorf("unknown site %q (try `servd status`)", args[0])
 	}
 	return []config.Site{*s}, nil
-}
-
-// newEnableCmd and newDisableCmd flip the registry `enabled` flag. Disabled
-// sites are skipped by `up --all` / `restart --all` but can still be started
-// explicitly by slug.
-func newEnableCmd() *cobra.Command {
-	return setEnabledCmd("enable", "Enable sites so `up --all` starts them", true)
-}
-
-func newDisableCmd() *cobra.Command {
-	return setEnabledCmd("disable", "Disable sites so `up --all` skips them", false)
-}
-
-func setEnabledCmd(use, short string, enabled bool) *cobra.Command {
-	return &cobra.Command{
-		Use:   use + " <slug...>",
-		Short: short,
-		Args:  cobra.MinimumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := config.MutateRegistry(func(reg *config.Registry) error {
-				for _, slug := range args {
-					s := reg.Find(slug)
-					if s == nil {
-						return fmt.Errorf("unknown site %q", slug)
-					}
-					s.Enabled = enabled
-				}
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-			verb := "Enabled"
-			if !enabled {
-				verb = "Disabled"
-			}
-			fmt.Printf("%s: %v\n", verb, args)
-			return nil
-		},
-	}
-}
-
-func enabledLabel(b bool) string {
-	if b {
-		return "yes"
-	}
-	return "no"
 }
