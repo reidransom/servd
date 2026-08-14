@@ -26,7 +26,7 @@ func prepareCommand(command *exec.Cmd) {
 	if command.SysProcAttr == nil {
 		command.SysProcAttr = &syscall.SysProcAttr{}
 	}
-	command.SysProcAttr.CreationFlags = windows.CREATE_NEW_PROCESS_GROUP | windows.DETACHED_PROCESS
+	command.SysProcAttr.CreationFlags = windows.CREATE_NEW_PROCESS_GROUP | windows.CREATE_NO_WINDOW
 	command.SysProcAttr.HideWindow = true
 }
 
