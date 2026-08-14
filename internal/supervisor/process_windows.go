@@ -14,7 +14,7 @@ import (
 )
 
 func newShellCommand(command string) *exec.Cmd {
-	return exec.Command("cmd.exe", "/d", "/s", "/v:off", "/c", command)
+	return exec.Command("cmd.exe", "/d", "/s", "/v:off", "/c", `"`+command+`"`)
 }
 
 func prepareCommand(command *exec.Cmd) {

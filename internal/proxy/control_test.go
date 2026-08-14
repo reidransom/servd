@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/launcher"
 )
 
 func TestProxySitePassesLANFlagToBackgroundProcess(t *testing.T) {
@@ -14,7 +15,7 @@ func TestProxySitePassesLANFlagToBackgroundProcess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasSuffix(site.Cmd, " proxy --lan") {
+	if suffix := launcher.ShellJoin([]string{"proxy", "--lan"}); !strings.HasSuffix(site.Cmd, suffix) {
 		t.Fatalf("proxy command = %q, want LAN flag", site.Cmd)
 	}
 }

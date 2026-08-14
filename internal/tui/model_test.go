@@ -99,7 +99,7 @@ func TestCompletePath(t *testing.T) {
 	}
 
 	// Unique directory prefix → completed to the full name with a trailing sep.
-	if got, m := completePath(filepath.Join(root, "be")); got != filepath.Join(root, "beta")+"/" || len(m) != 1 {
+	if got, m := completePath(filepath.Join(root, "be")); got != filepath.Join(root, "beta")+string(os.PathSeparator) || len(m) != 1 {
 		t.Errorf("unique: got %q matches %v", got, m)
 	}
 	// Ambiguous prefix → longest common prefix, both candidates returned. Note
@@ -112,11 +112,11 @@ func TestCompletePath(t *testing.T) {
 		t.Errorf("ambiguous: got matches %v, want alpha+alpine", m)
 	}
 	// Trailing slash → list every visible subdir (dotfiles hidden).
-	if _, m := completePath(root + "/"); len(m) != 3 {
+	if _, m := completePath(root + string(os.PathSeparator)); len(m) != 3 {
 		t.Errorf("list: got %d matches %v, want 3 (dotfile hidden)", len(m), m)
 	}
 	// A leading dot in the prefix reveals dotfiles.
-	if got, m := completePath(filepath.Join(root, ".h")); len(m) != 1 || got != filepath.Join(root, ".hidden")+"/" {
+	if got, m := completePath(filepath.Join(root, ".h")); len(m) != 1 || got != filepath.Join(root, ".hidden")+string(os.PathSeparator) {
 		t.Errorf("dotfile: got %q matches %v", got, m)
 	}
 }
@@ -132,7 +132,7 @@ func TestAddModalTabCompletes(t *testing.T) {
 	m := &model{mode: modeAdd, addInput: ti, cmdCache: map[string]string{}}
 
 	m.handleAddKey(tea.KeyMsg{Type: tea.KeyTab})
-	if got, want := m.addInput.Value(), filepath.Join(root, "widget")+"/"; got != want {
+	if got, want := m.addInput.Value(), filepath.Join(root, "widget")+string(os.PathSeparator); got != want {
 		t.Errorf("after tab: value = %q, want %q", got, want)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -48,8 +49,10 @@ func TestSyncAtReplacesOnlyManagedBlock(t *testing.T) {
 	if got := string(content); got != want {
 		t.Fatalf("hosts content = %q, want %q", got, want)
 	}
-	if info, err := os.Stat(path); err != nil || info.Mode().Perm() != 0o640 {
-		t.Fatalf("hosts mode = %v, %v; want 0640", info.Mode(), err)
+	if runtime.GOOS != "windows" {
+		if info, err := os.Stat(path); err != nil || info.Mode().Perm() != 0o640 {
+			t.Fatalf("hosts mode = %v, %v; want 0640", info.Mode(), err)
+		}
 	}
 	managed, err := ManagedHostnamesAt(path)
 	if err != nil {
