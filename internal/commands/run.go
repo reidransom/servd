@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/reidransom/servd/internal/app"
+	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 	"github.com/spf13/cobra"
@@ -24,12 +25,12 @@ func newUpCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			sites, err := selectSites(reg, args, all, true)
+			sites, err := selectSites(reg, args, all)
 			if err != nil {
 				return err
 			}
 			if all && len(sites) == 0 && !jsonOut {
-				fmt.Println("No enabled sites to start (all are disabled).")
+				fmt.Println("No sites registered.")
 				return nil
 			}
 			type upResult struct {
@@ -99,8 +100,7 @@ func newDownCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			// down --all stops every site (including disabled-but-running ones).
-			sites, err := selectSites(reg, args, all, false)
+			sites, err := selectSites(reg, args, all)
 			if err != nil {
 				return err
 			}
@@ -124,11 +124,15 @@ func newRestartCmd() *cobra.Command {
 		Use:   "restart [slug...]",
 		Short: "Restart one or more sites",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, st, err := app.Load()
+			settings, err := config.LoadSettings()
 			if err != nil {
 				return err
 			}
-			sites, err := selectSites(reg, args, all, true)
+			reg, err := config.LoadRegistry()
+			if err != nil {
+				return err
+			}
+			sites, err := selectSites(reg, args, all)
 			if err != nil {
 				return err
 			}
@@ -138,17 +142,6 @@ func newRestartCmd() *cobra.Command {
 					continue
 				}
 				fmt.Printf("  %-20s restarted on :%d\n", s.Slug, s.Port)
-			}
-			if all {
-				skipped := 0
-				for _, s := range reg.Sites {
-					if !s.Enabled && supervisor.StatusOf(s, st) != supervisor.Stopped {
-						skipped++
-					}
-				}
-				if skipped > 0 {
-					fmt.Printf("  (skipped %d disabled-but-running site(s); restart them by slug)\n", skipped)
-				}
 			}
 			return nil
 		},

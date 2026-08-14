@@ -3,6 +3,7 @@ package commands
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/reidransom/servd/internal/buildinfo"
 	"github.com/reidransom/servd/internal/config"
@@ -54,26 +55,12 @@ func newRootCmd() *cobra.Command {
 }
 
 // selectSites resolves command args (slugs) plus an --all flag into sites.
-//
-// With --all and onlyEnabled, disabled sites are skipped — this is how bulk
-// start operations (`up --all`, `restart --all`) honor enable/disable. Sites
-// named explicitly by slug are always returned regardless of their enabled
-// flag, so you can still start a disabled site on purpose.
-func selectSites(reg *config.Registry, args []string, all, onlyEnabled bool) ([]config.Site, error) {
+func selectSites(reg *config.Registry, args []string, all bool) ([]config.Site, error) {
 	if all && len(args) > 0 {
 		return nil, fmt.Errorf("pass slugs or --all, not both")
 	}
 	if all {
-		if !onlyEnabled {
-			return reg.Sites, nil
-		}
-		var out []config.Site
-		for _, s := range reg.Sites {
-			if s.Enabled {
-				out = append(out, s)
-			}
-		}
-		return out, nil
+		return slices.Clone(reg.Sites), nil
 	}
 	if len(args) == 0 {
 		return nil, fmt.Errorf("specify one or more slugs, or --all")
