@@ -25,10 +25,6 @@ type Settings struct {
 	PortRangeStart int              `toml:"port_range_start"`
 	BindHost       string           `toml:"bind_host"`
 	Hostnames      HostnameSettings `toml:"hostnames"`
-	// DefaultEnabled controls whether newly added sites start out enabled.
-	// Defaults to false: registration leaves sites disabled until you `servd
-	// enable` the ones you want `up --all` to run.
-	DefaultEnabled bool `toml:"default_enabled"`
 }
 
 // HostsMode controls future hosts-file synchronization behavior. It is
@@ -60,7 +56,6 @@ type Site struct {
 	HostPrefix string `toml:"host_prefix,omitempty"`
 	Path       string `toml:"path"`
 	Port       int    `toml:"port"`
-	Enabled    bool   `toml:"enabled"`
 	Cmd        string `toml:"cmd,omitempty"`      // manual launch override (highest precedence)
 	Launcher   string `toml:"launcher,omitempty"` // recorded resolver kind, e.g. "jigyll", "procfile"
 	// PreserveHost forwards the original routed Host header to the backend
@@ -238,7 +233,6 @@ func RegistryPath() string { return registryPath() }
 type rawSettings struct {
 	PortRangeStart *int                 `toml:"port_range_start"`
 	BindHost       *string              `toml:"bind_host"`
-	DefaultEnabled *bool                `toml:"default_enabled"`
 	ProxyPort      *int                 `toml:"proxy_port"`
 	DomainSuffix   *string              `toml:"domain_suffix"`
 	Hostnames      *rawHostnameSettings `toml:"hostnames"`
@@ -277,9 +271,6 @@ func LoadSettings() (Settings, error) {
 	}
 	if raw.BindHost != nil {
 		s.BindHost = *raw.BindHost
-	}
-	if raw.DefaultEnabled != nil {
-		s.DefaultEnabled = *raw.DefaultEnabled
 	}
 	if h := raw.Hostnames; h != nil {
 		if h.TLDs != nil {
