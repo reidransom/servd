@@ -127,6 +127,61 @@ func TestStartStopKeyTogglesSelectedSite(t *testing.T) {
 	}
 }
 
+func TestAllKeyTogglesSites(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	sites := []config.Site{
+		{Slug: "widget", Path: t.TempDir(), Port: 4242, Cmd: "sleep 30"},
+		{Slug: "gadget", Path: t.TempDir(), Port: 4243, Cmd: "sleep 30"},
+	}
+	if err := (&config.Registry{Sites: sites}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	for _, site := range sites {
+		t.Cleanup(func() { _ = supervisor.Stop(site.Slug) })
+	}
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("S")}); cmd == nil {
+		t.Fatal("expected a start-all command")
+	} else {
+		m.Update(cmd())
+	}
+	if got := m.status; got != "started 2 site(s)" {
+		t.Errorf("status = %q, want %q", got, "started 2 site(s)")
+	}
+
+	m.Update(refreshCmd(m.settings)())
+	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("S")}); cmd == nil {
+		t.Fatal("expected a stop-all command")
+	} else {
+		m.Update(cmd())
+	}
+	if got := m.status; got != "stopped 2 site(s)" {
+		t.Errorf("status = %q, want %q", got, "stopped 2 site(s)")
+	}
+}
+
+func TestAddKeyOpensModal(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
+	if m.mode != modeAdd {
+		t.Errorf("mode = %v, want modeAdd", m.mode)
+	}
+}
+
 // TestHelpToggle checks that h hides the help bar and gives its row to the
 // panes, and that a second press restores both.
 func TestHelpToggle(t *testing.T) {

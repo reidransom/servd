@@ -190,8 +190,7 @@ Select an error row to see its concise reason while the site log remains visible
 ### TUI keys
 
 `↑/↓` move · `tab` focus list/log · `s` start/stop · `r` restart ·
-`a` start-all · `X` stop-all · `o` open · `p` toggle proxy ·
-`A` add a site (type a path, `tab` completes) ·
+`S` start/stop all · `a` add a site (type a path, `tab` completes) · `o` open · `p` toggle proxy ·
 `h` show/hide this key help · `q` quit
 
 ## Agents and scripts

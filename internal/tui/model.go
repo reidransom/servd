@@ -240,6 +240,20 @@ func (m *model) selectedSite() *config.Site {
 	return m.reg.Find(m.slugs[idx])
 }
 
+// allSitesRunning reports whether every registered site has a live process.
+func (m *model) allSitesRunning() bool {
+	if len(m.reg.Sites) == 0 {
+		return false
+	}
+	for _, site := range m.reg.Sites {
+		entry, ok := m.st.Get(site.Slug)
+		if !ok || !state.EntryAlive(entry) {
+			return false
+		}
+	}
+	return true
+}
+
 func (m *model) Init() tea.Cmd { return tick() }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -322,7 +336,20 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Quit
-	case "A":
+	case "S":
+		if !m.busy {
+			sites := append([]config.Site(nil), m.reg.Sites...)
+			if m.allSitesRunning() {
+				return m.action("stopping all sites…", func() actionDoneMsg {
+					return bulkAction("stopped", sites, func(s config.Site) error { return supervisor.Stop(s.Slug) })
+				})
+			}
+			settings := m.settings
+			return m.action("starting all sites…", func() actionDoneMsg {
+				return bulkAction("started", sites, func(s config.Site) error { return supervisor.Start(s, settings) })
+			})
+		}
+	case "a":
 		m.mode = modeAdd
 		ti := textinput.New()
 		ti.Placeholder = "~/clients/newthing"
@@ -360,21 +387,6 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			site, settings := *s, m.settings
 			return m.action("restarting "+site.Slug+"…", func() actionDoneMsg {
 				return actionDoneMsg{verb: "restarted", slug: site.Slug, err: supervisor.Restart(site, settings)}
-			})
-		}
-	case "a":
-		if !m.busy {
-			sites := append([]config.Site(nil), m.reg.Sites...)
-			settings := m.settings
-			return m.action("starting all sites…", func() actionDoneMsg {
-				return bulkAction("started", sites, func(s config.Site) error { return supervisor.Start(s, settings) })
-			})
-		}
-	case "X":
-		if !m.busy {
-			sites := append([]config.Site(nil), m.reg.Sites...)
-			return m.action("stopping all…", func() actionDoneMsg {
-				return bulkAction("stopped", sites, func(s config.Site) error { return supervisor.Stop(s.Slug) })
 			})
 		}
 	case "d":
@@ -647,7 +659,7 @@ func (m *model) View() string {
 	// Panes: site list on the left, live log tail on the right.
 	var sidebar string
 	if len(m.reg.Sites) == 0 {
-		hint := dimStyle.Render("No sites.\nPress A to add a site.")
+		hint := dimStyle.Render("No sites.\nPress a to add a site.")
 		sidebar = box(m.focus == focusList).Width(m.sidebarWidth()).Height(m.viewport.Height).Render(hint)
 	} else {
 		sidebar = box(m.focus == focusList).Render(m.table.View())
@@ -698,7 +710,7 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start/stop · r restart · d remove · a all · X stop-all · o open · p proxy · A add · tab focus · h help · q quit"))
+		b.WriteString(helpStyle.Render("s start/stop · r restart · d remove · S start/stop-all · a add · o open · p proxy · tab focus · h help · q quit"))
 	}
 	return b.String()
 }
