@@ -19,7 +19,7 @@ test-race:
 
 # Build the servd binary into ./bin
 build:
-    go build -o bin/servd ./cmd/servd
+    GOWORK=off go build -o bin/servd ./cmd/servd
 
 # Install servd to GOPATH/bin
 install:
