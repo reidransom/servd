@@ -346,15 +346,13 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "s":
 		if s := m.selectedSite(); s != nil && !m.busy {
 			site, settings := *s, m.settings
+			if entry, ok := m.st.Get(site.Slug); ok && state.EntryAlive(entry) {
+				return m.action("stopping "+site.Slug+"…", func() actionDoneMsg {
+					return actionDoneMsg{verb: "stopped", slug: site.Slug, err: supervisor.Stop(site.Slug)}
+				})
+			}
 			return m.action("starting "+site.Slug+"…", func() actionDoneMsg {
 				return actionDoneMsg{verb: "started", slug: site.Slug, err: supervisor.Start(site, settings)}
-			})
-		}
-	case "x":
-		if s := m.selectedSite(); s != nil && !m.busy {
-			slug := s.Slug
-			return m.action("stopping "+slug+"…", func() actionDoneMsg {
-				return actionDoneMsg{verb: "stopped", slug: slug, err: supervisor.Stop(slug)}
 			})
 		}
 	case "r":
@@ -700,7 +698,7 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start · x stop · r restart · d remove · a all · X stop-all · o open · p proxy · A add · tab focus · h help · q quit"))
+		b.WriteString(helpStyle.Render("s start/stop · r restart · d remove · a all · X stop-all · o open · p proxy · A add · tab focus · h help · q quit"))
 	}
 	return b.String()
 }

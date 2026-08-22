@@ -8,8 +8,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/supervisor"
 )
 
 // TestAddModalRegistersSite drives the add-site modal end to end: typing a path
@@ -92,6 +92,41 @@ func TestRemoveKeyRemovesSelectedSite(t *testing.T) {
 	}
 }
 
+func TestStartStopKeyTogglesSelectedSite(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	site := config.Site{Slug: "widget", Path: t.TempDir(), Port: 4242, Cmd: "sleep 30"}
+	if err := (&config.Registry{Sites: []config.Site{site}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = supervisor.Stop(site.Slug) })
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")}); cmd == nil {
+		t.Fatal("expected a start command")
+	} else {
+		m.Update(cmd())
+	}
+	if got := m.status; got != "started widget" {
+		t.Errorf("status = %q, want %q", got, "started widget")
+	}
+
+	m.Update(refreshCmd(m.settings)())
+	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")}); cmd == nil {
+		t.Fatal("expected a stop command")
+	} else {
+		m.Update(cmd())
+	}
+	if got := m.status; got != "stopped widget" {
+		t.Errorf("status = %q, want %q", got, "stopped widget")
+	}
+}
+
 // TestHelpToggle checks that h hides the help bar and gives its row to the
 // panes, and that a second press restores both.
 func TestHelpToggle(t *testing.T) {
@@ -104,13 +139,13 @@ func TestHelpToggle(t *testing.T) {
 	}
 	m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 
-	if !strings.Contains(m.View(), "s start") {
+	if !strings.Contains(m.View(), "s start/stop") {
 		t.Fatal("help bar missing from initial view")
 	}
 	shown := m.table.Height()
 
 	m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
-	if strings.Contains(m.View(), "s start") {
+	if strings.Contains(m.View(), "s start/stop") {
 		t.Error("help bar still visible after h")
 	}
 	if got := m.table.Height(); got != shown+1 {
@@ -118,7 +153,7 @@ func TestHelpToggle(t *testing.T) {
 	}
 
 	m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
-	if !strings.Contains(m.View(), "s start") {
+	if !strings.Contains(m.View(), "s start/stop") {
 		t.Error("help bar not restored by second h")
 	}
 	if got := m.table.Height(); got != shown {

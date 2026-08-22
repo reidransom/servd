@@ -189,7 +189,7 @@ Select an error row to see its concise reason while the site log remains visible
 
 ### TUI keys
 
-`↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
+`↑/↓` move · `tab` focus list/log · `s` start/stop · `r` restart ·
 `a` start-all · `X` stop-all · `o` open · `p` toggle proxy ·
 `A` add a site (type a path, `tab` completes) ·
 `h` show/hide this key help · `q` quit
@@ -215,8 +215,8 @@ to find its slug, then hit `direct_url` (or `url` if the proxy is accepting).
 `up --wait` polls until the server actually accepts connections (default
 `--timeout 30s`), and exits non-zero — with the log tail in the error — if the
 process dies or never binds. Failed launches remain in `error` until a
-successful start or `servd down`/TUI `x` clears the runtime attempt. Path and
-launcher errors clear automatically when their source is fixed. With `--json`
+successful start or `servd down` clears the runtime attempt. Path and launcher
+errors clear automatically when their source is fixed. With `--json`
 the per-site results (including any `error`) go to stdout as an array. Servers
 are already detached by default, so `up` never needs backgrounding tricks; a
 second `up` on a running site is a no-op.
