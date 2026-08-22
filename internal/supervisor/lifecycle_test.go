@@ -27,13 +27,13 @@ func TestStartStopProcessTree(t *testing.T) {
 	site := config.Site{
 		Slug: "process-tree",
 		Port: port,
+		Path: t.TempDir(),
 		Cmd:  launcher.ShellJoin([]string{os.Args[0], "-test.run=^TestSupervisorParentProcess$"}),
 	}
 	if err := Start(site, settings); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = Stop(site.Slug) })
-	if err := WaitReady(site, 5*time.Second); err != nil {
+	if err := WaitReady(site, settings, 5*time.Second); err != nil {
 		t.Fatal(err)
 	}
 
@@ -53,12 +53,146 @@ func TestStartReportsFailureLog(t *testing.T) {
 	settings := config.DefaultSettings()
 	site := config.Site{
 		Slug: "startup-failure",
+		Path: t.TempDir(),
 		Port: availablePort(t),
 		Cmd:  launcher.ShellJoin([]string{os.Args[0], "-test.run=^TestSupervisorFailureProcess$"}),
 	}
 	err := Start(site, settings)
 	if err == nil || !strings.Contains(err.Error(), "intentional startup failure") {
 		t.Fatalf("Start() error = %v, want log-tail failure", err)
+	}
+}
+
+func TestStartDoesNotPersistStaticResolutionFailure(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{
+		Slug: "missing-project",
+		Path: filepath.Join(t.TempDir(), "missing"),
+		Port: availablePort(t),
+		Cmd:  "sleep 30",
+	}
+	settings := config.DefaultSettings()
+	if err := Start(site, settings); err == nil {
+		t.Fatal("Start() with missing project should fail")
+	}
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := st.Get(site.Slug); ok {
+		t.Fatal("static resolution failure should not persist a runtime attempt")
+	}
+	if err := os.MkdirAll(site.Path, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if got := Evaluate(site, settings, st); got.Kind != Stopped {
+		t.Errorf("repaired static status = %#v, want stopped", got)
+	}
+}
+func TestStartRecordsExitFailure(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{
+		Slug: "exit-failure",
+		Path: t.TempDir(),
+		Port: availablePort(t),
+		Cmd:  "exit 7",
+	}
+	if err := Start(site, config.DefaultSettings()); err == nil {
+		t.Fatal("Start() with exit 7 should fail")
+	}
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry, ok := st.Get(site.Slug)
+	if !ok {
+		t.Fatal("failed start was not retained")
+	}
+	if entry.Failure == "" || entry.FailedAt.IsZero() {
+		t.Errorf("failure record = %#v, want concise failure and time", entry)
+	}
+}
+
+func TestSuccessfulStartReplacesFailedEntry(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{
+		Slug: "replaces-failure",
+		Path: t.TempDir(),
+		Port: availablePort(t),
+		Cmd:  "exit 7",
+	}
+	settings := config.DefaultSettings()
+	if err := Start(site, settings); err == nil {
+		t.Fatal("Start() with exit 7 should fail")
+	}
+	site.Cmd = "sleep 30"
+	if err := Start(site, settings); err != nil {
+		t.Fatalf("Start() after failure = %v", err)
+	}
+	t.Cleanup(func() { _ = Stop(site.Slug) })
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry, ok := st.Get(site.Slug)
+	if !ok {
+		t.Fatal("successful start was not recorded")
+	}
+	if entry.Failure != "" || !entry.FailedAt.IsZero() || !state.EntryAlive(entry) {
+		t.Errorf("success record = %#v, want live entry without failure", entry)
+	}
+}
+
+func TestStopClearsFailedEntry(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{
+		Slug: "stops-failure",
+		Path: t.TempDir(),
+		Port: availablePort(t),
+		Cmd:  "exit 7",
+	}
+	if err := Start(site, config.DefaultSettings()); err == nil {
+		t.Fatal("Start() with exit 7 should fail")
+	}
+	if err := Stop(site.Slug); err != nil {
+		t.Fatal(err)
+	}
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := st.Get(site.Slug); ok {
+		t.Fatal("Stop() did not clear failed entry")
+	}
+}
+
+func TestRecordFailedStartKeepsConcurrentLiveEntry(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	pid := os.Getpid()
+	identity, err := state.ProcessIdentity(pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	site := config.Site{Slug: "concurrent", Path: t.TempDir(), Port: availablePort(t), Cmd: "exit 7"}
+	if err := state.Mutate(func(s *state.State) error {
+		s.Entries[site.Slug] = state.Entry{Slug: site.Slug, PID: pid, Identity: identity, StartedAt: time.Now()}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recordFailedStart(site, launcher.Resolved{Cmd: site.Cmd, Dir: site.Path}, "shell start failed"); err != nil {
+		t.Fatal(err)
+	}
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry, ok := st.Get(site.Slug)
+	if !ok {
+		t.Fatal("live entry missing")
+	}
+	if entry.PID != pid || entry.Failure != "" {
+		t.Errorf("live entry = %#v, want original live entry", entry)
 	}
 }
 

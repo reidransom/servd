@@ -62,21 +62,12 @@ type actionDoneMsg struct {
 	err  error
 }
 
-// statusesMsg carries a freshly loaded registry/state and the table rows
-// computed from them. A nil reg means the load failed and should be ignored.
-type statusesMsg struct {
-	reg          *config.Registry
-	st           *state.State
-	rows         []table.Row
-	slugs        []string
-	proxyRunning bool
-}
-
 type model struct {
 	settings config.Settings
 	reg      *config.Registry
 	st       *state.State
 
+	statuses map[string]supervisor.SiteStatus
 	table    table.Model
 	slugs    []string // parallel to table rows
 	focus    focus
@@ -139,33 +130,13 @@ func newModel() (*model, error) {
 	t.SetStyles(s)
 
 	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, viewport: viewport.New(80, 20), showHelp: true}
-	m.applyStatuses(buildStatuses(reg, st))
+	m.applyStatuses(buildStatuses(settings, reg, st))
 	m.syncLogSelection()
 	return m, nil
 }
 
-// buildStatuses computes the table rows for a registry+state snapshot. It
-// dials ports (StatusOf), so it must run off the Update goroutine.
-func buildStatuses(reg *config.Registry, st *state.State) statusesMsg {
-	running, _ := proxy.Running(st)
-	rows := make([]table.Row, 0, len(reg.Sites))
-	slugs := make([]string, 0, len(reg.Sites))
-	for _, s := range reg.Sites {
-		glyph := "○"
-		switch supervisor.StatusOf(s, st) {
-		case supervisor.Running:
-			glyph = "●"
-		case supervisor.Starting:
-			glyph = "◐"
-		}
-		rows = append(rows, table.Row{s.Slug, glyph})
-		slugs = append(slugs, s.Slug)
-	}
-	return statusesMsg{reg: reg, st: st, rows: rows, slugs: slugs, proxyRunning: running}
-}
-
 // refreshCmd reloads registry+state and computes statuses in a goroutine.
-func refreshCmd() tea.Cmd {
+func refreshCmd(settings config.Settings) tea.Cmd {
 	return func() tea.Msg {
 		reg, err := config.LoadRegistry()
 		if err != nil {
@@ -175,7 +146,7 @@ func refreshCmd() tea.Cmd {
 		if err != nil {
 			return statusesMsg{}
 		}
-		return buildStatuses(reg, st)
+		return buildStatuses(settings, reg, st)
 	}
 }
 
@@ -186,9 +157,15 @@ func (m *model) applyStatuses(msg statusesMsg) {
 	}
 	m.reg, m.st = msg.reg, msg.st
 	m.proxyRunning = msg.proxyRunning
-	cur := m.table.Cursor()
+	for slug, status := range msg.statuses {
+		if previous, ok := m.statuses[slug]; !ok || previous != status {
+			delete(m.cmdCache, slug)
+		}
+	}
+	m.statuses = msg.statuses
 	m.table.SetRows(msg.rows)
 	m.slugs = msg.slugs
+	cur := m.table.Cursor()
 	if cur >= len(msg.rows) {
 		cur = len(msg.rows) - 1
 	}
@@ -275,7 +252,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		m.syncLogSelection() // swap the panel if the highlighted slug changed
 		m.loadLog()          // tail the selected site's log
-		return m, tea.Batch(refreshCmd(), tick())
+		return m, tea.Batch(refreshCmd(m.settings), tick())
 
 	case statusesMsg:
 		m.applyStatuses(msg)
@@ -293,7 +270,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			m.status = msg.verb
 		}
-		return m, refreshCmd()
+		return m, refreshCmd(m.settings)
 
 	case tea.KeyMsg:
 		return m.handleKey(msg)
@@ -490,7 +467,7 @@ func (m *model) handleAddKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.mode = modeNormal
 		m.cmdCache = map[string]string{}
 		m.status = "added " + site.Slug
-		return m, refreshCmd()
+		return m, refreshCmd(m.settings)
 	}
 	m.addMatches = nil // any edit invalidates the last completion list
 	var cmd tea.Cmd
@@ -709,6 +686,9 @@ func (m *model) View() string {
 		}
 		if len(meta) > 0 {
 			b.WriteString(dimStyle.Render("  (" + strings.Join(meta, " · ") + ")"))
+		}
+		if health, ok := m.statuses[s.Slug]; ok && health.Kind == supervisor.Error {
+			b.WriteString("   " + errStyle.Render("ERROR: "+health.Reason))
 		}
 	}
 	if m.status != "" {

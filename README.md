@@ -184,6 +184,9 @@ the highlighted site's log on the right, led by the `$ command` that started
 focus to the log so `↑/↓` scroll it (scroll up to pause the tail, scroll back to
 the bottom to resume following).
 
+Site glyphs are `○` stopped, `◐` starting, `●` running, and red `✕` error.
+Select an error row to see its concise reason while the site log remains visible.
+
 ### TUI keys
 
 `↑/↓` move · `tab` focus list/log · `s` start · `x` stop · `r` restart ·
@@ -204,17 +207,19 @@ servd status acme --json       # status for one known server
 `status --json` prints one object: `proxy` (`running`, `accepting`, `pid`,
 `port`, `url`) plus a `sites` array (containing only the requested site when a
 slug is supplied) where each site carries `slug`, `path`, `port`, `url` (through the proxy), `direct_url` (straight to the dev server),
-`launcher`, `status` (`stopped` | `starting` | `running`), and — when live —
-`pid`, `cmd`, `log`, `started_at`, `uptime_seconds`. Match your project by
-`path` to find its slug, then hit `direct_url` (or `url` if the proxy is
-accepting).
+`launcher`, and `status` (`stopped` | `starting` | `running` | `error`).
+Error records also carry a concise `error` reason; live records carry `pid`,
+`cmd`, `log`, `started_at`, and `uptime_seconds`. Match your project by `path`
+to find its slug, then hit `direct_url` (or `url` if the proxy is accepting).
 
 `up --wait` polls until the server actually accepts connections (default
 `--timeout 30s`), and exits non-zero — with the log tail in the error — if the
-process dies or never binds. With `--json` the per-site results (including any
-`error`) go to stdout as an array. Servers are already detached by default, so
-`up` never needs backgrounding tricks; a second `up` on a running site is a
-no-op.
+process dies or never binds. Failed launches remain in `error` until a
+successful start or `servd down`/TUI `x` clears the runtime attempt. Path and
+launcher errors clear automatically when their source is fixed. With `--json`
+the per-site results (including any `error`) go to stdout as an array. Servers
+are already detached by default, so `up` never needs backgrounding tricks; a
+second `up` on a running site is a no-op.
 
 Use these instead of reading `state.json` directly — the file's format is
 internal and may change.
@@ -226,8 +231,7 @@ internal and may change.
 - `~/.config/servd/sites.toml` — the site registry
 - `~/.config/servd/launchers.toml` — your launcher rules (optional, see above)
 - `<project>/.servd.toml` — per-project launch command (optional)
-- `~/.local/state/servd/state.json` — live pids/ports (self-healing)
-
+- `~/.local/state/servd/state.json` — latest supervised runtime attempts
 - `~/.local/state/servd/logs/<slug>.log` — per-site server output
 
 Compatibility: legacy `enabled` site keys and `default_enabled` settings keys

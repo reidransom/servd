@@ -1,11 +1,11 @@
-// Package state tracks the live runtime of supervised dev servers.
+// Package state tracks the latest supervised runtime attempt for dev servers.
 //
-// state.json maps a site slug to the running process's pid, port group,
-// logfile and resolved command. It is the source of truth for "what is
-// running right now", independent of the registry (which is "what is known").
+// state.json maps a site slug to its latest supervised runtime attempt,
+// including the process details, logfile, resolved command, and any recorded
+// launch failure. It is independent of the registry (which is "what is
+// known").
 //
-// Reads (Load) are lock-free: the file is written atomically, so a read is
-// always consistent, and dead entries are dropped in memory. Writes go
+// Reads (Load) are lock-free: the file is written atomically. Writes go
 // through Mutate, which holds an exclusive file lock around the whole
 // load-modify-save cycle so concurrent servd processes (CLI, TUI, proxy
 // control) can't lose each other's updates.
@@ -22,7 +22,7 @@ import (
 	"github.com/reidransom/servd/internal/flock"
 )
 
-// Entry is the runtime record for one running process.
+// Entry is the runtime record for one supervised attempt.
 type Entry struct {
 	Slug          string    `json:"slug"`
 	PID           int       `json:"pid"`
@@ -32,6 +32,8 @@ type Entry struct {
 	Cmd           string    `json:"cmd"`
 	Log           string    `json:"log"`
 	StartedAt     time.Time `json:"started_at"`
+	Failure       string    `json:"failure,omitempty"`
+	FailedAt      time.Time `json:"failed_at,omitempty"`
 	PublishedMDNS []string  `json:"published_mdns,omitempty"`
 }
 
@@ -42,9 +44,7 @@ type State struct {
 
 func statePath() string { return filepath.Join(config.StateDir(), "state.json") }
 
-// Load reads and reconciles state.json. Missing file yields empty state.
-// Entries whose process is no longer alive are dropped in memory only; the
-// next Mutate persists the healed view.
+// Load reads state.json. Missing file yields empty state.
 func Load() (*State, error) {
 	s := &State{Entries: map[string]Entry{}}
 	data, err := os.ReadFile(statePath())
@@ -60,11 +60,7 @@ func Load() (*State, error) {
 	if s.Entries == nil {
 		s.Entries = map[string]Entry{}
 	}
-	for slug, e := range s.Entries {
-		if !EntryAlive(e) {
-			delete(s.Entries, slug)
-		}
-	}
+
 	return s, nil
 }
 

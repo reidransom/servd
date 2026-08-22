@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -17,8 +18,9 @@ func TestNewSiteInfo(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	settings := config.DefaultSettings()
 
-	// A dead site: no state entry, nothing listening.
-	dead := config.Site{Slug: "dead", Path: "/tmp/dead", Port: 1, Launcher: "static"}
+	// A stopped site: no state entry, nothing listening.
+	project := t.TempDir()
+	dead := config.Site{Slug: "dead", Path: project, Port: 1, Cmd: "sleep 30", Launcher: "static"}
 	// A live site: a state entry pointing at this test process, and a real
 	// listener so StatusOf sees the port accepting.
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -27,7 +29,7 @@ func TestNewSiteInfo(t *testing.T) {
 	}
 	defer func() { _ = ln.Close() }()
 	port := ln.Addr().(*net.TCPAddr).Port
-	live := config.Site{Slug: "live", Path: "/tmp/live", Port: port}
+	live := config.Site{Slug: "live", Path: project, Port: port, Cmd: "sleep 30"}
 
 	identity, err := state.ProcessIdentity(os.Getpid())
 	if err != nil {
@@ -68,6 +70,9 @@ func TestNewSiteInfo(t *testing.T) {
 			t.Errorf("stopped-site JSON contains %q: %s", key, data)
 		}
 	}
+	if strings.Contains(string(data), `"error"`) || di.Error != "" {
+		t.Errorf("stopped-site JSON contains error: %s", data)
+	}
 	if strings.Contains(string(data), `"enabled"`) {
 		t.Errorf("site JSON contains removed enabled field: %s", data)
 	}
@@ -88,8 +93,41 @@ func TestNewSiteInfo(t *testing.T) {
 	if li.PID != os.Getpid() || li.Cmd != "sleep 999" || li.StartedAt == nil || li.UptimeSeconds < 59 {
 		t.Errorf("live site info = %+v, want this pid, cmd and ~1m uptime", li)
 	}
+	if li.Error != "" {
+		t.Errorf("live site error = %q, want empty", li.Error)
+	}
 	if want := fmt.Sprintf("http://127.0.0.1:%d/", port); li.DirectURL != want {
 		t.Errorf("live direct_url = %q, want %q", li.DirectURL, want)
+	}
+}
+
+func TestNewSiteInfoError(t *testing.T) {
+	settings := config.DefaultSettings()
+	site := config.Site{Slug: "failed", Path: t.TempDir(), Port: 4011, Cmd: "sleep 30"}
+	st := &state.State{Entries: map[string]state.Entry{
+		site.Slug: {Slug: site.Slug, Failure: "shell start failed", FailedAt: time.Now()},
+	}}
+	info := newSiteInfo(settings, site, st)
+	if info.Status != "error" || info.Error != "shell start failed" {
+		t.Errorf("failed info = %+v, want status and error reason", info)
+	}
+	if info.PID != 0 || info.Cmd != "" || info.StartedAt != nil || info.UptimeSeconds != 0 {
+		t.Errorf("failed runtime fields = %+v, want omitted", info)
+	}
+	data, err := json.Marshal(info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), `"error":"shell start failed"`) {
+		t.Errorf("failed-site JSON omits error reason: %s", data)
+	}
+
+	dead := config.Site{Slug: "exited", Path: filepath.Join(site.Path, "."), Port: 4012, Cmd: "sleep 30"}
+	deadInfo := newSiteInfo(settings, dead, &state.State{Entries: map[string]state.Entry{
+		dead.Slug: {Slug: dead.Slug, PID: 1<<30 - 7, Cmd: "sleep 30", StartedAt: time.Now()},
+	}})
+	if deadInfo.Status != "error" || deadInfo.PID != 0 || deadInfo.UptimeSeconds != 0 {
+		t.Errorf("dead info = %+v, want error without runtime fields", deadInfo)
 	}
 }
 

@@ -3,6 +3,7 @@ package state
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -69,7 +70,7 @@ func TestMutateConcurrent(t *testing.T) {
 	}
 }
 
-func TestLoadReconcilesDeadEntries(t *testing.T) {
+func TestLoadRetainsDeadEntries(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	pid := os.Getpid()
 	identity, err := ProcessIdentity(pid)
@@ -78,7 +79,7 @@ func TestLoadReconcilesDeadEntries(t *testing.T) {
 	}
 	err = Mutate(func(s *State) error {
 		s.Entries["alive"] = Entry{Slug: "alive", PID: pid, Identity: identity}
-		s.Entries["dead"] = Entry{Slug: "dead", PID: 1<<30 - 7} // unlikely to exist
+		s.Entries["dead"] = Entry{Slug: "dead", PID: 1<<30 - 7}
 		return nil
 	})
 	if err != nil {
@@ -91,7 +92,49 @@ func TestLoadReconcilesDeadEntries(t *testing.T) {
 	if _, ok := s.Get("alive"); !ok {
 		t.Error("alive entry dropped")
 	}
-	if _, ok := s.Get("dead"); ok {
-		t.Error("dead entry not reconciled away")
+	if _, ok := s.Get("dead"); !ok {
+		t.Error("dead runtime attempt was removed")
+	}
+}
+
+func TestLoadLegacyEntryHasEmptyFailureFields(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	if err := os.MkdirAll(filepath.Dir(statePath()), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	data := []byte(`{"entries":{"legacy":{"slug":"legacy","pid":123,"pgid":123,"port":4001,"cmd":"serve","log":"/tmp/site.log","started_at":"2026-01-01T00:00:00Z"}}}`)
+	if err := os.WriteFile(statePath(), data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry, ok := s.Get("legacy")
+	if !ok {
+		t.Fatal("legacy entry was not loaded")
+	}
+	if entry.Failure != "" || !entry.FailedAt.IsZero() {
+		t.Errorf("legacy failure fields = %q, %s; want empty", entry.Failure, entry.FailedAt)
+	}
+}
+
+func TestDeleteRemovesFailedEntry(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	if err := Mutate(func(s *State) error {
+		s.Entries["failed"] = Entry{Slug: "failed", Failure: "shell start failed", FailedAt: time.Now()}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := Delete("failed"); err != nil {
+		t.Fatal(err)
+	}
+	s, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := s.Get("failed"); ok {
+		t.Fatal("failed entry was not deleted")
 	}
 }

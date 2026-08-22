@@ -157,13 +157,13 @@ func newStatusCmd() *cobra.Command {
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
 			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tSTATUS\tUPTIME\tURL")
 			for _, s := range sites {
-				status := supervisor.StatusOf(s, st)
+				status := supervisor.Evaluate(s, settings, st)
 				up := ""
 				if d := supervisor.Uptime(s.Slug, st); d > 0 {
 					up = app.FmtDuration(d)
 				}
 				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\n",
-					s.Slug, s.Port, app.Dash(s.Launcher), status, app.Dash(up), settings.SiteURL(s))
+					s.Slug, s.Port, app.Dash(s.Launcher), status.Kind, app.Dash(up), settings.SiteURL(s))
 			}
 			return tw.Flush()
 		},

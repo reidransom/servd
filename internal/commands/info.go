@@ -23,7 +23,8 @@ type siteInfo struct {
 	FallbackURL   string     `json:"fallback_url,omitempty"`
 	DirectURL     string     `json:"direct_url"` // straight to the dev server's port
 	Launcher      string     `json:"launcher,omitempty"`
-	Status        string     `json:"status"` // stopped | starting | running
+	Status        string     `json:"status"` // stopped | starting | running | error
+	Error         string     `json:"error,omitempty"`
 	PID           int        `json:"pid,omitempty"`
 	Cmd           string     `json:"cmd,omitempty"` // command the live process was started with
 	Log           string     `json:"log"`
@@ -45,6 +46,7 @@ type proxyInfo struct {
 }
 
 func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteInfo {
+	health := supervisor.Evaluate(s, settings, st)
 	info := siteInfo{
 		Slug:      s.Slug,
 		Path:      s.Path,
@@ -52,8 +54,11 @@ func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteI
 		URL:       settings.SiteURL(s),
 		DirectURL: fmt.Sprintf("http://127.0.0.1:%d/", s.Port),
 		Launcher:  s.Launcher,
-		Status:    supervisor.StatusOf(s, st).String(),
+		Status:    health.Kind.String(),
 		Log:       supervisor.LogPath(s.Slug),
+	}
+	if health.Kind == supervisor.Error {
+		info.Error = health.Reason
 	}
 	if fallback, ok := settings.FallbackURL(s); ok {
 		info.FallbackURL = fallback

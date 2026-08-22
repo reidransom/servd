@@ -19,10 +19,10 @@ package launcher
 
 import (
 	"fmt"
+	"github.com/reidransom/servd/internal/config"
+	"os"
 	"strconv"
 	"strings"
-
-	"github.com/reidransom/servd/internal/config"
 )
 
 // Resolved is a fully-resolved launch specification.
@@ -52,6 +52,14 @@ func Resolve(site config.Site, settings config.Settings) (Resolved, error) {
 	dir := site.Path
 	host := settings.BindHost
 	port := site.Port
+
+	info, err := os.Stat(dir)
+	if err != nil {
+		return Resolved{}, fmt.Errorf("project path %s is unavailable: %w", dir, err)
+	}
+	if !info.IsDir() {
+		return Resolved{}, fmt.Errorf("project path %s is not a directory", dir)
+	}
 
 	// 1. Manual override.
 	if strings.TrimSpace(site.Cmd) != "" {

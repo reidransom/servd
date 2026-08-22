@@ -21,6 +21,10 @@ func proxySite(settings config.Settings) (config.Site, error) {
 	if err != nil {
 		return config.Site{}, err
 	}
+	workDir, err := os.Getwd()
+	if err != nil {
+		return config.Site{}, err
+	}
 	arguments := []string{self, "proxy"}
 	if settings.Hostnames.LAN {
 		arguments = append(arguments, "--lan")
@@ -29,6 +33,7 @@ func proxySite(settings config.Settings) (config.Site, error) {
 	return config.Site{
 		Slug: Slug,
 		Port: settings.Hostnames.HTTPPort,
+		Path: workDir,
 		Cmd:  command,
 	}, nil
 }

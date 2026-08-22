@@ -16,7 +16,6 @@ import (
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
-	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/state"
 )
 
@@ -24,9 +23,10 @@ import (
 type Status int
 
 const (
-	Stopped  Status = iota // no live process
+	Stopped  Status = iota // no supervised runtime entry
 	Starting               // process alive but port not yet accepting
 	Running                // process alive and port accepting connections
+	Error                  // static or runtime failure
 )
 
 func (s Status) String() string {
@@ -35,6 +35,8 @@ func (s Status) String() string {
 		return "running"
 	case Starting:
 		return "starting"
+	case Error:
+		return "error"
 	default:
 		return "stopped"
 	}
@@ -61,11 +63,11 @@ func Start(site config.Site, settings config.Settings) error {
 	}
 
 	if err := os.MkdirAll(config.LogDir(), 0o755); err != nil {
-		return err
+		return startFailure(site, res, fmt.Sprintf("could not prepare log directory: %v", err), err)
 	}
 	logf, err := os.OpenFile(LogPath(site.Slug), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
-		return err
+		return startFailure(site, res, fmt.Sprintf("could not open log: %v", err), err)
 	}
 	defer func() { _ = logf.Close() }()
 
@@ -85,14 +87,15 @@ func Start(site config.Site, settings config.Settings) error {
 	prepareCommand(cmd)
 
 	if err := cmd.Start(); err != nil {
-		return err
+		return startFailure(site, res, fmt.Sprintf("could not start command: %v", err), err)
 	}
 	pid := cmd.Process.Pid
 	pgid := processGroupID(pid)
 	identity, err := state.ProcessIdentity(pid)
 	if err != nil {
 		_ = cmd.Process.Kill()
-		return fmt.Errorf("identify process %d: %w", pid, err)
+		startErr := fmt.Errorf("identify process %d: %w", pid, err)
+		return startFailure(site, res, startErr.Error(), startErr)
 	}
 
 	// Verify the process survives a brief grace period. A dev server that
@@ -104,11 +107,12 @@ func Start(site config.Site, settings config.Settings) error {
 	select {
 	case werr := <-waited:
 		_ = logf.Sync()
-		tail := lastLines(LogPath(site.Slug), 12)
-		if tail != "" {
-			return fmt.Errorf("%s exited on startup (%v):\n%s", site.Slug, werr, tail)
+		failure := fmt.Sprintf("process exited on startup: %v", werr)
+		startErr := fmt.Errorf("%s exited on startup: %v", site.Slug, werr)
+		if tail := lastLines(LogPath(site.Slug), 12); tail != "" {
+			startErr = fmt.Errorf("%w:\n%s", startErr, tail)
 		}
-		return fmt.Errorf("%s exited on startup: %v", site.Slug, werr)
+		return startFailure(site, res, failure, startErr)
 	case <-time.After(600 * time.Millisecond):
 		// Still alive — leave the Wait goroutine running; when we exit, init reaps.
 	}
@@ -133,6 +137,30 @@ func Start(site config.Site, settings config.Settings) error {
 	})
 }
 
+func startFailure(site config.Site, res launcher.Resolved, failure string, startErr error) error {
+	if err := recordFailedStart(site, res, failure); err != nil {
+		return fmt.Errorf("%w; could not record startup failure: %v", startErr, err)
+	}
+	return startErr
+}
+
+func recordFailedStart(site config.Site, res launcher.Resolved, failure string) error {
+	return state.Mutate(func(s *state.State) error {
+		if existing, ok := s.Get(site.Slug); ok && state.EntryAlive(existing) {
+			return nil
+		}
+		s.Entries[site.Slug] = state.Entry{
+			Slug:     site.Slug,
+			Port:     site.Port,
+			Cmd:      res.Cmd,
+			Log:      LogPath(site.Slug),
+			Failure:  failure,
+			FailedAt: time.Now(),
+		}
+		return nil
+	})
+}
+
 // Stop requests graceful termination for the site's process tree, then forces
 // termination after a grace period, and finally clears its state entry.
 //
@@ -146,6 +174,9 @@ func Stop(slug string) error {
 	e, ok := st.Get(slug)
 	if !ok {
 		return nil
+	}
+	if !state.EntryAlive(e) {
+		return state.Delete(slug)
 	}
 	_ = terminateProcess(e, false)
 	if waitDead(e, 5*time.Second) {
@@ -170,21 +201,23 @@ func waitDead(e state.Entry, timeout time.Duration) bool {
 	return false
 }
 
-// WaitReady blocks until the site's port accepts connections, its process
-// dies, or the timeout elapses. Nil means Running; any error carries the log
-// tail so callers can show why the server never came up.
-func WaitReady(site config.Site, timeout time.Duration) error {
+// WaitReady blocks until the site's port accepts connections or its health
+// becomes an error. Any error carries the log tail when available.
+func WaitReady(site config.Site, settings config.Settings, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	for {
 		st, err := state.Load()
 		if err != nil {
 			return err
 		}
-		switch StatusOf(site, st) {
+		status := Evaluate(site, settings, st)
+		switch status.Kind {
 		case Running:
 			return nil
 		case Stopped:
 			return waitErr(site.Slug, "exited before accepting connections")
+		case Error:
+			return waitErr(site.Slug, status.Reason)
 		}
 		if time.Now().After(deadline) {
 			return waitErr(site.Slug, fmt.Sprintf("still not accepting connections on :%d after %s", site.Port, timeout))
@@ -207,18 +240,6 @@ func Restart(site config.Site, settings config.Settings) error {
 		return err
 	}
 	return Start(site, settings)
-}
-
-// StatusOf reports the runtime status of a site given current state.
-func StatusOf(site config.Site, st *state.State) Status {
-	e, ok := st.Get(site.Slug)
-	if !ok || !state.EntryAlive(e) {
-		return Stopped
-	}
-	if netcheck.PortAccepting("127.0.0.1", site.Port) {
-		return Running
-	}
-	return Starting
 }
 
 // lastLines returns the last n non-empty-trimmed lines of a file.

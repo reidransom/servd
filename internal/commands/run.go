@@ -42,7 +42,7 @@ func newUpCmd() *cobra.Command {
 			for _, s := range sites {
 				err := supervisor.Start(s, settings)
 				if err == nil && wait {
-					err = supervisor.WaitReady(s, timeout)
+					err = supervisor.WaitReady(s, settings, timeout)
 				}
 				if jsonOut {
 					// Reload state so the result carries the fresh pid/status.

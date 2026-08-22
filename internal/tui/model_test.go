@@ -135,7 +135,7 @@ func TestViewOmitsWebsiteEnablement(t *testing.T) {
 		t.Fatal(err)
 	}
 	registry := &config.Registry{Sites: []config.Site{{Slug: "widget", Path: t.TempDir(), Port: 1}}}
-	m.applyStatuses(buildStatuses(registry, m.st))
+	m.applyStatuses(buildStatuses(m.settings, registry, m.st))
 	m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 
 	view := m.View()

@@ -65,6 +65,33 @@ func TestResolveNothingServable(t *testing.T) {
 	}
 }
 
+func TestResolveRejectsMissingProjectPathWithManualCommand(t *testing.T) {
+	isolateConfig(t)
+	path := filepath.Join(t.TempDir(), "missing")
+	_, err := Resolve(config.Site{Slug: "x", Path: path, Port: 4001, Cmd: "serve"}, testSettings())
+	if err == nil {
+		t.Fatal("missing project path should not resolve")
+	}
+	if !strings.Contains(err.Error(), path) {
+		t.Errorf("error %q should name path %q", err, path)
+	}
+}
+
+func TestResolveRejectsProjectPathThatIsNotDirectory(t *testing.T) {
+	isolateConfig(t)
+	path := filepath.Join(t.TempDir(), "project-file")
+	if err := os.WriteFile(path, []byte("not a directory"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := Resolve(config.Site{Slug: "x", Path: path, Port: 4001, Cmd: "serve"}, testSettings())
+	if err == nil {
+		t.Fatal("project file should not resolve")
+	}
+	if !strings.Contains(err.Error(), "not a directory") {
+		t.Errorf("error %q should explain path is not a directory", err)
+	}
+}
+
 func TestResolveProjectConfigBeatsProcfile(t *testing.T) {
 	isolateConfig(t)
 	dir := t.TempDir()
