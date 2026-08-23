@@ -18,12 +18,12 @@ func startUserWorker(settings config.Settings, listener net.Listener) (workerPro
 	if listener == nil {
 		return workerProcess{}, fmt.Errorf("proxy listener was not acquired")
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	listenerFile, err := listenerFile(listener)
 	if err != nil {
 		return workerProcess{}, err
 	}
-	defer listenerFile.Close()
+	defer func() { _ = listenerFile.Close() }()
 	worker, err := os.Executable()
 	if err != nil {
 		return workerProcess{}, err
@@ -47,8 +47,8 @@ func spawnWorker(request workerStartRequest) (workerProcess, error) {
 	if err != nil {
 		return workerProcess{}, err
 	}
-	defer readyRead.Close()
-	defer readyWrite.Close()
+	defer func() { _ = readyRead.Close() }()
+	defer func() { _ = readyWrite.Close() }()
 
 	cmd := exec.Command(request.Worker, workerArgs(request.Port, request.LAN)...)
 	cmd.ExtraFiles = []*os.File{request.Listener, readyWrite}
@@ -84,8 +84,8 @@ func RunInheritedWorker(settings config.Settings, listenerFile, readyFile *os.Fi
 		_, _ = fmt.Fprintf(readyFile, "error: %v\n", err)
 		return err
 	}
-	defer listener.Close()
-	defer readyFile.Close()
+	defer func() { _ = listener.Close() }()
+	defer func() { _ = readyFile.Close() }()
 	return New(settings).serve(listener, func() { _, _ = fmt.Fprintln(readyFile, "ready") })
 }
 

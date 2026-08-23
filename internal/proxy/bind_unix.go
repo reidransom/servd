@@ -18,11 +18,6 @@ import (
 	"github.com/reidransom/servd/internal/state"
 )
 
-const (
-	inheritedListenerFD = 3
-	readyPipeFD         = 4
-)
-
 type workerProcess struct {
 	PID      int
 	PGID     int
@@ -52,13 +47,13 @@ func RunPrivilegedBind(request BindRequest) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	listenerFile, err := listenerFile(listener)
 	if err != nil {
 		return 0, err
 	}
-	defer listenerFile.Close()
+	defer func() { _ = listenerFile.Close() }()
 
 	process, err := spawnWorker(workerStartRequest{
 		Worker:     request.Worker,

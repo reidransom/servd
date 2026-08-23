@@ -33,7 +33,7 @@ func newProxyWorkerCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			defer logFile.Close()
+			defer func() { _ = logFile.Close() }()
 			log.SetOutput(logFile)
 
 			listenerFile := os.NewFile(3, "proxy-listener")
@@ -41,7 +41,7 @@ func newProxyWorkerCmd() *cobra.Command {
 			if listenerFile == nil || readyFile == nil {
 				return fmt.Errorf("missing proxy listener descriptors")
 			}
-			defer listenerFile.Close()
+			defer func() { _ = listenerFile.Close() }()
 			return proxy.RunInheritedWorker(settings, listenerFile, readyFile)
 		},
 	}

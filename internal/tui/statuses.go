@@ -2,7 +2,6 @@ package tui
 
 import (
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/lipgloss"
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/proxy"
@@ -50,8 +49,4 @@ func statusGlyph(status supervisor.SiteStatus) string {
 	default:
 		return "○"
 	}
-}
-
-func glyphWidth(status supervisor.SiteStatus) int {
-	return lipgloss.Width(statusGlyph(status))
 }

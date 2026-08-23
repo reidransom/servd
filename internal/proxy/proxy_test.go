@@ -167,7 +167,7 @@ func TestServeUsesProvidedListener(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Fatal(err)
@@ -230,7 +230,7 @@ func TestServeReloadsRegistryWithoutLAN(t *testing.T) {
 			t.Fatal(err)
 		}
 		body, readErr := io.ReadAll(response.Body)
-		response.Body.Close()
+		_ = response.Body.Close()
 		if readErr != nil {
 			t.Fatal(readErr)
 		}
