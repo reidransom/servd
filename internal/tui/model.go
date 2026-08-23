@@ -120,7 +120,7 @@ func newModel() (*model, error) {
 	}
 	cols := []table.Column{
 		{Title: "", Width: 1}, // status glyph
-		{Title: "SLUG", Width: 19},
+		{Title: "", Width: 19},
 	}
 	t := table.New(
 		table.WithColumns(cols),
