@@ -91,11 +91,13 @@ DNS setup.
 ### Proxy port selection
 
 When `config.toml` is absent, `servd proxy up` first tries `127.0.0.1:80`.
-If that requires permission, it asks `sudo` only to bind the listener, then
-starts the HTTP proxy as the invoking user. If elevation is declined or port
-80 is already occupied, servd falls back to `127.0.0.1:8080` for that run; it
-does not write that fallback into configuration. A noninteractive command
-attempts passwordless elevation and falls back immediately.
+If that requires permission in an interactive terminal, it asks whether to use
+`port-less mode (requires root password)` before invoking `sudo`. Answering no
+falls back to `127.0.0.1:8080` without requesting a password. If the user
+confirms, `sudo` binds only the listener and the HTTP proxy runs as the invoking
+user. A noninteractive command attempts passwordless elevation and falls back
+immediately. Port 80 conflicts also fall back to port 8080. The fallback applies
+only to that run and is not written to configuration.
 
 Set an explicit port to make the choice strict:
 
@@ -210,7 +212,7 @@ Select an error row to see its concise reason while the site log remains visible
 
 ### TUI keys
 
-`↑/↓` move · `tab` focus list/log · `s` start/stop · `r` restart ·
+`↑/↓` move · `tab` focus list/log · `s` start/stop · `r` rename · `R` restart ·
 `S` start/stop all · `a` add a site (type a path, `tab` completes) · `o` open · `p` toggle proxy ·
 `h` show/hide this key help · `q` quit
 

@@ -116,3 +116,33 @@ func TestAddSiteUndetectable(t *testing.T) {
 		t.Errorf("got %+v, want Cmd preserved", site)
 	}
 }
+
+func TestRenameSite(t *testing.T) {
+	reg := &config.Registry{Sites: []config.Site{
+		{Slug: "alpha", Path: "/alpha", Port: 42101, Cmd: "serve"},
+		{Slug: "beta", Path: "/beta", Port: 42102},
+	}}
+
+	renamed, err := RenameSite(reg, "alpha", "gamma")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if renamed.Slug != "gamma" || renamed.Path != "/alpha" || renamed.Port != 42101 || renamed.Cmd != "serve" {
+		t.Fatalf("renamed site = %+v", renamed)
+	}
+	if reg.Find("alpha") != nil || reg.Find("gamma") == nil {
+		t.Fatalf("registry after rename = %+v", reg.Sites)
+	}
+}
+
+func TestRenameSiteRejectsInvalidOrDuplicateSlug(t *testing.T) {
+	for _, newSlug := range []string{"Bad Slug", "beta"} {
+		reg := &config.Registry{Sites: []config.Site{{Slug: "alpha"}, {Slug: "beta"}}}
+		if _, err := RenameSite(reg, "alpha", newSlug); err == nil {
+			t.Errorf("rename to %q succeeded", newSlug)
+		}
+		if reg.Find("alpha") == nil {
+			t.Errorf("rename to %q mutated registry after error: %+v", newSlug, reg.Sites)
+		}
+	}
+}

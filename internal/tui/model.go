@@ -45,6 +45,7 @@ type mode int
 const (
 	modeNormal mode = iota
 	modeAdd
+	modeRename
 )
 
 type tickMsg struct{}
@@ -82,9 +83,11 @@ type model struct {
 	busy         bool   // an async action is in flight
 	showHelp     bool   // help bar visible (toggled with h)
 
-	mode       mode            // normal dashboard vs. the add-site modal
-	addInput   textinput.Model // path entry for the add-site modal
-	addMatches []string        // last tab-completion candidates, shown under the field
+	mode        mode            // normal dashboard vs. the add-site modal
+	addInput    textinput.Model // path entry for the add-site modal
+	addMatches  []string        // last tab-completion candidates, shown under the field
+	renameInput textinput.Model
+	renameFrom  string
 }
 
 var (
@@ -336,9 +339,12 @@ func bulkAction(verb string, sites []config.Site, do func(config.Site) error) ac
 }
 
 func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	// The add-site modal captures all keys while it's open.
-	if m.mode == modeAdd {
+	// Modals capture all keys while open.
+	switch m.mode {
+	case modeAdd:
 		return m.handleAddKey(msg)
+	case modeRename:
+		return m.handleRenameKey(msg)
 	}
 	switch msg.String() {
 	case "q", "ctrl+c":
@@ -390,6 +396,19 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			})
 		}
 	case "r":
+		if s := m.selectedSite(); s != nil && !m.busy {
+			m.mode = modeRename
+			m.renameFrom = s.Slug
+			ti := textinput.New()
+			ti.Prompt = ""
+			ti.SetValue(s.Slug)
+			ti.CursorEnd()
+			ti.Focus()
+			m.renameInput = ti
+			m.status = ""
+			return m, nil
+		}
+	case "R":
 		if s := m.selectedSite(); s != nil && !m.busy {
 			site, settings := *s, m.settings
 			return m.action("restarting "+site.Slug+"…", func() actionDoneMsg {
@@ -644,8 +663,11 @@ func (m *model) loadLog() {
 }
 
 func (m *model) View() string {
-	if m.mode == modeAdd {
+	switch m.mode {
+	case modeAdd:
 		return m.addView()
+	case modeRename:
+		return m.renameView()
 	}
 
 	var b strings.Builder
@@ -717,7 +739,7 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start/stop · r restart · d remove · S start/stop-all · a add · o open · p proxy · tab focus · h help · q quit"))
+		b.WriteString(helpStyle.Render("s start/stop · r rename · R restart · d remove · S start/stop-all · a add · o open · p proxy · tab focus · h help · q quit"))
 	}
 	return b.String()
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 )
 
@@ -329,5 +330,80 @@ func TestSiteListOmitsPorts(t *testing.T) {
 	}
 	if strings.Contains(view, "PORT") || strings.Contains(view, "4242") {
 		t.Errorf("TUI shows a port:\n%s", view)
+	}
+}
+
+func TestRenameAndRestartKeys(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	site := config.Site{Slug: "widget", Path: t.TempDir(), Port: 4242, Cmd: "sleep 30"}
+	if err := (&config.Registry{Sites: []config.Site{site}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	if err := supervisor.Start(site, config.DefaultSettings()); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = supervisor.Stop("widget")
+		_ = supervisor.Stop("gadget")
+	})
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")}); cmd != nil {
+		t.Fatal("rename key unexpectedly returned a command before input")
+	}
+	if m.mode != modeRename || m.renameInput.Value() != "widget" {
+		t.Fatalf("rename modal = mode %v value %q", m.mode, m.renameInput.Value())
+	}
+	m.renameInput.SetValue("gadget")
+	_, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil {
+		t.Fatal("rename submission returned no command")
+	}
+	m.Update(cmd())
+	if m.status != "renamed widget to gadget" {
+		t.Fatalf("rename status = %q", m.status)
+	}
+
+	reg, err := config.LoadRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reg.Find("widget") != nil || reg.Find("gadget") == nil {
+		t.Fatalf("registry after rename = %+v", reg.Sites)
+	}
+	runtime, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, ok := runtime.Get("gadget")
+	if !ok || !state.EntryAlive(before) {
+		t.Fatalf("renamed site is not running: %+v", runtime.Entries)
+	}
+	if _, ok := runtime.Get("widget"); ok {
+		t.Fatalf("old runtime entry remains: %+v", runtime.Entries)
+	}
+
+	m.Update(refreshCmd(m.settings)())
+	_, cmd = m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("R")})
+	if cmd == nil {
+		t.Fatal("restart key returned no command")
+	}
+	m.Update(cmd())
+	if m.status != "restarted gadget" {
+		t.Fatalf("restart status = %q", m.status)
+	}
+	runtime, err = state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, ok := runtime.Get("gadget")
+	if !ok || !state.EntryAlive(after) || !after.StartedAt.After(before.StartedAt) {
+		t.Fatalf("restart did not replace runtime entry: before=%+v after=%+v", before, after)
 	}
 }

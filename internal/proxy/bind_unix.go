@@ -3,8 +3,10 @@
 package proxy
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -82,6 +84,15 @@ func startElevatedWorker(settings config.Settings) (workerProcess, error) {
 	groups, err := os.Getgroups()
 	if err != nil {
 		return workerProcess{}, err
+	}
+	if interactiveTerminal() {
+		confirmed, confirmErr := confirmPortlessMode(os.Stdin, os.Stderr)
+		if confirmErr != nil {
+			return workerProcess{}, confirmErr
+		}
+		if !confirmed {
+			return workerProcess{}, errors.New("port-less mode declined")
+		}
 	}
 	pid, err := runSudoBind(sudoBindArgs(worker, settings, groups))
 	if err != nil {
@@ -161,6 +172,18 @@ func ParseGroups(raw string) ([]uint32, error) {
 func interactiveTerminal() bool {
 	info, err := os.Stdin.Stat()
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
+}
+
+func confirmPortlessMode(input io.Reader, output io.Writer) (bool, error) {
+	if _, err := fmt.Fprint(output, "Use port-less mode (requires root password)? [y/N] "); err != nil {
+		return false, err
+	}
+	answer, err := bufio.NewReader(input).ReadString('\n')
+	if err != nil && !errors.Is(err, io.EOF) {
+		return false, err
+	}
+	answer = strings.TrimSpace(answer)
+	return strings.EqualFold(answer, "y") || strings.EqualFold(answer, "yes"), nil
 }
 
 func processGroupID(pid int) int {
