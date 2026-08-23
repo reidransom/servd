@@ -46,8 +46,8 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	if status.Kind != supervisor.Error || !strings.Contains(status.Reason, "unavailable") {
 		t.Fatalf("broken status = %#v, want missing-path error", status)
 	}
-	if !strings.Contains(broken.rows[0][1], "✕") {
-		t.Errorf("broken row = %#v, want error glyph", broken.rows[0])
+	if !strings.Contains(broken.rows[0][0], "✕") {
+		t.Errorf("broken row = %#v, want error glyph before slug", broken.rows[0])
 	}
 
 	if err := os.MkdirAll(project, 0o755); err != nil {
@@ -57,14 +57,14 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	if got := repaired.statuses[site.Slug]; got.Kind != supervisor.Stopped {
 		t.Errorf("repaired status = %#v, want stopped", got)
 	}
-	if got := repaired.rows[0][1]; got != "○" {
-		t.Errorf("repaired glyph = %q, want stopped glyph", got)
+	if got := repaired.rows[0]; got[0] != "○" || got[1] != site.Slug {
+		t.Errorf("repaired row = %#v, want stopped glyph before slug", got)
 	}
 
 	m := &model{
 		cmdCache: map[string]string{site.Slug: "stale command"},
 		statuses: broken.statuses,
-		table:    table.New(table.WithColumns([]table.Column{{Title: "SLUG", Width: 16}, {Title: "", Width: 2}})),
+		table:    table.New(table.WithColumns([]table.Column{{Title: "", Width: 2}, {Title: "SLUG", Width: 16}})),
 	}
 	m.applyStatuses(repaired)
 	if _, ok := m.cmdCache[site.Slug]; ok {

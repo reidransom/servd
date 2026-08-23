@@ -33,7 +33,7 @@ func buildStatuses(settings config.Settings, reg *config.Registry, st *state.Sta
 	for _, site := range reg.Sites {
 		status := supervisor.Evaluate(site, effectiveSettings, st)
 		statuses[site.Slug] = status
-		rows = append(rows, table.Row{site.Slug, statusGlyph(status)})
+		rows = append(rows, table.Row{statusGlyph(status), site.Slug})
 		slugs = append(slugs, site.Slug)
 	}
 	return statusesMsg{settings: effectiveSettings, reg: reg, st: st, rows: rows, slugs: slugs, statuses: statuses, proxyRunning: running}
