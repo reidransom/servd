@@ -125,7 +125,7 @@ func newModel() (*model, error) {
 	t := table.New(
 		table.WithColumns(cols),
 		table.WithFocused(true),
-		table.WithHeight(12),
+		table.WithHeight(13), // includes the header row omitted by sidebarTableView
 	)
 	s := table.DefaultStyles()
 	s.Header = s.Header.Bold(true).Foreground(lipgloss.Color("#7aa2f7")).BorderBottom(true).PaddingRight(0)
@@ -201,7 +201,7 @@ func (m *model) resize() {
 		chrome++
 	}
 	inner := max(5, m.height-chrome)
-	m.table.SetHeight(inner)
+	m.table.SetHeight(inner + 1) // table height includes its omitted header row
 	// The sidebar box hugs the table's rendered width; both boxes add 2 cols
 	// of border, so the log viewport gets whatever's left.
 	m.viewport.Width = max(20, m.width-m.sidebarWidth()-4)
@@ -210,11 +210,21 @@ func (m *model) resize() {
 	m.viewport.Height = max(4, inner-1)
 }
 
+// sidebarTableView removes the table component's mandatory header row.
+func (m *model) sidebarTableView() string {
+	view := m.table.View()
+	_, rows, ok := strings.Cut(view, "\n")
+	if !ok {
+		return view
+	}
+	return rows
+}
+
 // sidebarWidth is the rendered width of the site-list table (fixed columns +
 // lipgloss cell padding), used to size the log viewport so the two bordered
 // boxes tile exactly across the terminal.
 func (m *model) sidebarWidth() int {
-	return lipgloss.Width(m.table.View())
+	return lipgloss.Width(m.sidebarTableView())
 }
 
 // logCmd returns the shell command that launched (or would launch) the site
@@ -692,7 +702,7 @@ func (m *model) View() string {
 		hint := dimStyle.Render("No sites.\nPress a to add a site.")
 		sidebar = box(m.focus == focusList).Width(m.sidebarWidth()).Height(m.viewport.Height).Render(hint)
 	} else {
-		sidebar = box(m.focus == focusList).Render(m.table.View())
+		sidebar = box(m.focus == focusList).Render(m.sidebarTableView())
 	}
 	// The log pane leads with the command that started the site, then its tail.
 	cmd := m.logCmd()

@@ -99,9 +99,13 @@ func TestSidebarUsesOneSpaceBetweenStatusAndSlug(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	view := ansi.Strip(m.table.View())
+	view := ansi.Strip(m.sidebarTableView())
 	if strings.Contains(view, "SLUG") {
 		t.Errorf("sidebar still renders the SLUG header:\n%s", view)
+	}
+	firstLine, _, _ := strings.Cut(view, "\n")
+	if !strings.Contains(firstLine, "widget") {
+		t.Errorf("sidebar has a blank row before its first site:\n%s", view)
 	}
 	if !strings.Contains(view, "○ widget") {
 		t.Errorf("sidebar row does not use one space between status and slug:\n%s", view)
