@@ -16,6 +16,7 @@ import (
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/hostnames"
 	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/registration"
@@ -687,10 +688,8 @@ func (m *model) View() string {
 	left := titleStyle.Render("servd") + dimStyle.Render(" — local dev servers")
 	var right string
 	if m.proxyRunning {
-		right = okStyle.Render("● proxy on") + dimStyle.Render(fmt.Sprintf(" :%d %s", m.settings.Hostnames.HTTPPort, m.settings.PrimaryURLPattern()))
-		if _, enabled := m.settings.FallbackURLPattern(); enabled {
-			right += dimStyle.Render(" + nip.io")
-		}
+		landingURL := hostnames.FormatURL(m.settings.BindHost, m.settings.Hostnames.HTTPPort, false) + "/"
+		right = okStyle.Render("● proxy on") + dimStyle.Render(" "+landingURL)
 	} else {
 		right = offStyle.Render("○ proxy off") + dimStyle.Render("  press p")
 	}

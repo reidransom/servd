@@ -88,6 +88,29 @@ func TestBuildStatusesUsesLiveProxyPort(t *testing.T) {
 	}
 }
 
+func TestProxyStatusShowsLandingURL(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.settings.Hostnames.HTTPPort = 42200
+	m.proxyRunning = true
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+
+	firstLine, _, _ := strings.Cut(ansi.Strip(m.View()), "\n")
+	if !strings.Contains(firstLine, "● proxy on http://127.0.0.1:42200/") {
+		t.Errorf("proxy status does not show the landing URL:\n%s", firstLine)
+	}
+	for _, unwanted := range []string{"nip.io", "<slug>"} {
+		if strings.Contains(firstLine, unwanted) {
+			t.Errorf("proxy status contains %q:\n%s", unwanted, firstLine)
+		}
+	}
+}
+
 func TestSidebarUsesOneSpaceBetweenStatusAndSlug(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
