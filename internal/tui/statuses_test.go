@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
@@ -64,7 +65,7 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	m := &model{
 		cmdCache: map[string]string{site.Slug: "stale command"},
 		statuses: broken.statuses,
-		table:    table.New(table.WithColumns([]table.Column{{Title: "", Width: 2}, {Title: "SLUG", Width: 16}})),
+		table:    table.New(table.WithColumns([]table.Column{{Title: "", Width: 1}, {Title: "SLUG", Width: 19}})),
 	}
 	m.applyStatuses(repaired)
 	if _, ok := m.cmdCache[site.Slug]; ok {
@@ -84,6 +85,26 @@ func TestBuildStatusesUsesLiveProxyPort(t *testing.T) {
 	}})
 	if got := message.settings.Hostnames.HTTPPort; got != 8080 {
 		t.Fatalf("display port = %d, want 8080", got)
+	}
+}
+
+func TestSidebarUsesOneSpaceBetweenStatusAndSlug(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{Slug: "widget", Path: t.TempDir(), Port: 4011, Cmd: "sleep 30"}
+	if err := (&config.Registry{Sites: []config.Site{site}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	view := ansi.Strip(m.table.View())
+	if !strings.Contains(view, "○ widget") {
+		t.Errorf("sidebar row does not use one space between status and slug:\n%s", view)
+	}
+	if strings.Contains(view, "○  widget") {
+		t.Errorf("sidebar row uses multiple spaces between status and slug:\n%s", view)
 	}
 }
 

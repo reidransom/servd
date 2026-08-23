@@ -119,8 +119,8 @@ func newModel() (*model, error) {
 		return nil, err
 	}
 	cols := []table.Column{
-		{Title: "", Width: 2}, // status glyph
-		{Title: "SLUG", Width: 16},
+		{Title: "", Width: 1}, // status glyph
+		{Title: "SLUG", Width: 19},
 	}
 	t := table.New(
 		table.WithColumns(cols),
@@ -128,7 +128,8 @@ func newModel() (*model, error) {
 		table.WithHeight(12),
 	)
 	s := table.DefaultStyles()
-	s.Header = s.Header.Bold(true).Foreground(lipgloss.Color("#7aa2f7")).BorderBottom(true)
+	s.Header = s.Header.Bold(true).Foreground(lipgloss.Color("#7aa2f7")).BorderBottom(true).PaddingRight(0)
+	s.Cell = s.Cell.PaddingRight(0)
 	s.Selected = s.Selected.Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("#7aa2f7"))
 	t.SetStyles(s)
 
