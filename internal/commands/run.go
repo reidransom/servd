@@ -9,6 +9,7 @@ import (
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 	"github.com/spf13/cobra"
@@ -227,7 +228,7 @@ func newOpenCmd() *cobra.Command {
 		Short: "Open a site's nip.io URL in the browser",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, _, err := app.Load()
+			settings, reg, st, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -235,7 +236,7 @@ func newOpenCmd() *cobra.Command {
 			if s == nil {
 				return fmt.Errorf("unknown site %q", args[0])
 			}
-			url := settings.SiteURL(*s)
+			url := proxy.EffectiveSettings(settings, st).SiteURL(*s)
 			fmt.Println(url)
 			return app.OpenBrowser(url)
 		},

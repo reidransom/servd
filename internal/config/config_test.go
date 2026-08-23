@@ -21,6 +21,32 @@ func writeConfig(t *testing.T, content string) {
 	}
 }
 
+func TestLoadSettingsWithSourceReportsConfigPresence(t *testing.T) {
+	t.Run("missing config", func(t *testing.T) {
+		t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+		_, source, err := LoadSettingsWithSource()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if source.ConfigPresent {
+			t.Fatal("ConfigPresent = true, want false")
+		}
+	})
+
+	t.Run("present malformed config", func(t *testing.T) {
+		writeConfig(t, "[hostnames\n")
+
+		_, source, err := LoadSettingsWithSource()
+		if err == nil {
+			t.Fatal("LoadSettingsWithSource unexpectedly succeeded")
+		}
+		if !source.ConfigPresent {
+			t.Fatal("ConfigPresent = false, want true")
+		}
+	})
+}
+
 func TestDefaultHostnameSettings(t *testing.T) {
 	settings := DefaultSettings()
 	if got := settings.Hostnames.TLDs; len(got) != 1 || got[0] != "localhost" {

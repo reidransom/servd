@@ -60,21 +60,39 @@ func New(settings config.Settings) *Server {
 
 // ListenAndServe starts the proxy on the active HTTP listener port.
 func (s *Server) ListenAndServe() error {
+	addr := net.JoinHostPort(s.settings.BindHost, strconv.Itoa(s.settings.Hostnames.HTTPPort))
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	return s.Serve(listener)
+}
+
+// Serve starts the proxy on a listener acquired by the caller.
+func (s *Server) Serve(listener net.Listener) error {
+	return s.serve(listener, nil)
+}
+
+func (s *Server) serve(listener net.Listener, ready func()) error {
 	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals()...)
 	defer stop()
+
+	go s.watchRegistry(ctx)
 	if err := s.startLAN(ctx); err != nil {
 		return err
 	}
 	defer s.stopLAN()
 
-	addr := net.JoinHostPort(s.settings.BindHost, strconv.Itoa(s.settings.Hostnames.HTTPPort))
-	srv := &http.Server{Addr: addr, Handler: s}
+	srv := &http.Server{Handler: s}
 	go func() {
 		<-ctx.Done()
 		_ = srv.Close()
 	}()
-	err := srv.ListenAndServe()
-	if errors.Is(err, http.ErrServerClosed) {
+	if ready != nil {
+		ready()
+	}
+	err := srv.Serve(listener)
+	if errors.Is(err, http.ErrServerClosed) || errors.Is(err, net.ErrClosed) {
 		return nil
 	}
 	return err
@@ -205,8 +223,6 @@ func normalizeRequestHostname(host string) string {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.reload()
-
 	host := normalizeRequestHostname(r.Host)
 	if host == "" {
 		s.landing(w, r)

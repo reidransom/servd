@@ -57,16 +57,23 @@ func newProxyUpCmd(lan *bool) *cobra.Command {
 				return err
 			}
 			if running, pid := proxy.Running(st); running {
-				fmt.Printf("Proxy already running (pid %d) on :%d.\n", pid, settings.Hostnames.HTTPPort)
+				effective := proxy.EffectiveSettings(settings, st)
+				fmt.Printf("Proxy already running (pid %d) on :%d.\n", pid, effective.Hostnames.HTTPPort)
 				return nil
 			}
 			if err := syncHostsForProxy(settings, registry); err != nil {
 				return err
 			}
-			if err := proxy.StartBackground(settings); err != nil {
+			result, err := proxy.StartBackground(settings)
+			if err != nil {
 				return err
 			}
-			fmt.Printf("Proxy started on :%d — sites at %s\n", settings.Hostnames.HTTPPort, settings.PrimaryURLPattern())
+			settings.Hostnames.HTTPPort = result.Port
+			if result.UsedFallback {
+				fmt.Printf("Could not acquire port 80: %v\n", result.PreferredErr)
+				fmt.Println("Falling back to 127.0.0.1:8080.")
+			}
+			fmt.Printf("Proxy started on :%d — sites at %s\n", result.Port, settings.PrimaryURLPattern())
 			if fallback, ok := settings.FallbackURLPattern(); ok {
 				fmt.Printf("nip.io fallback: %s\n", fallback)
 			}
@@ -102,12 +109,13 @@ func newProxyStatusCmd(lan *bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			effective := proxy.EffectiveSettings(settings, st)
 			running, pid := proxy.Running(st)
 			switch {
-			case running && proxy.Accepting(settings):
-				fmt.Printf("running (pid %d) on :%d\n", pid, settings.Hostnames.HTTPPort)
+			case running && proxy.Accepting(effective):
+				fmt.Printf("running (pid %d) on :%d\n", pid, effective.Hostnames.HTTPPort)
 			case running:
-				fmt.Printf("starting (pid %d), not yet accepting on :%d\n", pid, settings.Hostnames.HTTPPort)
+				fmt.Printf("starting (pid %d), not yet accepting on :%d\n", pid, effective.Hostnames.HTTPPort)
 			default:
 				fmt.Println("stopped")
 			}

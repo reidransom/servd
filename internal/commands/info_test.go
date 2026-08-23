@@ -147,3 +147,20 @@ func TestNewProxyInfoUsesRoutingNeutralPatterns(t *testing.T) {
 		t.Errorf("disabled fallback pattern appears in JSON: %s", data)
 	}
 }
+
+func TestNewProxyInfoUsesLiveRuntimePort(t *testing.T) {
+	identity, err := state.ProcessIdentity(os.Getpid())
+	if err != nil {
+		t.Fatal(err)
+	}
+	settings := config.DefaultSettings()
+	settings.Hostnames.HTTPPort = 80
+	st := &state.State{Entries: map[string]state.Entry{
+		"__proxy": {Slug: "__proxy", PID: os.Getpid(), Identity: identity, Port: 8080},
+	}}
+
+	info := newProxyInfo(settings, st)
+	if info.Port != 8080 || info.PrimaryURLPattern != "http://<slug>.localhost:8080/" {
+		t.Fatalf("proxy info = %+v, want live port 8080", info)
+	}
+}

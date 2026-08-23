@@ -38,7 +38,6 @@ func (s *Server) startLAN(ctx context.Context) error {
 		_ = publisher.Cleanup()
 		return err
 	}
-	go s.watchRegistry(ctx)
 	if s.settings.Hostnames.LANIP == "" {
 		mdns.StartLANIPMonitor(ctx, ip, s.replaceLANIP)
 	}

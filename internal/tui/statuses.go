@@ -13,6 +13,7 @@ import (
 // statusesMsg carries a freshly loaded registry/state and the table rows
 // computed from them. A nil reg means the load failed and should be ignored.
 type statusesMsg struct {
+	settings     config.Settings
 	reg          *config.Registry
 	st           *state.State
 	rows         []table.Row
@@ -24,17 +25,18 @@ type statusesMsg struct {
 // buildStatuses computes table rows and shared health results off the Update
 // goroutine because evaluating a status may dial a port.
 func buildStatuses(settings config.Settings, reg *config.Registry, st *state.State) statusesMsg {
+	effectiveSettings := proxy.EffectiveSettings(settings, st)
 	running, _ := proxy.Running(st)
 	rows := make([]table.Row, 0, len(reg.Sites))
 	slugs := make([]string, 0, len(reg.Sites))
 	statuses := make(map[string]supervisor.SiteStatus, len(reg.Sites))
 	for _, site := range reg.Sites {
-		status := supervisor.Evaluate(site, settings, st)
+		status := supervisor.Evaluate(site, effectiveSettings, st)
 		statuses[site.Slug] = status
 		rows = append(rows, table.Row{site.Slug, statusGlyph(status)})
 		slugs = append(slugs, site.Slug)
 	}
-	return statusesMsg{reg: reg, st: st, rows: rows, slugs: slugs, statuses: statuses, proxyRunning: running}
+	return statusesMsg{settings: effectiveSettings, reg: reg, st: st, rows: rows, slugs: slugs, statuses: statuses, proxyRunning: running}
 }
 
 func statusGlyph(status supervisor.SiteStatus) string {

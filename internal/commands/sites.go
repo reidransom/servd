@@ -8,6 +8,7 @@ import (
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
+	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/registration"
 	"github.com/reidransom/servd/internal/supervisor"
 	"github.com/spf13/cobra"
@@ -154,16 +155,17 @@ func newStatusCmd() *cobra.Command {
 				fmt.Println("No sites registered. Run `servd add <path>`.")
 				return nil
 			}
+			effective := proxy.EffectiveSettings(settings, st)
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
 			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tSTATUS\tUPTIME\tURL")
 			for _, s := range sites {
-				status := supervisor.Evaluate(s, settings, st)
+				status := supervisor.Evaluate(s, effective, st)
 				up := ""
 				if d := supervisor.Uptime(s.Slug, st); d > 0 {
 					up = app.FmtDuration(d)
 				}
 				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\n",
-					s.Slug, s.Port, app.Dash(s.Launcher), status.Kind, app.Dash(up), settings.SiteURL(s))
+					s.Slug, s.Port, app.Dash(s.Launcher), status.Kind, app.Dash(up), effective.SiteURL(s))
 			}
 			return tw.Flush()
 		},

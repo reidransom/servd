@@ -48,6 +48,7 @@ func newRootCmd() *cobra.Command {
 		newVersionCmd(),
 		newStaticCmd(),
 	)
+	addProxyInternalCommands(root)
 	return root
 }
 

@@ -1,6 +1,8 @@
 package proxy
 
 import (
+	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -126,6 +128,126 @@ func TestServerRoutesExactHostsAndKeepsForwardedHeaders(t *testing.T) {
 	server.ServeHTTP(rec, req)
 	if strings.Contains(rec.Body.String(), "127.0.0.1:"+strconv.Itoa(port)) {
 		t.Fatal("unconfigured alias reached the backend")
+	}
+}
+
+func TestServeUsesProvidedListener(t *testing.T) {
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("served through inherited listener"))
+	}))
+	defer backend.Close()
+	backendURL, err := url.Parse(backend.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	backendPort, err := strconv.Atoi(backendURL.Port())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	settings := proxySettings()
+	if err := (&config.Registry{Sites: []config.Site{{Slug: "acme", Port: backendPort}}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := New(settings)
+	done := make(chan error, 1)
+	go func() { done <- server.Serve(listener) }()
+
+	request, err := http.NewRequest(http.MethodGet, "http://"+listener.Addr().String()+"/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Host = "acme.localhost"
+	response, err := (&http.Client{Timeout: time.Second}).Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(body); got != "served through inherited listener" {
+		t.Fatalf("response = %q", got)
+	}
+
+	if err := listener.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-done; err != nil {
+		t.Fatalf("Serve returned %v", err)
+	}
+}
+
+func TestServeReloadsRegistryWithoutLAN(t *testing.T) {
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("beta route"))
+	}))
+	defer backend.Close()
+	backendURL, err := url.Parse(backend.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	backendPort, err := strconv.Atoi(backendURL.Port())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	settings := proxySettings()
+	registry := &config.Registry{Sites: []config.Site{{Slug: "alpha", Port: 4001}}}
+	if err := registry.Save(); err != nil {
+		t.Fatal(err)
+	}
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := New(settings)
+	done := make(chan error, 1)
+	go func() { done <- server.Serve(listener) }()
+
+	time.Sleep(20 * time.Millisecond)
+	registry.Sites = append(registry.Sites, config.Site{Slug: "beta", Port: backendPort})
+	if err := registry.Save(); err != nil {
+		t.Fatal(err)
+	}
+
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		request, err := http.NewRequest(http.MethodGet, "http://"+listener.Addr().String()+"/", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.Host = "beta.localhost"
+		response, err := (&http.Client{Timeout: time.Second}).Do(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, readErr := io.ReadAll(response.Body)
+		response.Body.Close()
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		if string(body) == "beta route" {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("new route did not load; last response = %q", body)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	if err := listener.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-done; err != nil {
+		t.Fatalf("Serve returned %v", err)
 	}
 }
 

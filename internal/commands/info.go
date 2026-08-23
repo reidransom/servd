@@ -46,6 +46,7 @@ type proxyInfo struct {
 }
 
 func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteInfo {
+	settings = proxy.EffectiveSettings(settings, st)
 	health := supervisor.Evaluate(s, settings, st)
 	info := siteInfo{
 		Slug:      s.Slug,
@@ -74,6 +75,7 @@ func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteI
 }
 
 func newProxyInfo(settings config.Settings, st *state.State) proxyInfo {
+	settings = proxy.EffectiveSettings(settings, st)
 	running, pid := proxy.Running(st)
 	info := proxyInfo{
 		Running:           running,

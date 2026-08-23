@@ -14,9 +14,12 @@ import (
 
 // Load reads settings, registry and reconciled runtime state.
 func Load() (config.Settings, *config.Registry, *state.State, error) {
-	settings, err := config.LoadSettings()
+	settings, source, err := config.LoadSettingsWithSource()
 	if err != nil {
 		return settings, nil, nil, fmt.Errorf("loading settings: %w", err)
+	}
+	if !source.ConfigPresent {
+		settings.Hostnames.HTTPPort = 80
 	}
 	if err := settings.Validate(); err != nil {
 		return settings, nil, nil, fmt.Errorf("validating settings: %w", err)

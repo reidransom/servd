@@ -72,6 +72,21 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	}
 }
 
+func TestBuildStatusesUsesLiveProxyPort(t *testing.T) {
+	identity, err := state.ProcessIdentity(os.Getpid())
+	if err != nil {
+		t.Fatal(err)
+	}
+	settings := config.DefaultSettings()
+	settings.Hostnames.HTTPPort = 80
+	message := buildStatuses(settings, &config.Registry{}, &state.State{Entries: map[string]state.Entry{
+		"__proxy": {Slug: "__proxy", PID: os.Getpid(), Identity: identity, Port: 8080},
+	}})
+	if got := message.settings.Hostnames.HTTPPort; got != 8080 {
+		t.Fatalf("display port = %d, want 8080", got)
+	}
+}
+
 func TestSelectedErrorShowsReason(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_STATE_HOME", t.TempDir())

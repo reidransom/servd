@@ -8,11 +8,11 @@
 
 Run and manage many local dev servers at once.
 
-`servd` runs your registered web projects on stable ports and reverse-proxies
-them as friendly [nip.io](https://nip.io) subdomains — so a folder of
-client sites becomes `http://acme.127.0.0.1.nip.io:8080/`,
-`http://blog.127.0.0.1.nip.io:8080/`, and so on, all managed from one CLI or an
-interactive TUI.
+`servd` runs registered web projects on stable backend ports and reverse-proxies
+them by exact hostname. A folder of client sites becomes
+`http://acme.localhost/`, `http://blog.localhost/`, and so on, all managed from
+one CLI or interactive TUI. Optional [nip.io](https://nip.io) hostnames remain
+available for compatibility.
 
 It is **not tied to any one generator.**
 [jigyll](https://github.com/reidransom/jigyll)/[Jekyll](https://jekyllrb.com)
@@ -76,7 +76,7 @@ servd version
 ```sh
 servd add ~/clients/acme  # detect the launcher, assign a port + slug
 servd up --all            # start every registered dev server
-servd proxy up            # start the nip.io reverse proxy on :8080
+servd proxy up            # start the hostname reverse proxy
 servd                     # open the interactive dashboard (TUI)
 ```
 
@@ -84,9 +84,30 @@ Every entry in `sites.toml` is managed by servd and participates in
 `up --all` and `restart --all`. To start a single registered site, name it:
 `servd up acme`.
 
-Then visit `http://<slug>.127.0.0.1.nip.io:8080/` for any site, or
-`http://127.0.0.1:8080/` for a landing page listing them all. nip.io resolves
-`*.127.0.0.1.nip.io` to 127.0.0.1 with zero DNS setup.
+Then visit `http://<slug>.localhost/` for any site, or `http://127.0.0.1/`
+for a landing page listing them all. `.localhost` resolves to loopback without
+DNS setup.
+
+### Proxy port selection
+
+When `config.toml` is absent, `servd proxy up` first tries `127.0.0.1:80`.
+If that requires permission, it asks `sudo` only to bind the listener, then
+starts the HTTP proxy as the invoking user. If elevation is declined or port
+80 is already occupied, servd falls back to `127.0.0.1:8080` for that run; it
+does not write that fallback into configuration. A noninteractive command
+attempts passwordless elevation and falls back immediately.
+
+Set an explicit port to make the choice strict:
+
+```toml
+[hostnames]
+http_port = 8080
+```
+
+An explicit privileged port fails when it cannot be acquired; it never silently
+falls back. While running, status, site URLs, the TUI, and browser-open actions
+use the proxy's recorded runtime port. Route changes in `sites.toml` reload
+without restarting the proxy.
 
 ## How a project is launched
 

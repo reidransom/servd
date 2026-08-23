@@ -135,9 +135,16 @@ func newModel() (*model, error) {
 	return m, nil
 }
 
-// refreshCmd reloads registry+state and computes statuses in a goroutine.
-func refreshCmd(settings config.Settings) tea.Cmd {
+// refreshCmd reloads settings, registry, and state before computing statuses.
+func refreshCmd(_ config.Settings) tea.Cmd {
 	return func() tea.Msg {
+		settings, source, err := config.LoadSettingsWithSource()
+		if err != nil {
+			return statusesMsg{}
+		}
+		if !source.ConfigPresent {
+			settings.Hostnames.HTTPPort = 80
+		}
 		reg, err := config.LoadRegistry()
 		if err != nil {
 			return statusesMsg{}
@@ -155,7 +162,7 @@ func (m *model) applyStatuses(msg statusesMsg) {
 	if msg.reg == nil {
 		return
 	}
-	m.reg, m.st = msg.reg, msg.st
+	m.settings, m.reg, m.st = msg.settings, msg.reg, msg.st
 	m.proxyRunning = msg.proxyRunning
 	for slug, status := range msg.statuses {
 		if previous, ok := m.statuses[slug]; !ok || previous != status {
@@ -420,7 +427,7 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			if running {
 				err = proxy.StopBackground()
 			} else {
-				err = proxy.StartBackground(settings)
+				_, err = proxy.StartBackground(settings)
 			}
 			return actionDoneMsg{verb: verb, err: err}
 		})

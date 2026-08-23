@@ -27,6 +27,13 @@ type Settings struct {
 	Hostnames      HostnameSettings `toml:"hostnames"`
 }
 
+// SettingsSource records whether settings came from the user's config file.
+// Defaults are still valid settings, but callers that choose a listener need
+// to distinguish them from an explicit configuration choice.
+type SettingsSource struct {
+	ConfigPresent bool
+}
+
 // HostsMode controls future hosts-file synchronization behavior. It is
 // configured now so legacy sync_hosts migrations retain their intent.
 type HostsMode string
@@ -253,18 +260,27 @@ type rawHostnameSettings struct {
 // LoadSettings reads config.toml and migrates legacy keys into the hostname
 // model without retaining them as runtime settings.
 func LoadSettings() (Settings, error) {
+	settings, _, err := LoadSettingsWithSource()
+	return settings, err
+}
+
+// LoadSettingsWithSource also reports whether config.toml existed. A malformed
+// config remains present so callers never treat it as permission to use
+// first-run defaults.
+func LoadSettingsWithSource() (Settings, SettingsSource, error) {
 	s := DefaultSettings()
 	data, err := os.ReadFile(settingsPath())
 	if errors.Is(err, os.ErrNotExist) {
-		return s, s.Validate()
+		return s, SettingsSource{}, s.Validate()
 	}
 	if err != nil {
-		return s, err
+		return s, SettingsSource{}, err
 	}
+	source := SettingsSource{ConfigPresent: true}
 
 	var raw rawSettings
 	if err := toml.Unmarshal(data, &raw); err != nil {
-		return s, err
+		return s, source, err
 	}
 	if raw.PortRangeStart != nil {
 		s.PortRangeStart = *raw.PortRangeStart
@@ -315,7 +331,7 @@ func LoadSettings() (Settings, error) {
 	if s.Hostnames.LAN {
 		s.EnableLAN()
 	}
-	return s, s.Validate()
+	return s, source, s.Validate()
 }
 
 // Validate verifies the active HTTP hostname contract.
