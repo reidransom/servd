@@ -185,6 +185,23 @@ func TestInvalidNextCommandKeepsRunningSiteStoppable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	before, ok := st.Get(site.Slug)
+	if !ok || !state.EntryAlive(before) {
+		t.Fatalf("running site entry = %#v, want live entry", before)
+	}
+
+	if err := Start(site, settings); err == nil || !strings.Contains(err.Error(), "no command configured") {
+		t.Fatalf("Start() with invalid next command = %v, want command-resolution error", err)
+	}
+
+	st, err = state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, ok := st.Get(site.Slug)
+	if !ok || after.PID != before.PID || !state.EntryAlive(after) {
+		t.Fatalf("invalid Start() changed running site from %#v to %#v", before, after)
+	}
 	if got := Evaluate(site, settings, st); got.Kind != Error || !strings.Contains(got.Reason, "no command configured") {
 		t.Fatalf("invalid running site status = %#v, want command-resolution error", got)
 	}
