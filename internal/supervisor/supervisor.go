@@ -47,19 +47,20 @@ func LogPath(slug string) string {
 	return filepath.Join(config.LogDir(), slug+".log")
 }
 
-// Start launches the site's dev server detached. It is a no-op (no error) if
-// the site is already running.
+// Start launches the site's dev server detached. It resolves the next command
+// before returning a no-op for a running site so invalid configuration is
+// reported without disturbing that process.
 func Start(site config.Site, settings config.Settings) error {
 	st, err := state.Load()
 	if err != nil {
 		return err
 	}
-	if e, ok := st.Get(site.Slug); ok && state.EntryAlive(e) {
-		return nil
-	}
 	res, err := launcher.Resolve(site, settings)
 	if err != nil {
 		return err
+	}
+	if e, ok := st.Get(site.Slug); ok && state.EntryAlive(e) {
+		return nil
 	}
 
 	if err := os.MkdirAll(config.LogDir(), 0o755); err != nil {
