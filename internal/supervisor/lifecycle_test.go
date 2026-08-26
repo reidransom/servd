@@ -166,6 +166,40 @@ func TestStopClearsFailedEntry(t *testing.T) {
 	}
 }
 
+func TestInvalidNextCommandKeepsRunningSiteStoppable(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{
+		Slug: "invalid-next-command",
+		Path: t.TempDir(),
+		Port: availablePort(t),
+		Cmd:  "sleep 30",
+	}
+	settings := config.DefaultSettings()
+	if err := Start(site, settings); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = Stop(site.Slug) })
+
+	site.Cmd = ""
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := Evaluate(site, settings, st); got.Kind != Error || !strings.Contains(got.Reason, "no command configured") {
+		t.Fatalf("invalid running site status = %#v, want command-resolution error", got)
+	}
+	if err := Stop(site.Slug); err != nil {
+		t.Fatalf("Stop() invalid running site: %v", err)
+	}
+	st, err = state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := st.Get(site.Slug); ok {
+		t.Fatal("Stop() left invalid running site in state")
+	}
+}
+
 func TestRecordFailedStartKeepsConcurrentLiveEntry(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	pid := os.Getpid()

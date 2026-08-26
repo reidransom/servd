@@ -46,6 +46,60 @@ func TestStatusCommandAcceptsAtMostOneSlug(t *testing.T) {
 	}
 }
 
+func TestStatusCommandIsolatesInvalidSite(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	project := t.TempDir()
+	registry := &config.Registry{Sites: []config.Site{
+		{Slug: "valid", Path: project, Port: 4001, Cmd: "sleep 30"},
+		{Slug: "invalid", Path: project, Port: 4002},
+	}}
+	if err := registry.Save(); err != nil {
+		t.Fatal(err)
+	}
+
+	var aggregate bytes.Buffer
+	all := newStatusCmd()
+	all.SetOut(&aggregate)
+	all.SetErr(&bytes.Buffer{})
+	all.SilenceErrors, all.SilenceUsage = true, true
+	if err := all.Execute(); err != nil {
+		t.Fatalf("aggregate status = %v", err)
+	}
+	if got := aggregate.String(); !strings.Contains(got, "valid") || !strings.Contains(got, "invalid") || !strings.Contains(got, "error") {
+		t.Errorf("aggregate status = %q, want both rows and the invalid error", got)
+	}
+
+	var named bytes.Buffer
+	one := newStatusCmd()
+	one.SetOut(&named)
+	one.SetErr(&bytes.Buffer{})
+	one.SilenceErrors, one.SilenceUsage = true, true
+	one.SetArgs([]string{"invalid"})
+	if err := one.Execute(); err == nil || !strings.Contains(err.Error(), "no command configured") {
+		t.Fatalf("named invalid status error = %v, want command-resolution error", err)
+	}
+	if got := named.String(); !strings.Contains(got, "invalid") || !strings.Contains(got, "error") {
+		t.Errorf("named status = %q, want rendered invalid row", got)
+	}
+
+	var structured bytes.Buffer
+	jsonStatus := newStatusCmd()
+	jsonStatus.SetOut(&structured)
+	jsonStatus.SetErr(&bytes.Buffer{})
+	jsonStatus.SilenceErrors, jsonStatus.SilenceUsage = true, true
+	jsonStatus.SetArgs([]string{"--json", "invalid"})
+	if err := jsonStatus.Execute(); err == nil {
+		t.Fatal("named JSON status should return a resolution error")
+	}
+	if got := structured.String(); !strings.Contains(got, `"status": "error"`) || !strings.Contains(got, `"error":`) {
+		t.Errorf("structured status = %q, want status and error", got)
+	} else if strings.Contains(got, `"launcher"`) || strings.Contains(got, `"source"`) {
+		t.Errorf("structured status exposes removed command metadata: %s", got)
+	}
+}
+
 func TestAddCommandVectorReportsSourceAndWhich(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	project := filepath.Join(t.TempDir(), "project")

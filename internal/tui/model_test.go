@@ -153,8 +153,8 @@ func TestAllKeyTogglesSites(t *testing.T) {
 	} else {
 		m.Update(cmd())
 	}
-	if got := m.status; got != "started 2 site(s)" {
-		t.Errorf("status = %q, want %q", got, "started 2 site(s)")
+	if got := m.status; got != "Started 2 sites; 0 failed" {
+		t.Errorf("status = %q, want %q", got, "Started 2 sites; 0 failed")
 	}
 
 	m.Update(refreshCmd(m.settings)())
@@ -163,8 +163,28 @@ func TestAllKeyTogglesSites(t *testing.T) {
 	} else {
 		m.Update(cmd())
 	}
-	if got := m.status; got != "stopped 2 site(s)" {
-		t.Errorf("status = %q, want %q", got, "stopped 2 site(s)")
+	if got := m.status; got != "Stopped 2 sites; 0 failed" {
+		t.Errorf("status = %q, want %q", got, "Stopped 2 sites; 0 failed")
+	}
+}
+
+func TestBulkActionReportsCountsWithoutDroppingRowErrors(t *testing.T) {
+	sites := []config.Site{{Slug: "valid"}, {Slug: "broken"}, {Slug: "other"}}
+	result := bulkAction("started", sites, func(site config.Site) error {
+		if site.Slug == "broken" {
+			return os.ErrInvalid
+		}
+		return nil
+	})
+	m := &model{statuses: map[string]supervisor.SiteStatus{
+		"broken": {Kind: supervisor.Error, Reason: "no command configured"},
+	}}
+	m.Update(result)
+	if got, want := m.status, "Started 2 sites; 1 failed"; got != want {
+		t.Errorf("status = %q, want %q", got, want)
+	}
+	if got := m.statuses["broken"]; got.Kind != supervisor.Error || got.Reason != "no command configured" {
+		t.Errorf("broken row error = %#v, want retained error", got)
 	}
 }
 
@@ -330,6 +350,32 @@ func TestSiteListOmitsPorts(t *testing.T) {
 	}
 	if strings.Contains(view, "PORT") || strings.Contains(view, "4242") {
 		t.Errorf("TUI shows a port:\n%s", view)
+	}
+}
+
+func TestLogCmdUsesNextCommandAndReportsResolutionErrors(t *testing.T) {
+	project := t.TempDir()
+	configPath := filepath.Join(project, ".servd.toml")
+	if err := os.WriteFile(configPath, []byte(`cmd = "echo next"`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	site := config.Site{Slug: "site", Path: project, Port: 4011}
+	m := &model{
+		settings:  config.DefaultSettings(),
+		reg:       &config.Registry{Sites: []config.Site{site}},
+		logSlug:   site.Slug,
+		cmdCache:  map[string]string{},
+		cmdErrors: map[string]error{},
+	}
+	if got, err := m.logCmd(); err != nil || got != "echo next" {
+		t.Fatalf("next command = %q, %v; want %q, nil", got, err, "echo next")
+	}
+	if err := os.WriteFile(configPath, []byte("cmd ="), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m.cmdCache = map[string]string{}
+	if _, err := m.logCmd(); err == nil {
+		t.Fatal("preview of invalid next command should return a resolution error")
 	}
 }
 

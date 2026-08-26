@@ -76,8 +76,10 @@ func TestNewSiteInfo(t *testing.T) {
 	if strings.Contains(string(data), `"enabled"`) {
 		t.Errorf("site JSON contains removed enabled field: %s", data)
 	}
-	if strings.Contains(string(data), `"launcher"`) {
-		t.Errorf("site JSON contains removed launcher field: %s", data)
+	for _, key := range []string{"launcher", "source", "command_source"} {
+		if strings.Contains(string(data), `"`+key+`"`) {
+			t.Errorf("site JSON contains removed command metadata %q: %s", key, data)
+		}
 	}
 
 	settings.Hostnames.NipIO = false

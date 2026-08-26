@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"text/tabwriter"
 
 	"github.com/reidransom/servd/internal/app"
@@ -127,6 +126,7 @@ func newStatusCmd() *cobra.Command {
 		Use:     "status [slug]",
 		Aliases: []string{"ls"},
 		Short:   "List sites with their port, URL, and live status",
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
 			if err != nil {
@@ -141,18 +141,25 @@ func newStatusCmd() *cobra.Command {
 				for _, s := range sites {
 					infos = append(infos, newSiteInfo(settings, s, st))
 				}
-				return printJSON(struct {
+				if err := printJSONTo(cmd.OutOrStdout(), struct {
 					Proxy proxyInfo  `json:"proxy"`
 					Sites []siteInfo `json:"sites"`
-				}{newProxyInfo(settings, st), infos})
-			}
-			if len(sites) == 0 {
-				fmt.Println("No sites registered. Run `servd add <path>`.")
+				}{newProxyInfo(settings, st), infos}); err != nil {
+					return err
+				}
+				if len(args) == 1 && infos[0].Status == supervisor.Error.String() {
+					return fmt.Errorf("%s: %s", sites[0].Slug, infos[0].Error)
+				}
 				return nil
 			}
+			if len(sites) == 0 {
+				_, err := fmt.Fprintln(cmd.OutOrStdout(), "No sites registered. Run `servd add <path>`.")
+				return err
+			}
 			effective := proxy.EffectiveSettings(settings, st)
-			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
+			tw := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 2, 2, ' ', 0)
 			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tSTATUS\tUPTIME\tURL")
+			var namedErr error
 			for _, s := range sites {
 				status := supervisor.Evaluate(s, effective, st)
 				up := ""
@@ -161,8 +168,14 @@ func newStatusCmd() *cobra.Command {
 				}
 				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\n",
 					s.Slug, s.Port, status.Kind, app.Dash(up), effective.SiteURL(s))
+				if len(args) == 1 && status.Kind == supervisor.Error {
+					namedErr = fmt.Errorf("%s: %s", s.Slug, status.Reason)
+				}
 			}
-			return tw.Flush()
+			if err := tw.Flush(); err != nil {
+				return err
+			}
+			return namedErr
 		},
 	}
 	c.Flags().BoolVar(&jsonOut, "json", false, "emit machine-readable JSON (proxy + sites)")
