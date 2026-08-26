@@ -49,6 +49,7 @@ func (m *model) handleRenameKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		wasRunning := exists && state.EntryAlive(entry)
 		m.mode = modeNormal
 		m.cmdCache = map[string]string{}
+		m.cmdErrors = map[string]error{}
 		return m.action("renaming "+site.Slug+" to "+newSlug+"…", func() actionDoneMsg {
 			if wasRunning {
 				if err := supervisor.Stop(site.Slug); err != nil {

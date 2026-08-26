@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -92,7 +93,11 @@ func newProxyInfo(settings config.Settings, st *state.State) proxyInfo {
 
 // printJSON writes v to stdout, indented, with a trailing newline.
 func printJSON(v any) error {
-	enc := json.NewEncoder(os.Stdout)
+	return printJSONTo(os.Stdout, v)
+}
+
+func printJSONTo(w io.Writer, v any) error {
+	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(v)
 }

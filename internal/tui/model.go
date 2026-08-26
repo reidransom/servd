@@ -57,11 +57,12 @@ func tick() tea.Cmd {
 
 // actionDoneMsg reports the result of an async supervisor/proxy action.
 type actionDoneMsg struct {
-	verb string // "started", "stopped", ...
-	slug string // empty for bulk actions
-	n    int    // count, for bulk actions
-	bulk bool   // true when the action covered multiple sites
-	err  error
+	verb   string // "started", "stopped", ...
+	slug   string // empty for bulk actions
+	n      int    // succeeded count, for bulk actions
+	failed int    // failed count, for bulk actions
+	bulk   bool   // true when the action covered multiple sites
+	err    error
 }
 
 type model struct {
@@ -73,9 +74,10 @@ type model struct {
 	table    table.Model
 	slugs    []string // parallel to table rows
 	focus    focus
-	logSlug  string            // site the log panel is currently showing
-	cmdCache map[string]string // slug -> resolved launch command (for stopped sites)
-	viewport viewport.Model
+	logSlug   string           // site the log panel is currently showing
+	cmdCache  map[string]string // slug -> resolved next launch command
+	cmdErrors map[string]error  // slug -> next launch resolution error
+	viewport  viewport.Model
 
 	proxyRunning bool
 	width        int
@@ -134,7 +136,7 @@ func newModel() (*model, error) {
 	s.Selected = s.Selected.Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("#7aa2f7"))
 	t.SetStyles(s)
 
-	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, viewport: viewport.New(80, 20), showHelp: true}
+	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, cmdErrors: map[string]error{}, viewport: viewport.New(80, 20), showHelp: true}
 	m.applyStatuses(buildStatuses(settings, reg, st))
 	m.syncLogSelection()
 	return m, nil
@@ -169,11 +171,8 @@ func (m *model) applyStatuses(msg statusesMsg) {
 	}
 	m.settings, m.reg, m.st = msg.settings, msg.reg, msg.st
 	m.proxyRunning = msg.proxyRunning
-	for slug, status := range msg.statuses {
-		if previous, ok := m.statuses[slug]; !ok || previous != status {
-			delete(m.cmdCache, slug)
-		}
-	}
+	m.cmdCache = map[string]string{}
+	m.cmdErrors = map[string]error{}
 	m.statuses = msg.statuses
 	m.table.SetRows(msg.rows)
 	m.slugs = msg.slugs
@@ -228,27 +227,34 @@ func (m *model) sidebarWidth() int {
 	return lipgloss.Width(m.sidebarTableView())
 }
 
-// logCmd returns the shell command that launched (or would launch) the site
-// shown in the log panel: the live command when it's running, otherwise the
-// resolved launch command. Resolution hits the filesystem, so it's cached.
-func (m *model) logCmd() string {
+// logCmd returns the next resolved launch command for the selected site.
+// Resolution hits the filesystem, so it is cached until the next refresh.
+func (m *model) logCmd() (string, error) {
 	if m.logSlug == "" {
-		return ""
+		return "", nil
 	}
-	if e, ok := m.st.Get(m.logSlug); ok && e.Cmd != "" {
-		return e.Cmd
+	if err, ok := m.cmdErrors[m.logSlug]; ok {
+		return "", err
 	}
 	if c, ok := m.cmdCache[m.logSlug]; ok {
-		return c
+		return c, nil
 	}
-	c := ""
+	if m.cmdErrors == nil {
+		m.cmdErrors = map[string]error{}
+	}
+	if m.cmdCache == nil {
+		m.cmdCache = map[string]string{}
+	}
 	if s := m.reg.Find(m.logSlug); s != nil {
-		if res, err := launcher.Resolve(*s, m.settings); err == nil {
-			c = res.Cmd
+		res, err := launcher.Resolve(*s, m.settings)
+		if err != nil {
+			m.cmdErrors[m.logSlug] = err
+			return "", err
 		}
+		m.cmdCache[m.logSlug] = res.Cmd
+		return res.Cmd, nil
 	}
-	m.cmdCache[m.logSlug] = c
-	return c
+	return "", nil
 }
 
 func (m *model) selectedSite() *config.Site {
@@ -297,10 +303,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case actionDoneMsg:
 		m.busy = false
 		switch {
+		case msg.bulk:
+			m.status = fmt.Sprintf("%s %d sites; %d failed", strings.ToUpper(msg.verb[:1])+msg.verb[1:], msg.n, msg.failed)
 		case msg.err != nil:
 			m.status = "ERROR: " + firstLine(msg.err.Error())
-		case msg.bulk:
-			m.status = fmt.Sprintf("%s %d site(s)", msg.verb, msg.n)
 		case msg.slug != "":
 			m.status = msg.verb + " " + msg.slug
 		default:
@@ -333,21 +339,18 @@ func (m *model) action(status string, fn func() actionDoneMsg) (tea.Model, tea.C
 	return m, func() tea.Msg { return fn() }
 }
 
-// bulkAction applies do to each site, reporting the success count and the
-// first error encountered.
+// bulkAction applies do to each site, reporting both outcome counts.
 func bulkAction(verb string, sites []config.Site, do func(config.Site) error) actionDoneMsg {
 	n := 0
-	var firstErr error
+	failed := 0
 	for _, s := range sites {
 		if err := do(s); err != nil {
-			if firstErr == nil {
-				firstErr = err
-			}
+			failed++
 			continue
 		}
 		n++
 	}
-	return actionDoneMsg{verb: verb, n: n, bulk: true, err: firstErr}
+	return actionDoneMsg{verb: verb, n: n, failed: failed, bulk: true}
 }
 
 func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -514,6 +517,7 @@ func (m *model) handleAddKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		m.mode = modeNormal
 		m.cmdCache = map[string]string{}
+		m.cmdErrors = map[string]error{}
 		m.status = "added " + site.Slug
 		return m, refreshCmd(m.settings)
 	}
@@ -703,9 +707,11 @@ func (m *model) View() string {
 	} else {
 		sidebar = box(m.focus == focusList).Render(m.sidebarTableView())
 	}
-	// The log pane leads with the command that started the site, then its tail.
-	cmd := m.logCmd()
-	if cmd == "" {
+	// The log pane leads with the next launch command and any resolution error.
+	cmd, cmdErr := m.logCmd()
+	if cmdErr != nil {
+		cmd = errStyle.Render("ERROR: " + firstLine(cmdErr.Error()))
+	} else if cmd == "" {
 		cmd = "(unknown)"
 	}
 	// Tail indicator: green LIVE when pinned to the bottom (new lines stream in),

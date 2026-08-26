@@ -63,13 +63,17 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	}
 
 	m := &model{
-		cmdCache: map[string]string{site.Slug: "stale command"},
-		statuses: broken.statuses,
-		table:    table.New(table.WithColumns([]table.Column{{Title: "", Width: 1}, {Title: "SLUG", Width: 19}})),
+		cmdCache:  map[string]string{site.Slug: "stale command"},
+		cmdErrors: map[string]error{site.Slug: os.ErrInvalid},
+		statuses:  broken.statuses,
+		table:     table.New(table.WithColumns([]table.Column{{Title: "", Width: 1}, {Title: "SLUG", Width: 19}})),
 	}
 	m.applyStatuses(repaired)
 	if _, ok := m.cmdCache[site.Slug]; ok {
-		t.Error("status change did not invalidate cached launch command")
+		t.Error("refresh did not invalidate cached launch command")
+	}
+	if _, ok := m.cmdErrors[site.Slug]; ok {
+		t.Error("refresh did not invalidate cached launch error")
 	}
 }
 

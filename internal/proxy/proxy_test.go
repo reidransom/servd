@@ -287,7 +287,9 @@ func TestLandingRendersSiteLink(t *testing.T) {
 	if !strings.Contains(body, s.settings.SiteURL(s.sites[0])) {
 		t.Error("expected site link in landing page")
 	}
-	if strings.Contains(body, `class="kind"`) {
-		t.Error("landing page contains removed launcher metadata")
+	for _, removed := range []string{`class="kind"`, "launcher", "source:"} {
+		if strings.Contains(body, removed) {
+			t.Errorf("landing page contains removed command metadata %q: %s", removed, body)
+		}
 	}
 }
