@@ -75,10 +75,7 @@ func newUpCmd() *cobra.Command {
 					return err
 				}
 			}
-			// --wait/--json callers (scripts, agents) need the exit code to
-			// mean something; the bare human command keeps its old behavior
-			// of reporting per-site errors without failing the whole run.
-			if failed > 0 && (wait || jsonOut) {
+			if failed > 0 {
 				return fmt.Errorf("%d site(s) failed to start", failed)
 			}
 			return nil
@@ -105,12 +102,17 @@ func newDownCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			failed := 0
 			for _, s := range sites {
 				if err := supervisor.Stop(s.Slug); err != nil {
+					failed++
 					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
 					continue
 				}
 				fmt.Printf("  %-20s stopped\n", s.Slug)
+			}
+			if failed > 0 {
+				return fmt.Errorf("%d site(s) failed to stop", failed)
 			}
 			return nil
 		},
@@ -137,12 +139,17 @@ func newRestartCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			failed := 0
 			for _, s := range sites {
 				if err := supervisor.Restart(s, settings); err != nil {
+					failed++
 					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
 					continue
 				}
 				fmt.Printf("  %-20s restarted on :%d\n", s.Slug, s.Port)
+			}
+			if failed > 0 {
+				return fmt.Errorf("%d site(s) failed to restart", failed)
 			}
 			return nil
 		},
