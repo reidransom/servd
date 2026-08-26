@@ -23,7 +23,7 @@ type siteInfo struct {
 	URL           string     `json:"url"` // via the reverse proxy (needs proxy.accepting)
 	FallbackURL   string     `json:"fallback_url,omitempty"`
 	DirectURL     string     `json:"direct_url"` // straight to the dev server's port
-	Status        string     `json:"status"` // stopped | starting | running | error
+	Status        string     `json:"status"`     // stopped | starting | running | error
 	Error         string     `json:"error,omitempty"`
 	PID           int        `json:"pid,omitempty"`
 	Cmd           string     `json:"cmd,omitempty"` // command the live process was started with

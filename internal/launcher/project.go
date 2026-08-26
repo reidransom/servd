@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/reidransom/servd/internal/config"
 	toml "github.com/pelletier/go-toml/v2"
+	"github.com/reidransom/servd/internal/config"
 )
 
 const projectConfigName = ".servd.toml"

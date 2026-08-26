@@ -122,4 +122,3 @@ func newDoctorCmd() *cobra.Command {
 		},
 	}
 }
-

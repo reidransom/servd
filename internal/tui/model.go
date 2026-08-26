@@ -70,11 +70,11 @@ type model struct {
 	reg      *config.Registry
 	st       *state.State
 
-	statuses map[string]supervisor.SiteStatus
-	table    table.Model
-	slugs    []string // parallel to table rows
-	focus    focus
-	logSlug   string           // site the log panel is currently showing
+	statuses  map[string]supervisor.SiteStatus
+	table     table.Model
+	slugs     []string // parallel to table rows
+	focus     focus
+	logSlug   string            // site the log panel is currently showing
 	cmdCache  map[string]string // slug -> resolved next launch command
 	cmdErrors map[string]error  // slug -> next launch resolution error
 	viewport  viewport.Model

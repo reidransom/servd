@@ -118,11 +118,11 @@ func TestStaticCommandRejectsInvalidInputBeforeListening(t *testing.T) {
 func TestStaticHandlerServesContainedFilesOnly(t *testing.T) {
 	root := t.TempDir()
 	files := map[string]string{
-		"index.html":          "root index",
-		"plain.txt":           "plain file",
-		"nested/index.html":   "nested index",
-		"without-index/file":  "no listing",
-		".hidden.txt":         "hidden",
+		"index.html":            "root index",
+		"plain.txt":             "plain file",
+		"nested/index.html":     "nested index",
+		"without-index/file":    "no listing",
+		".hidden.txt":           "hidden",
 		".well-known/challenge": "hidden well-known",
 	}
 	for name, content := range files {

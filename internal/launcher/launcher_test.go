@@ -110,12 +110,16 @@ func TestResolveIgnoresDiscoverySources(t *testing.T) {
 
 func TestResolveRepositoryCommandErrors(t *testing.T) {
 	cases := []struct {
-		name    string
-		setup   func(t *testing.T, dir string)
+		name     string
+		setup    func(t *testing.T, dir string)
 		contains string
 	}{
 		{"missing", func(t *testing.T, dir string) {}, "no command configured"},
-		{"unreadable", func(t *testing.T, dir string) { if err := os.Mkdir(filepath.Join(dir, ".servd.toml"), 0o755); err != nil { t.Fatal(err) } }, "cannot read repository command file"},
+		{"unreadable", func(t *testing.T, dir string) {
+			if err := os.Mkdir(filepath.Join(dir, ".servd.toml"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+		}, "cannot read repository command file"},
 		{"malformed", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", "not toml [[[") }, "invalid repository command file"},
 		{"non-string", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", "cmd = 42") }, "non-string cmd"},
 		{"missing cmd", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", "other = true") }, "has no cmd"},
