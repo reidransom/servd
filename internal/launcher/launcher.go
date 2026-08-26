@@ -42,8 +42,8 @@ func Resolve(site config.Site, settings config.Settings) (Resolved, error) {
 	return Resolved{}, missingCommandError(site)
 }
 
-// subst replaces {port} and {host} placeholders. Procfile $PORT/$HOST are left
-// untouched here and resolved from the environment by the shell at run time.
+// subst replaces {port} and {host} placeholders. Environment variables remain
+// available for shell expansion at execution time.
 func subst(cmd, host string, port int) string {
 	cmd = strings.ReplaceAll(cmd, "{port}", strconv.Itoa(port))
 	cmd = strings.ReplaceAll(cmd, "{host}", host)

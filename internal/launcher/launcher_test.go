@@ -3,6 +3,7 @@ package launcher
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -57,17 +58,53 @@ func TestResolveWhitespaceSiteCommandUsesRepositoryCommand(t *testing.T) {
 	}
 }
 
-func TestResolveDoesNotInspectParentOrProcfile(t *testing.T) {
+func TestResolveIgnoresDiscoverySources(t *testing.T) {
 	parent := t.TempDir()
 	writeFile(t, parent, ".servd.toml", `cmd = "parent"`)
 	dir := filepath.Join(parent, "child")
 	if err := os.Mkdir(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	writeFile(t, dir, "Procfile", "web: ignored")
+	for name, content := range map[string]string{
+		"Procfile":     "web: ignored",
+		"Procfile.dev": "web: ignored",
+		"_config.yml":  "ignored",
+		"Gemfile":      "ignored",
+		"hugo.toml":    "ignored",
+		"index.html":   "ignored",
+		"justfile":     "serve:\n\tignored",
+		"Makefile":     "serve:\n\tignored",
+		"package.json": `{"scripts":{"dev":"ignored"}}`,
+		"recipe":       "ignored",
+	} {
+		writeFile(t, dir, name, content)
+	}
+
+	configHome := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+	launcherConfig := filepath.Join(configHome, "servd", "launchers.toml")
+	const launcherConfigContent = "[[launcher]]\nname = \"ignored\"\ncmd = \"ignored\""
+	writeFile(t, filepath.Dir(launcherConfig), filepath.Base(launcherConfig), launcherConfigContent)
+
+	binDir := t.TempDir()
+	binary := "hugo"
+	if runtime.GOOS == "windows" {
+		binary += ".exe"
+	}
+	writeFile(t, binDir, binary, "")
+	t.Setenv("PATH", binDir)
+
 	_, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
 	if err == nil || !strings.Contains(err.Error(), "no command configured") {
 		t.Fatalf("resolution error = %v, want missing command", err)
+	}
+
+	data, readErr := os.ReadFile(launcherConfig)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if string(data) != launcherConfigContent {
+		t.Errorf("launchers.toml was modified: got %q, want %q", data, launcherConfigContent)
 	}
 }
 
