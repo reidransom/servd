@@ -46,7 +46,7 @@ func TestEvaluate(t *testing.T) {
 
 	assertStatus("stopped", base, nil, Stopped, "")
 	assertStatus("missing path", config.Site{Slug: base.Slug, Path: filepath.Join(project, "missing"), Port: base.Port, Cmd: base.Cmd}, nil, Error, "unavailable")
-	assertStatus("no launcher", config.Site{Slug: base.Slug, Path: project, Port: base.Port}, nil, Error, "no launcher")
+	assertStatus("missing command", config.Site{Slug: base.Slug, Path: project, Port: base.Port}, nil, Error, "no command configured")
 	assertStatus("recorded failure", base, &state.Entry{Slug: base.Slug, Failure: "shell start failed", FailedAt: time.Now()}, Error, "shell start failed")
 	assertStatus("dead process", base, &state.Entry{Slug: base.Slug, PID: 1<<30 - 7, Log: "/tmp/site.log", StartedAt: time.Now()}, Error, "process exited")
 

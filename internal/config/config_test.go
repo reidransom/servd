@@ -192,7 +192,7 @@ func TestLegacyEnablementKeysAreIgnoredAndOmittedOnSave(t *testing.T) {
 		if err := os.MkdirAll(filepath.Join(configHome, "servd"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		legacy := "[[site]]\nslug = \"alpha\"\npath = \"/tmp/alpha\"\nport = 4001\nenabled = true\n\n[[site]]\nslug = \"bravo\"\npath = \"/tmp/bravo\"\nport = 4002\nenabled = false\n"
+		legacy := "[[site]]\nslug = \"alpha\"\npath = \"/tmp/alpha\"\nport = 4001\nlauncher = \"static\"\nenabled = true\n\n[[site]]\nslug = \"bravo\"\npath = \"/tmp/bravo\"\nport = 4002\nenabled = false\n"
 		if err := os.WriteFile(registryPath(), []byte(legacy), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -210,8 +210,8 @@ func TestLegacyEnablementKeysAreIgnoredAndOmittedOnSave(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if strings.Contains(string(data), "enabled") {
-			t.Fatalf("saved registry contains enabled:\n%s", data)
+		if strings.Contains(string(data), "enabled") || strings.Contains(string(data), "launcher") {
+			t.Fatalf("saved registry retains removed fields:\n%s", data)
 		}
 	})
 }

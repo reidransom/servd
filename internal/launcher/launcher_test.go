@@ -21,101 +21,120 @@ func testSettings() config.Settings {
 	return config.Settings{BindHost: "127.0.0.1", PortRangeStart: 42101, Hostnames: config.HostnameSettings{HTTPPort: 42100}}
 }
 
-func TestResolveManualOverridesProcfile(t *testing.T) {
-	isolateConfig(t)
+func TestResolveExplicitCommandWinsWithoutReadingRepositoryConfig(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "Procfile"), []byte("web: from-procfile"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	site := config.Site{Slug: "x", Path: dir, Port: 4001, Cmd: "manual -p {port}"}
-	res, err := Resolve(site, testSettings())
+	writeFile(t, dir, ".servd.toml", "not toml [[[")
+	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001, Cmd: "manual -p {port}"}, testSettings())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Kind != "manual" || res.Cmd != "manual -p 4001" {
-		t.Errorf("got kind=%q cmd=%q, want manual override", res.Kind, res.Cmd)
+	if res.Source != "explicit" || res.Cmd != "manual -p 4001" {
+		t.Errorf("got source=%q cmd=%q, want explicit command", res.Source, res.Cmd)
 	}
 }
 
-func TestResolveProcfile(t *testing.T) {
-	isolateConfig(t)
+func TestResolveRepositoryCommand(t *testing.T) {
 	dir := t.TempDir()
-	procfile := "worker: node worker.js\nweb: npm start\n"
-	if err := os.WriteFile(filepath.Join(dir, "Procfile"), []byte(procfile), 0o644); err != nil {
-		t.Fatal(err)
-	}
+	writeFile(t, dir, ".servd.toml", "extra = true\ncmd = \"from-project -H {host} -p {port}\"")
 	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Kind != "procfile" || res.Cmd != "npm start" {
-		t.Errorf("got kind=%q cmd=%q, want procfile web entry", res.Kind, res.Cmd)
+	if res.Source != ".servd.toml" || res.Cmd != "from-project -H 127.0.0.1 -p 4001" {
+		t.Errorf("got source=%q cmd=%q, want repository command", res.Source, res.Cmd)
 	}
 }
 
-func TestResolveNothingServable(t *testing.T) {
-	isolateConfig(t)
+func TestResolveWhitespaceSiteCommandUsesRepositoryCommand(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, ".servd.toml", `cmd = "from-project"`)
+	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001, Cmd: " \t\n "}, testSettings())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Source != ".servd.toml" || res.Cmd != "from-project" {
+		t.Errorf("got source=%q cmd=%q, want repository command", res.Source, res.Cmd)
+	}
+}
+
+func TestResolveDoesNotInspectParentOrProcfile(t *testing.T) {
+	parent := t.TempDir()
+	writeFile(t, parent, ".servd.toml", `cmd = "parent"`)
+	dir := filepath.Join(parent, "child")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, dir, "Procfile", "web: ignored")
+	_, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
+	if err == nil || !strings.Contains(err.Error(), "no command configured") {
+		t.Fatalf("resolution error = %v, want missing command", err)
+	}
+}
+
+func TestResolveRepositoryCommandErrors(t *testing.T) {
+	cases := []struct {
+		name    string
+		setup   func(t *testing.T, dir string)
+		contains string
+	}{
+		{"missing", func(t *testing.T, dir string) {}, "no command configured"},
+		{"unreadable", func(t *testing.T, dir string) { if err := os.Mkdir(filepath.Join(dir, ".servd.toml"), 0o755); err != nil { t.Fatal(err) } }, "cannot read repository command file"},
+		{"malformed", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", "not toml [[[") }, "invalid repository command file"},
+		{"non-string", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", "cmd = 42") }, "non-string cmd"},
+		{"missing cmd", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", "other = true") }, "has no cmd"},
+		{"blank cmd", func(t *testing.T, dir string) { writeFile(t, dir, ".servd.toml", `cmd = " \t"`) }, "blank cmd"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			tc.setup(t, dir)
+			_, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
+			if err == nil || !strings.Contains(err.Error(), tc.contains) {
+				t.Fatalf("resolution error = %v, want %q", err, tc.contains)
+			}
+		})
+	}
+}
+
+func TestResolveMissingCommandIncludesRemediation(t *testing.T) {
 	dir := t.TempDir()
 	_, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
 	if err == nil {
-		t.Fatal("empty dir should not resolve")
+		t.Fatal("missing command resolved")
 	}
-	if !strings.Contains(err.Error(), "--cmd") {
-		t.Errorf("error should mention --cmd escape hatch: %v", err)
+	for _, want := range []string{dir, "create " + filepath.Join(dir, ".servd.toml") + " with a nonblank cmd", "servd rm x", "servd add " + dir + " -- <command>"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error %q does not contain %q", err, want)
+		}
 	}
 }
 
-func TestResolveRejectsMissingProjectPathWithManualCommand(t *testing.T) {
-	isolateConfig(t)
+func TestResolveRejectsMissingProjectPathWithExplicitCommand(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "missing")
 	_, err := Resolve(config.Site{Slug: "x", Path: path, Port: 4001, Cmd: "serve"}, testSettings())
-	if err == nil {
-		t.Fatal("missing project path should not resolve")
-	}
-	if !strings.Contains(err.Error(), path) {
-		t.Errorf("error %q should name path %q", err, path)
+	if err == nil || !strings.Contains(err.Error(), path) {
+		t.Fatalf("resolution error = %v, want unavailable path", err)
 	}
 }
 
 func TestResolveRejectsProjectPathThatIsNotDirectory(t *testing.T) {
-	isolateConfig(t)
 	path := filepath.Join(t.TempDir(), "project-file")
 	if err := os.WriteFile(path, []byte("not a directory"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	_, err := Resolve(config.Site{Slug: "x", Path: path, Port: 4001, Cmd: "serve"}, testSettings())
-	if err == nil {
-		t.Fatal("project file should not resolve")
-	}
-	if !strings.Contains(err.Error(), "not a directory") {
-		t.Errorf("error %q should explain path is not a directory", err)
+	if err == nil || !strings.Contains(err.Error(), "not a directory") {
+		t.Fatalf("resolution error = %v, want non-directory error", err)
 	}
 }
 
-func TestResolveProjectConfigBeatsProcfile(t *testing.T) {
-	isolateConfig(t)
-	dir := t.TempDir()
-	writeFile(t, dir, "Procfile", "web: from-procfile")
-	writeFile(t, dir, ".servd.toml", `cmd = "from-project -p {port}"`)
-	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
-	if err != nil {
+func writeFile(t *testing.T, dir, name, content string) {
+	t.Helper()
+	path := filepath.Join(dir, name)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if res.Kind != "project" || res.Cmd != "from-project -p 4001" {
-		t.Errorf("got kind=%q cmd=%q, want .servd.toml override", res.Kind, res.Cmd)
-	}
-}
-
-func TestResolveProjectConfigInvalidFallsThrough(t *testing.T) {
-	isolateConfig(t)
-	dir := t.TempDir()
-	writeFile(t, dir, ".servd.toml", "not toml [[[")
-	writeFile(t, dir, "Procfile", "web: from-procfile")
-	res, err := Resolve(config.Site{Slug: "x", Path: dir, Port: 4001}, testSettings())
-	if err != nil {
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
-	}
-	if res.Kind != "procfile" || res.Cmd != "from-procfile" {
-		t.Errorf("got kind=%q cmd=%q, want procfile fallback", res.Kind, res.Cmd)
 	}
 }

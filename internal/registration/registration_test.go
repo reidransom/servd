@@ -22,7 +22,7 @@ func mkSite(t *testing.T, root string, parts ...string) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte("<h1>hi</h1>"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".servd.toml"), []byte(`cmd = "serve"`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -37,8 +37,8 @@ func TestAddSite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if site.Slug != "gamma" || site.Port != 42101 || site.Launcher == "" {
-		t.Errorf("got %+v, want slug=gamma port=42101 launcher!=\"\"", site)
+	if site.Slug != "gamma" || site.Port != 42101 || site.Cmd != "" {
+		t.Errorf("got %+v, want slug=gamma port=42101 without explicit command", site)
 	}
 	if len(reg.Sites) != 1 {
 		t.Fatalf("registry: got %d sites", len(reg.Sites))
@@ -112,8 +112,22 @@ func TestAddSiteUndetectable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if site.Cmd == "" {
-		t.Errorf("got %+v, want Cmd preserved", site)
+	if site.Cmd != "python -m http.server {port}" || reg.Sites[0].Cmd != site.Cmd {
+		t.Errorf("got %+v, want explicit Cmd persisted", site)
+	}
+}
+
+func TestAddSiteExplicitCommandDoesNotReadMalformedRepositoryConfig(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".servd.toml"), []byte("not toml [[["), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	site, err := AddSite(&config.Registry{}, testSettings(), AddParams{Path: dir, Cmd: "serve"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if site.Cmd != "serve" {
+		t.Fatalf("site command = %q, want explicit command", site.Cmd)
 	}
 }
 

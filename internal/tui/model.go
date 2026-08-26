@@ -722,20 +722,9 @@ func (m *model) View() string {
 	logPane := box(m.focus == focusLog).Render(header + "\n" + m.viewport.View())
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, sidebar, logPane) + "\n")
 
-	// Footer detail: selected-site URL plus launcher and uptime facts, then any
-	// transient status message.
+	// Footer detail: selected-site URL and any transient status message.
 	if s := m.selectedSite(); s != nil {
 		b.WriteString(dimStyle.Render("→ ") + m.settings.SiteURL(*s))
-		var meta []string
-		if s.Launcher != "" {
-			meta = append(meta, s.Launcher)
-		}
-		if d := supervisor.Uptime(s.Slug, m.st); d > 0 {
-			meta = append(meta, "up "+app.FmtDuration(d))
-		}
-		if len(meta) > 0 {
-			b.WriteString(dimStyle.Render("  (" + strings.Join(meta, " · ") + ")"))
-		}
 		if health, ok := m.statuses[s.Slug]; ok && health.Kind == supervisor.Error {
 			b.WriteString("   " + errStyle.Render("ERROR: "+health.Reason))
 		}

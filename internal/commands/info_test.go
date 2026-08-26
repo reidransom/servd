@@ -20,7 +20,7 @@ func TestNewSiteInfo(t *testing.T) {
 
 	// A stopped site: no state entry, nothing listening.
 	project := t.TempDir()
-	dead := config.Site{Slug: "dead", Path: project, Port: 1, Cmd: "sleep 30", Launcher: "static"}
+	dead := config.Site{Slug: "dead", Path: project, Port: 1, Cmd: "sleep 30"}
 	// A live site: a state entry pointing at this test process, and a real
 	// listener so StatusOf sees the port accepting.
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -75,6 +75,9 @@ func TestNewSiteInfo(t *testing.T) {
 	}
 	if strings.Contains(string(data), `"enabled"`) {
 		t.Errorf("site JSON contains removed enabled field: %s", data)
+	}
+	if strings.Contains(string(data), `"launcher"`) {
+		t.Errorf("site JSON contains removed launcher field: %s", data)
 	}
 
 	settings.Hostnames.NipIO = false
