@@ -56,8 +56,8 @@ func newAddCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Added %s :%d (%s)\n  %s\n  %s\n  direct: http://127.0.0.1:%d/\n",
-				site.Slug, site.Port, site.Launcher, site.Path, settings.SiteURL(site), site.Port)
+			fmt.Printf("Added %s :%d\n  %s\n  %s\n  direct: http://127.0.0.1:%d/\n",
+				site.Slug, site.Port, site.Path, settings.SiteURL(site), site.Port)
 			return nil
 		},
 	}
@@ -115,11 +115,8 @@ func newWhichCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("slug:     %s\n", s.Slug)
-			fmt.Printf("path:     %s\n", s.Path)
-			fmt.Printf("launcher: %s\n", res.Kind)
-			fmt.Printf("port:     %d  (PORT/HOST exported to the process)\n", s.Port)
-			fmt.Printf("command:  %s\n", res.Cmd)
+			fmt.Printf("source: %s\n", res.Source)
+			fmt.Printf("command: %s\n", res.Cmd)
 			return nil
 		},
 	}
@@ -130,8 +127,7 @@ func newStatusCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:     "status [slug]",
 		Aliases: []string{"ls"},
-		Short:   "List sites with their port, URL, launcher and live status",
-		Args:    cobra.MaximumNArgs(1),
+		Short:   "List sites with their port, URL, and live status",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
 			if err != nil {
@@ -157,15 +153,15 @@ func newStatusCmd() *cobra.Command {
 			}
 			effective := proxy.EffectiveSettings(settings, st)
 			tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
-			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tLAUNCHER\tSTATUS\tUPTIME\tURL")
+			_, _ = fmt.Fprintln(tw, "SLUG\tPORT\tSTATUS\tUPTIME\tURL")
 			for _, s := range sites {
 				status := supervisor.Evaluate(s, effective, st)
 				up := ""
 				if d := supervisor.Uptime(s.Slug, st); d > 0 {
 					up = app.FmtDuration(d)
 				}
-				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\t%s\n",
-					s.Slug, s.Port, app.Dash(s.Launcher), status.Kind, app.Dash(up), effective.SiteURL(s))
+				_, _ = fmt.Fprintf(tw, "%s\t%d\t%s\t%s\t%s\n",
+					s.Slug, s.Port, status.Kind, app.Dash(up), effective.SiteURL(s))
 			}
 			return tw.Flush()
 		},

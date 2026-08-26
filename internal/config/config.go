@@ -63,8 +63,7 @@ type Site struct {
 	HostPrefix string `toml:"host_prefix,omitempty"`
 	Path       string `toml:"path"`
 	Port       int    `toml:"port"`
-	Cmd        string `toml:"cmd,omitempty"`      // manual launch override (highest precedence)
-	Launcher   string `toml:"launcher,omitempty"` // recorded resolver kind, e.g. "jigyll", "procfile"
+	Cmd        string `toml:"cmd,omitempty"`
 	// PreserveHost forwards the original routed Host header to the backend
 	// instead of rewriting it to the backend's own address. Only needed by
 	// servers that build absolute URLs from Host; such servers must then

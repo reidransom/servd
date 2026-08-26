@@ -249,7 +249,7 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 	b.WriteString(`<!doctype html><html><head><meta charset="utf-8"><title>servd</title>`)
 	b.WriteString(`<style>body{font:16px/1.5 system-ui,sans-serif;max-width:640px;margin:3rem auto;padding:0 1rem;color:#222}`)
 	b.WriteString(`h1{font-size:1.4rem}a{color:#0a58ca;text-decoration:none}a:hover{text-decoration:underline}`)
-	b.WriteString(`li{margin:.4rem 0}.port{color:#888;font-size:.85em}.kind{color:#aaa;font-size:.8em}</style></head><body>`)
+	b.WriteString(`li{margin:.4rem 0}.port{color:#888;font-size:.85em}</style></head><body>`)
 	b.WriteString(`<h1>servd &mdash; local sites</h1>`)
 	if len(sites) == 0 {
 		b.WriteString(`<p>No sites registered yet. Run <code>servd add /path/to/project</code>.</p>`)
@@ -259,9 +259,6 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 			u := s.settings.SiteURL(site)
 			b.WriteString("<li><a href=\"" + html.EscapeString(u) + "\">" + html.EscapeString(site.Slug) + "</a> ")
 			b.WriteString(fmt.Sprintf(`<span class="port">:%d</span> `, site.Port))
-			if site.Launcher != "" {
-				b.WriteString(`<span class="kind">` + html.EscapeString(site.Launcher) + `</span>`)
-			}
 			b.WriteString("</li>")
 		}
 		b.WriteString("</ul>")

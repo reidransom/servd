@@ -1,35 +1,47 @@
 package launcher
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/reidransom/servd/internal/config"
 	toml "github.com/pelletier/go-toml/v2"
 )
 
-// projectConfigName is the per-project override file. A project that knows
-// how to serve itself declares it once, next to its code:
-//
-//	cmd = "bundle exec middleman serve -p {port}"
-//
-// It beats Procfile and all launcher rules; only a `servd add --cmd` pin on
-// the site ranks higher.
 const projectConfigName = ".servd.toml"
 
-// readProjectCmd returns the cmd from dir/.servd.toml, if one is declared.
-// A missing file, unparsable file, or empty cmd all fall through to the next
-// resolution step.
-func readProjectCmd(dir string) (string, bool) {
-	data, err := os.ReadFile(filepath.Join(dir, projectConfigName))
+// readProjectCmd reads only the registered root's repository command.
+func readProjectCmd(dir string) (string, bool, error) {
+	path := filepath.Join(dir, projectConfigName)
+	data, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return "", false, nil
+	}
 	if err != nil {
-		return "", false
+		return "", false, fmt.Errorf("cannot read repository command file %s: %w", path, err)
 	}
-	var pc struct {
-		Cmd string `toml:"cmd"`
+
+	var values map[string]any
+	if err := toml.Unmarshal(data, &values); err != nil {
+		return "", false, fmt.Errorf("invalid repository command file %s: %w", path, err)
 	}
-	if err := toml.Unmarshal(data, &pc); err != nil || strings.TrimSpace(pc.Cmd) == "" {
-		return "", false
+	value, ok := values["cmd"]
+	if !ok {
+		return "", false, fmt.Errorf("repository command file %s has no cmd", path)
 	}
-	return pc.Cmd, true
+	cmd, ok := value.(string)
+	if !ok {
+		return "", false, fmt.Errorf("repository command file %s has a non-string cmd", path)
+	}
+	if strings.TrimSpace(cmd) == "" {
+		return "", false, fmt.Errorf("repository command file %s has a blank cmd", path)
+	}
+	return cmd, true, nil
+}
+
+func missingCommandError(site config.Site) error {
+	return fmt.Errorf("no command configured for %s\ncreate %s with a nonblank cmd, or run:\n  servd rm %s\n  servd add %s -- <command>", site.Path, filepath.Join(site.Path, projectConfigName), site.Slug, site.Path)
 }

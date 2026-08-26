@@ -22,7 +22,6 @@ type siteInfo struct {
 	URL           string     `json:"url"` // via the reverse proxy (needs proxy.accepting)
 	FallbackURL   string     `json:"fallback_url,omitempty"`
 	DirectURL     string     `json:"direct_url"` // straight to the dev server's port
-	Launcher      string     `json:"launcher,omitempty"`
 	Status        string     `json:"status"` // stopped | starting | running | error
 	Error         string     `json:"error,omitempty"`
 	PID           int        `json:"pid,omitempty"`
@@ -54,7 +53,6 @@ func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteI
 		Port:      s.Port,
 		URL:       settings.SiteURL(s),
 		DirectURL: fmt.Sprintf("http://127.0.0.1:%d/", s.Port),
-		Launcher:  s.Launcher,
 		Status:    health.Kind.String(),
 		Log:       supervisor.LogPath(s.Slug),
 	}

@@ -275,19 +275,19 @@ func TestReloadKeepsLastValidRoutesAfterCollision(t *testing.T) {
 	}
 }
 
-func TestLandingEscapesHTML(t *testing.T) {
+func TestLandingRendersSiteLink(t *testing.T) {
 	settings := proxySettings()
 	s := &Server{
 		settings: settings,
-		sites:    []config.Site{{Slug: "ok", Port: 4001, Launcher: `<script>alert(1)</script>`}},
+		sites:    []config.Site{{Slug: "ok", Port: 4001}},
 	}
 	rec := httptest.NewRecorder()
 	s.landing(rec, httptest.NewRequest("GET", "http://localhost/", nil))
 	body := rec.Body.String()
-	if strings.Contains(body, "<script>alert(1)</script>") || !strings.Contains(body, "&lt;script&gt;") {
-		t.Error("launcher field not escaped in landing page")
-	}
 	if !strings.Contains(body, s.settings.SiteURL(s.sites[0])) {
 		t.Error("expected site link in landing page")
+	}
+	if strings.Contains(body, `class="kind"`) {
+		t.Error("landing page contains removed launcher metadata")
 	}
 }
