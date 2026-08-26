@@ -46,12 +46,16 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(project, "index.html"), []byte(fixture), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile(filepath.Join(project, ".servd.toml"), []byte("cmd = \"servd static\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	configHome := filepath.Join(tmp, "config")
 	stateHome := filepath.Join(tmp, "state")
 	environment := append(os.Environ(),
 		"XDG_CONFIG_HOME="+configHome,
 		"XDG_STATE_HOME="+stateHome,
+		"PATH="+tmp+string(os.PathListSeparator)+os.Getenv("PATH"),
 	)
 	port := availableSmokePort(t)
 	runSmokeCommand(t, environment, binary, "add", project, "--slug", smokeSlug, "--port", fmt.Sprint(port))

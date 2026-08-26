@@ -3,13 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/reidransom/servd/internal/mdns"
-	"io/fs"
 	"net"
-	"net/http"
-	"os/exec"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
@@ -157,69 +151,3 @@ func newDoctorCmd() *cobra.Command {
 	}
 }
 
-// newStaticCmd is the hidden built-in static file server used by the "static"
-// launcher fallback. It serves --dir on --host:--port, refusing dot-prefixed
-// paths (.env, .git, …) so a project dir doesn't leak secrets.
-func newStaticCmd() *cobra.Command {
-	var host, dir string
-	var port int
-	c := &cobra.Command{
-		Use:    "__static",
-		Hidden: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			addr := net.JoinHostPort(host, strconv.Itoa(port))
-			srv := &http.Server{
-				Addr:         addr,
-				Handler:      http.FileServer(dotHidingFS{http.Dir(dir)}),
-				ReadTimeout:  30 * time.Second,
-				WriteTimeout: 30 * time.Second,
-			}
-			return srv.ListenAndServe()
-		},
-	}
-	c.Flags().StringVar(&host, "host", "127.0.0.1", "bind host")
-	c.Flags().IntVar(&port, "port", 0, "listen port")
-	c.Flags().StringVar(&dir, "dir", ".", "directory to serve")
-	return c
-}
-
-// dotHidingFS wraps an http.FileSystem and hides dot-prefixed files and
-// directories from both direct requests and directory listings.
-type dotHidingFS struct{ fs http.FileSystem }
-
-// containsDotSegment reports whether any path segment starts with a dot.
-// http.FileServer cleans the URL path before calling Open, and the
-// http.FileSystem API always uses forward slashes.
-func containsDotSegment(name string) bool {
-	for _, part := range strings.Split(name, "/") {
-		if strings.HasPrefix(part, ".") {
-			return true
-		}
-	}
-	return false
-}
-
-func (d dotHidingFS) Open(name string) (http.File, error) {
-	if containsDotSegment(name) {
-		return nil, fs.ErrPermission // FileServer renders 403
-	}
-	f, err := d.fs.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	return dotHidingFile{f}, nil
-}
-
-// dotHidingFile filters dotfiles out of directory listings.
-type dotHidingFile struct{ http.File }
-
-func (f dotHidingFile) Readdir(count int) ([]fs.FileInfo, error) {
-	entries, err := f.File.Readdir(count)
-	out := entries[:0]
-	for _, e := range entries {
-		if !strings.HasPrefix(e.Name(), ".") {
-			out = append(out, e)
-		}
-	}
-	return out, err
-}

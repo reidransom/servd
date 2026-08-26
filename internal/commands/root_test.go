@@ -58,3 +58,25 @@ func TestSelectSitesExplicitSlugsAndErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestStaticCommandIsPublicWithoutLegacyAlias(t *testing.T) {
+	root := newRootCmd()
+	var staticFound, legacyFound bool
+	for _, command := range root.Commands() {
+		switch command.Name() {
+		case "static":
+			staticFound = true
+			if command.Hidden {
+				t.Fatal("static command is hidden")
+			}
+		case "__static":
+			legacyFound = true
+		}
+	}
+	if !staticFound {
+		t.Fatal("static command is not registered")
+	}
+	if legacyFound {
+		t.Fatal("legacy __static alias is still registered")
+	}
+}
