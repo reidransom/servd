@@ -2,13 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/reidransom/servd/internal/mdns"
 	"net"
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/hostsfile"
-	"github.com/reidransom/servd/internal/launcher"
+	"github.com/reidransom/servd/internal/mdns"
 	"github.com/reidransom/servd/internal/netcheck"
 	"github.com/reidransom/servd/internal/tui"
 	"github.com/spf13/cobra"
@@ -24,24 +23,6 @@ func newTUICmd() *cobra.Command {
 	}
 }
 
-// newLaunchersCmd prints the effective launcher rules — the user's
-// launchers.toml entries followed by the surviving built-ins — in the same
-// TOML format, so any rule can be copied into launchers.toml and tweaked.
-func newLaunchersCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "launchers",
-		Short: "Print the effective launcher rules (launchers.toml + built-ins)",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			out, err := launcher.MarshalRules(launcher.EffectiveRules())
-			if err != nil {
-				return err
-			}
-			fmt.Print(string(out))
-			return nil
-		},
-	}
-}
-
 func newDoctorCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "doctor",
@@ -52,15 +33,6 @@ func newDoctorCmd() *cobra.Command {
 				return err
 			}
 			ok := true
-
-			fmt.Println("Launcher tools:")
-			for _, bin := range launcher.Tools(launcher.EffectiveRules()) {
-				if p, err := exec.LookPath(bin); err == nil {
-					fmt.Printf("  ✓ %-7s %s\n", bin, p)
-				} else {
-					fmt.Printf("  · %-7s (not installed)\n", bin)
-				}
-			}
 
 			fmt.Println("Proxy port:")
 			if netcheck.PortFree(settings.BindHost, settings.Hostnames.HTTPPort) {

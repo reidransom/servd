@@ -36,9 +36,6 @@ func newAddCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if dash := cmd.ArgsLenAtDash(); dash >= 0 {
-				if cmdline != "" {
-					return fmt.Errorf("use either --cmd or a trailing -- command, not both")
-				}
 				cmdline = launcher.ShellJoin(args[dash:])
 			}
 			settings, err := config.LoadSettings()
@@ -56,16 +53,19 @@ func newAddCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Added %s :%d\n  %s\n  %s\n  direct: http://127.0.0.1:%d/\n",
-				site.Slug, site.Port, site.Path, settings.SiteURL(site), site.Port)
-			return nil
+			res, err := launcher.Resolve(site, settings)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprintf(cmd.OutOrStdout(), "Added %s :%d\n  %s\n  %s\n  source: %s\n  command: %s\n  direct: http://127.0.0.1:%d/\n",
+				site.Slug, site.Port, site.Path, settings.SiteURL(site), res.Source, res.Cmd, site.Port)
+			return err
 		},
 	}
 	c.Flags().StringVar(&slug, "slug", "", "stable CLI slug (defaults to inferred project name)")
 	c.Flags().StringVar(&hostPrefix, "host-prefix", "", "hostname prefix for a linked worktree")
 	c.Flags().BoolVar(&noWorktreePrefix, "no-worktree-prefix", false, "do not derive a hostname prefix from a linked worktree")
 	c.Flags().IntVar(&port, "port", 0, "port (defaults to next free)")
-	c.Flags().StringVar(&cmdline, "cmd", "", "manual launch command (overrides detection; {port}/{host} allowed; or pass it after --)")
 	return c
 }
 
@@ -115,9 +115,8 @@ func newWhichCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("source: %s\n", res.Source)
-			fmt.Printf("command: %s\n", res.Cmd)
-			return nil
+			_, err = fmt.Fprintf(cmd.OutOrStdout(), "source: %s\ncommand: %s\n", res.Source, res.Cmd)
+			return err
 		},
 	}
 }

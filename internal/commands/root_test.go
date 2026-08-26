@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/reidransom/servd/internal/config"
+	"github.com/spf13/cobra"
 )
 
 func TestSelectSitesAllReturnsEveryRegisteredSite(t *testing.T) {
@@ -59,9 +60,9 @@ func TestSelectSitesExplicitSlugsAndErrors(t *testing.T) {
 	}
 }
 
-func TestStaticCommandIsPublicWithoutLegacyAlias(t *testing.T) {
+func TestRemovedAndStaticCommandSurface(t *testing.T) {
 	root := newRootCmd()
-	var staticFound, legacyFound bool
+	var staticFound, legacyFound, launchersFound bool
 	for _, command := range root.Commands() {
 		switch command.Name() {
 		case "static":
@@ -71,6 +72,8 @@ func TestStaticCommandIsPublicWithoutLegacyAlias(t *testing.T) {
 			}
 		case "__static":
 			legacyFound = true
+		case "launchers":
+			launchersFound = true
 		}
 	}
 	if !staticFound {
@@ -78,5 +81,30 @@ func TestStaticCommandIsPublicWithoutLegacyAlias(t *testing.T) {
 	}
 	if legacyFound {
 		t.Fatal("legacy __static alias is still registered")
+	}
+	if launchersFound {
+		t.Fatal("removed launchers command is still registered")
+	}
+}
+
+func TestBulkUpAndRestartReportEveryFailure(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	if err := config.MutateRegistry(func(registry *config.Registry) error {
+		registry.Sites = []config.Site{
+			{Slug: "first", Path: "/missing/first", Port: 4101, Cmd: "echo first"},
+			{Slug: "second", Path: "/missing/second", Port: 4102, Cmd: "echo second"},
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, command := range []*cobra.Command{newUpCmd(), newRestartCmd()} {
+		command.SetArgs([]string{"--all"})
+		err := command.Execute()
+		if err == nil || !strings.Contains(err.Error(), "2 site(s) failed") {
+			t.Fatalf("%s --all error = %v, want two failed sites", command.Name(), err)
+		}
 	}
 }
