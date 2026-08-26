@@ -1,7 +1,6 @@
 # servd
 
 [![CI](https://github.com/reidransom/servd/actions/workflows/ci.yml/badge.svg)](https://github.com/reidransom/servd/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/reidransom/servd)](https://goreportcard.com/report/github.com/reidransom/servd)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reidransom/servd.svg)](https://pkg.go.dev/github.com/reidransom/servd)
 ![Go Version](https://img.shields.io/github/go-mod/go-version/reidransom/servd)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -283,6 +282,10 @@ The reverse proxy passes through websocket upgrades, so live-reload / HMR works.
 ```sh
 go build ./... && go vet ./... && go test ./... -race
 ```
+
+The accepted design for the next breaking launcher simplification is documented
+in [Explicit launch commands](docs/explicit-launch-commands.md). It is not yet
+implemented; the behavior documented above remains current.
 
 ## Proxy and the Host header
 
