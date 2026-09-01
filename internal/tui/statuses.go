@@ -45,7 +45,7 @@ func statusGlyph(status supervisor.SiteStatus) string {
 	case supervisor.Starting:
 		return "◐"
 	case supervisor.Error:
-		return errStyle.Render("✕")
+		return "✕"
 	default:
 		return "○"
 	}

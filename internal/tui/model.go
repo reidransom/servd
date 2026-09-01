@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
@@ -104,8 +105,10 @@ var (
 	statusStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#bb9af7"))
 	errStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("203"))
 
-	boxStyle      = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240"))
-	boxFocusStyle = boxStyle.BorderForeground(lipgloss.Color("#7aa2f7"))
+	boxStyle                = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240"))
+	boxFocusStyle           = boxStyle.BorderForeground(lipgloss.Color("#7aa2f7"))
+	sidebarSelectedStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("#7aa2f7"))
+	sidebarSelectedErrStyle = sidebarSelectedStyle.Foreground(lipgloss.Color("203"))
 )
 
 // box returns the bordered-box style for a pane, highlighted when focused.
@@ -133,7 +136,7 @@ func newModel() (*model, error) {
 	s := table.DefaultStyles()
 	s.Header = s.Header.Bold(true).Foreground(lipgloss.Color("#7aa2f7")).BorderBottom(true).PaddingRight(0)
 	s.Cell = s.Cell.PaddingRight(0)
-	s.Selected = s.Selected.Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("#7aa2f7"))
+	s.Selected = sidebarSelectedStyle
 	t.SetStyles(s)
 
 	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, cmdErrors: map[string]error{}, viewport: viewport.New(80, 20), showHelp: true}
@@ -210,14 +213,33 @@ func (m *model) resize() {
 	m.viewport.Height = max(4, inner-1)
 }
 
-// sidebarTableView removes the table component's mandatory header row.
+// sidebarTableView removes the table component's mandatory header row and
+// colors error glyphs after the table has truncated its plain-text cells.
+// Bubbles' table uses an ANSI-unaware truncator, so styled cell values can
+// become malformed escape sequences in narrow columns.
 func (m *model) sidebarTableView() string {
 	view := m.table.View()
 	_, rows, ok := strings.Cut(view, "\n")
 	if !ok {
-		return view
+		rows = view
 	}
-	return rows
+	lines := strings.Split(rows, "\n")
+	for i, line := range lines {
+		plain := ansi.Strip(line)
+		glyph := strings.Index(plain, "✕")
+		if glyph < 0 {
+			continue
+		}
+		before, after := plain[:glyph], plain[glyph+len("✕"):]
+		if line == plain {
+			lines[i] = before + errStyle.Render("✕") + after
+			continue
+		}
+		lines[i] = sidebarSelectedStyle.Render(before) +
+			sidebarSelectedErrStyle.Render("✕") +
+			sidebarSelectedStyle.Render(after)
+	}
+	return strings.Join(lines, "\n")
 }
 
 // sidebarWidth is the rendered width of the site-list table (fixed columns +

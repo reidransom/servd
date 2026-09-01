@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
+	"github.com/muesli/termenv"
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
@@ -139,6 +140,44 @@ func TestSidebarUsesOneSpaceBetweenStatusAndSlug(t *testing.T) {
 	}
 	if strings.Contains(view, "○  widget") {
 		t.Errorf("sidebar row uses multiple spaces between status and slug:\n%s", view)
+	}
+}
+
+func TestSidebarRendersColoredErrorGlyph(t *testing.T) {
+	profile := lipgloss.ColorProfile()
+	lipgloss.SetColorProfile(termenv.TrueColor)
+	t.Cleanup(func() {
+		lipgloss.SetColorProfile(profile)
+	})
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	root := t.TempDir()
+	missing := filepath.Join(root, "missing")
+	broken := config.Site{Slug: "broken", Path: missing, Port: 4011, Cmd: "sleep 30"}
+	healthy := config.Site{Slug: "healthy", Path: root, Port: 4012, Cmd: "sleep 30"}
+	if err := (&config.Registry{Sites: []config.Site{broken, healthy}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	view := m.sidebarTableView()
+	if strings.Contains(view, "\x1b…") {
+		t.Errorf("sidebar contains a truncated ANSI escape: %q", view)
+	}
+	if stripped := ansi.Strip(view); !strings.Contains(stripped, "✕ broken") {
+		t.Errorf("sidebar error row = %q, want error glyph before slug", stripped)
+	}
+	if !strings.Contains(view, sidebarSelectedErrStyle.Render("✕")) {
+		t.Errorf("selected error glyph is not red: %q", view)
+	}
+
+	m.table.SetCursor(1)
+	view = m.sidebarTableView()
+	if !strings.Contains(view, errStyle.Render("✕")) {
+		t.Errorf("unselected error glyph is not red: %q", view)
 	}
 }
 
