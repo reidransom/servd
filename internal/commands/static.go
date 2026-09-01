@@ -116,7 +116,9 @@ func canonicalStaticRoot(dir string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("read static root %q: %w", dir, err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 	if _, err := file.Readdirnames(1); err != nil && !errors.Is(err, io.EOF) {
 		return "", fmt.Errorf("read static root %q: %w", dir, err)
 	}
@@ -159,7 +161,9 @@ func (server staticHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 		staticError(writer, http.StatusNotFound)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 	http.ServeContent(writer, request, info.Name(), info.ModTime(), file)
 }
 

@@ -152,7 +152,9 @@ func TestServerRoutesWebSocketUpgradesByHostname(t *testing.T) {
 				t.Errorf("%s backend hijack: %v", label, err)
 				return
 			}
-			defer connection.Close()
+			defer func() {
+				_ = connection.Close()
+			}()
 
 			acceptHash := sha1.Sum([]byte(r.Header.Get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
 			accept := base64.StdEncoding.EncodeToString(acceptHash[:])
