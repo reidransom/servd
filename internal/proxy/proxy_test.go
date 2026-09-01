@@ -1,6 +1,10 @@
 package proxy
 
 import (
+	"bufio"
+	"crypto/sha1"
+	"encoding/base64"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -128,6 +132,120 @@ func TestServerRoutesExactHostsAndKeepsForwardedHeaders(t *testing.T) {
 	server.ServeHTTP(rec, req)
 	if strings.Contains(rec.Body.String(), "127.0.0.1:"+strconv.Itoa(port)) {
 		t.Fatal("unconfigured alias reached the backend")
+	}
+}
+
+func TestServerRoutesWebSocketUpgradesByHostname(t *testing.T) {
+	newBackend := func(label string) (*httptest.Server, int) {
+		backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/livereload" {
+				http.NotFound(w, r)
+				return
+			}
+			if !strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+				http.Error(w, "missing websocket upgrade", http.StatusBadRequest)
+				return
+			}
+
+			connection, readWriter, err := http.NewResponseController(w).Hijack()
+			if err != nil {
+				t.Errorf("%s backend hijack: %v", label, err)
+				return
+			}
+			defer connection.Close()
+
+			acceptHash := sha1.Sum([]byte(r.Header.Get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
+			accept := base64.StdEncoding.EncodeToString(acceptHash[:])
+			if _, err := fmt.Fprintf(readWriter, "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n", accept); err != nil {
+				t.Errorf("%s backend response: %v", label, err)
+				return
+			}
+			if _, err := readWriter.Write([]byte{0x81, byte(len(label))}); err != nil {
+				t.Errorf("%s backend frame header: %v", label, err)
+				return
+			}
+			if _, err := readWriter.WriteString(label); err != nil {
+				t.Errorf("%s backend frame: %v", label, err)
+				return
+			}
+			if err := readWriter.Flush(); err != nil {
+				t.Errorf("%s backend flush: %v", label, err)
+			}
+		}))
+		backendURL, err := url.Parse(backend.URL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		port, err := strconv.Atoi(backendURL.Port())
+		if err != nil {
+			t.Fatal(err)
+		}
+		return backend, port
+	}
+
+	firstBackend, firstPort := newBackend("first")
+	defer firstBackend.Close()
+	secondBackend, secondPort := newBackend("second")
+	defer secondBackend.Close()
+
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	settings := proxySettings()
+	registry := &config.Registry{Sites: []config.Site{
+		{Slug: "first", Port: firstPort},
+		{Slug: "second", Port: secondPort},
+	}}
+	if err := registry.Save(); err != nil {
+		t.Fatal(err)
+	}
+	proxyServer := httptest.NewServer(New(settings))
+	defer proxyServer.Close()
+
+	const websocketKey = "dGhlIHNhbXBsZSBub25jZQ=="
+	for host, want := range map[string]string{
+		"first.localhost":  "first",
+		"second.localhost": "second",
+	} {
+		connection, err := net.DialTimeout("tcp", proxyServer.Listener.Addr().String(), time.Second)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := connection.SetDeadline(time.Now().Add(time.Second)); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := fmt.Fprintf(connection, "GET /livereload HTTP/1.1\r\nHost: %s\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n", host, websocketKey); err != nil {
+			t.Fatal(err)
+		}
+
+		reader := bufio.NewReader(connection)
+		request, err := http.NewRequest(http.MethodGet, "http://"+host+"/livereload", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response, err := http.ReadResponse(reader, request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if response.StatusCode != http.StatusSwitchingProtocols {
+			t.Fatalf("%s status = %s", host, response.Status)
+		}
+
+		frameHeader := make([]byte, 2)
+		if _, err := io.ReadFull(reader, frameHeader); err != nil {
+			t.Fatal(err)
+		}
+		if frameHeader[0] != 0x81 || int(frameHeader[1]) != len(want) {
+			t.Fatalf("%s frame header = %#v", host, frameHeader)
+		}
+		payload := make([]byte, len(want))
+		if _, err := io.ReadFull(reader, payload); err != nil {
+			t.Fatal(err)
+		}
+		if got := string(payload); got != want {
+			t.Fatalf("%s reached backend %q, want %q", host, got, want)
+		}
+		if err := connection.Close(); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
