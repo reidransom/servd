@@ -4,12 +4,10 @@ package commands
 
 import (
 	"fmt"
-	"os"
-	"os/user"
-	"strconv"
-
 	"github.com/reidransom/servd/internal/proxy"
 	"github.com/spf13/cobra"
+	"os"
+	"strconv"
 )
 
 func addProxyInternalCommands(root *cobra.Command) {
@@ -72,21 +70,17 @@ func validateBindIdentity(uid, gid uint32, groups []uint32) error {
 	if uid != sudoUID || gid != sudoGID {
 		return fmt.Errorf("requested worker identity does not match the sudo caller")
 	}
-	account, err := user.LookupId(strconv.FormatUint(uint64(uid), 10))
+	actual, err := os.Getgroups()
 	if err != nil {
-		return fmt.Errorf("lookup worker groups: %w", err)
+		return fmt.Errorf("read sudo caller groups: %w", err)
 	}
-	actual, err := account.GroupIds()
-	if err != nil {
-		return fmt.Errorf("lookup worker groups: %w", err)
-	}
+	return validateSupplementaryGroups(gid, groups, actual)
+}
+
+func validateSupplementaryGroups(gid uint32, groups []uint32, actual []int) error {
 	allowed := map[uint32]struct{}{gid: {}}
-	for _, value := range actual {
-		parsed, err := strconv.ParseUint(value, 10, 32)
-		if err != nil {
-			return fmt.Errorf("parse worker group %q: %w", value, err)
-		}
-		allowed[uint32(parsed)] = struct{}{}
+	for _, group := range actual {
+		allowed[uint32(group)] = struct{}{}
 	}
 	for _, group := range groups {
 		if _, ok := allowed[group]; !ok {

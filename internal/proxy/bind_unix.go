@@ -98,6 +98,7 @@ func startElevatedWorker(settings config.Settings) (workerProcess, error) {
 
 func sudoBindArgs(worker string, settings config.Settings, groups []int) []string {
 	args := []string{
+		"-P",
 		worker, "__proxy-bind",
 		"--worker", worker,
 		"--port", strconv.Itoa(settings.Hostnames.HTTPPort),

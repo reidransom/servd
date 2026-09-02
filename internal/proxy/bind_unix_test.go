@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/reidransom/servd/internal/config"
 )
 
 func TestConfirmPortlessMode(t *testing.T) {
@@ -36,4 +38,19 @@ func TestConfirmPortlessMode(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSudoBindArgsPreserveCallerGroups(t *testing.T) {
+	const worker = "/tmp/servd"
+	args := sudoBindArgs(worker, config.Settings{}, []int{992, 998})
+	for index, arg := range args {
+		if arg != worker {
+			continue
+		}
+		if index == 0 || args[index-1] != "-P" {
+			t.Fatalf("sudo args = %q, want -P immediately before worker", args)
+		}
+		return
+	}
+	t.Fatalf("sudo args = %q, missing worker", args)
 }
