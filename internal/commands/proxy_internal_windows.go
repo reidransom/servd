@@ -18,7 +18,7 @@ func addProxyInternalCommands(root *cobra.Command) {
 
 func newProxyWorkerCmd() *cobra.Command {
 	var port int
-	var lan bool
+	var enableMDNS bool
 	command := &cobra.Command{
 		Use:    "__proxy-worker",
 		Hidden: true,
@@ -29,8 +29,8 @@ func newProxyWorkerCmd() *cobra.Command {
 				return err
 			}
 			settings.Hostnames.HTTPPort = port
-			if lan {
-				settings.EnableLAN()
+			if enableMDNS {
+				settings.EnableMDNS()
 			}
 			if err := os.MkdirAll(config.LogDir(), 0o755); err != nil {
 				return err
@@ -45,7 +45,7 @@ func newProxyWorkerCmd() *cobra.Command {
 		},
 	}
 	command.Flags().IntVar(&port, "port", 0, "listener port")
-	command.Flags().BoolVar(&lan, "lan", false, "enable LAN mode")
+	command.Flags().BoolVar(&enableMDNS, "enable-mdns", false, "enable mDNS publishing")
 	_ = command.MarkFlagRequired("port")
 	return command
 }

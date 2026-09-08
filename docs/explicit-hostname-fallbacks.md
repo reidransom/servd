@@ -42,7 +42,7 @@ tlds = "100.101.102.103.nip.io"
 tlds_fallback = ["localhost"]
 http_port = 8080
 hosts_mode = "never"
-lan = false
+enable_mdns = false
 ```
 
 Replace the example address with the server's Tailscale IP. Primary links use the remote suffix; `acme.localhost` remains an explicitly requested local alias. This config does not configure DNS, Tailscale or a public listener. Those remain separate setup steps.
@@ -90,13 +90,13 @@ Update `servd open` help in [internal/commands/run.go](../internal/commands/run.
 
 Replace the nip.io-specific check in [internal/commands/misc.go](../internal/commands/misc.go) with generic diagnostics for explicitly configured fallback hostnames of registered sites. Do not probe a synthetic `test.<suffix>` name, which incorrectly assumes wildcard DNS. With no registered sites or no fallbacks, skip those lookups. Keep optional fallback-resolution failures advisory and do not require fallback addresses to be loopback. Preserve unrelated primary-resolution diagnostics in this change.
 
-## Hosts-file and LAN behavior
+## Hosts-file and mDNS behavior
 
 Hosts synchronization continues to own primary names only. Adapt [internal/commands/hosts.go](../internal/commands/hosts.go) to collect one primary hostname per site and [internal/hostsfile/hostsfile.go](../internal/hostsfile/hostsfile.go) to evaluate a scalar primary suffix. Preserve sorting, deduplication across registry entries, Safari handling, `hosts_mode` behavior and explicit hosts commands.
 
 Do not automatically write fallback names to `127.0.0.1`. A fallback may deliberately resolve to another address, as in the Tailscale example. Users supply DNS or hosts entries for fallbacks themselves.
 
-LAN mode continues to select the effective primary suffix `local`, without changing backend binding. Keep explicitly configured fallbacks routable, but do not invent additional aliases. In [internal/proxy/lan.go](../internal/proxy/lan.go), publish only the single primary `.local` name per site through mDNS. Do not attempt to publish arbitrary fallback suffixes through mDNS.
+`hostnames.enable_mdns` defaults to `false`. Enabling it, or passing `--enable-mdns`, selects the effective primary suffix `local`, without changing backend binding. Keep explicitly configured fallbacks routable, but do not invent additional aliases. In [internal/proxy/mdns.go](../internal/proxy/mdns.go), publish only the single primary `.local` name per site through mDNS. Do not attempt to publish arbitrary fallback suffixes through mDNS. The old `lan` config key and `--lan` flag have been replaced, not retained as aliases; preserve the boolean value when renaming the key.
 
 This makes migration from a multi-primary array observable: entries moved into `tlds_fallback` remain routes but are no longer owned by primary hosts-file synchronization. Explain that distinction and inspect stale managed entries during migration rather than silently preserving the old ownership model.
 

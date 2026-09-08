@@ -7,21 +7,8 @@ import (
 	"strings"
 	"syscall"
 	"testing"
-
-	"github.com/reidransom/servd/internal/config"
 )
 
-func TestWorkerArgsPassLANFlagAndPort(t *testing.T) {
-	settings := config.DefaultSettings()
-	settings.EnableLAN()
-	settings.Hostnames.HTTPPort = 80
-
-	got := workerArgs(settings.Hostnames.HTTPPort, settings.Hostnames.LAN)
-	want := []string{"__proxy-worker", "--port", "80", "--lan"}
-	if strings.Join(got, " ") != strings.Join(want, " ") {
-		t.Fatalf("worker args = %q, want %q", got, want)
-	}
-}
 func TestStartWithPortPolicy(t *testing.T) {
 	permissionDenied := &net.OpError{Err: os.ErrPermission}
 	occupied := &net.OpError{Err: syscall.EADDRINUSE}

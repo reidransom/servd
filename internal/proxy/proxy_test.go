@@ -106,28 +106,28 @@ func TestBuildRouteTableSupportsCustomTLDAndDetectsCollisions(t *testing.T) {
 	}
 }
 
-func TestBuildRouteTableUsesLocalHostnamesInLANMode(t *testing.T) {
+func TestBuildRouteTableUsesLocalHostnamesWithMDNS(t *testing.T) {
 	settings := proxySettings()
-	settings.Hostnames.LAN = true
+	settings.Hostnames.EnableMDNS = true
 	settings.Hostnames.TLDsFallback = []string{"127.0.0.1.nip.io", "dev.example.com", "local"}
 	routes, err := buildRouteTable(settings, []config.Site{{Slug: "acme", Port: 4001}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(routes) != 3 || routes["acme.local"] == nil {
-		t.Fatalf("LAN routes = %v, want primary and two fallbacks", routes)
+		t.Fatalf("mDNS routes = %v, want primary and two fallbacks", routes)
 	}
 	if routes["acme.localhost"] != nil {
-		t.Fatal("non-LAN hostname was routed in LAN mode")
+		t.Fatal("localhost hostname was routed with mDNS enabled")
 	}
 	for _, host := range []string{"acme.127.0.0.1.nip.io", "acme.dev.example.com"} {
 		if routes[host] != routes["acme.local"] {
-			t.Fatalf("LAN fallback %q does not share primary backend", host)
+			t.Fatalf("fallback %q does not share primary backend", host)
 		}
 	}
 }
 
-func TestLANPublishesOnlyPrimaryHostnames(t *testing.T) {
+func TestMDNSPublishesOnlyPrimaryHostnames(t *testing.T) {
 	var binary string
 	switch runtime.GOOS {
 	case "darwin":
@@ -145,7 +145,7 @@ func TestLANPublishesOnlyPrimaryHostnames(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	settings := proxySettings()
 	settings.Hostnames.TLD = "dev.example.com"
-	settings.Hostnames.LAN = true
+	settings.Hostnames.EnableMDNS = true
 	settings.Hostnames.LANIP = "192.168.1.23"
 	settings.Hostnames.TLDsFallback = []string{"localhost", "127.0.0.1.nip.io", "local"}
 	server := &Server{
@@ -157,10 +157,10 @@ func TestLANPublishesOnlyPrimaryHostnames(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	if err := server.startLAN(ctx); err != nil {
+	if err := server.startMDNS(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer server.stopLAN()
+	defer server.stopMDNS()
 	if got, want := server.publisher.Published(), []string{"acme.local", "auth.acme.local"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("published = %v, want %v", got, want)
 	}
@@ -417,7 +417,7 @@ func TestServeUsesProvidedListener(t *testing.T) {
 	}
 }
 
-func TestServeReloadsRegistryWithoutLAN(t *testing.T) {
+func TestServeReloadsRegistryWithoutMDNS(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("beta route"))
 	}))

@@ -132,9 +132,10 @@ Each site has one primary hostname. The default hostname settings are:
 [hostnames]
 tlds = "localhost"
 tlds_fallback = []
+enable_mdns = false
 ```
 
-Omitting either key uses its default. `tlds` must be a nonempty string;
+Omitting a key uses its default. `tlds` must be a nonempty string;
 `tlds_fallback` must be a list of nonempty strings. Multi-label suffixes are
 valid, but uppercase letters, surrounding whitespace and invalid DNS labels
 are rejected rather than repaired. Each complete site hostname, including its
@@ -163,10 +164,13 @@ They never map fallback names to loopback. `hosts_mode` remains `auto`,
 `always` or `never`; `never` disables automatic sync, not explicit hosts
 commands. Safari may need primary `.localhost` hosts entries in `auto` mode.
 
-LAN mode selects `.local` as the effective primary and publishes only that
-name through mDNS. Explicit fallbacks remain routable, but LAN mode adds no
-other aliases and does not change backend binding. The declared primary
-suffix remains saved for use outside LAN mode.
+`enable_mdns` defaults to `false`. Set it to `true`, or pass
+`servd proxy --enable-mdns`, to select `.local` as the effective primary and
+publish that name through mDNS. Explicit fallbacks remain routable, but mDNS
+publishing adds no other aliases and does not change backend binding or grant
+network access. The declared primary suffix remains saved for use when mDNS
+is disabled. `lan_ip` remains the optional LAN address advertised through mDNS;
+otherwise servd detects that address.
 
 For remote access, a primary such as `tlds = "100.101.102.103.nip.io"`
 with `tlds_fallback = ["localhost"]` makes remote links primary while keeping
@@ -188,6 +192,7 @@ rewrites the file or silently enables a previously disabled alternative.
 | `nip_io = true` with the default suffix | Delete the key; add `"127.0.0.1.nip.io"` to `tlds_fallback` only if wanted |
 | `nip_io_suffix = "100.101.102.103.nip.io"` | Delete the key; explicitly choose that suffix as primary or fallback |
 | No config file | Keep the default `.localhost` primary; the implicit nip.io route disappears |
+| `lan = true` or `lan = false` | Rename to `enable_mdns`, keeping the boolean value; `false` may be omitted |
 
 An empty primary array remains invalid. For longer arrays, choose the first
 entry as the scalar primary and retain remaining entries as fallbacks only
@@ -196,6 +201,9 @@ longer owned by servd's managed hosts block. Inspect stale entries with
 `servd hosts status` before running `servd hosts sync`, which replaces the
 managed block with current primary names. Preserve any needed fallback
 entries separately with their intended addresses.
+
+Rename the `--lan` CLI flag to `--enable-mdns`. The old flag and config key
+are rejected rather than retained as aliases.
 
 Legacy `proxy_port` and `hostnames.sync_hosts` migration still works.
 An explicit legacy `domain_suffix` becomes the scalar primary only when

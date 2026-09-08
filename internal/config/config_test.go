@@ -62,15 +62,15 @@ func TestDefaultHostnameRoutes(t *testing.T) {
 	}
 }
 
-func TestLANForcesLocalHostnames(t *testing.T) {
+func TestEnableMDNSForcesLocalHostnames(t *testing.T) {
 	settings := DefaultSettings()
 	settings.Hostnames.TLD = "dev.example.com"
-	settings.EnableLAN()
+	settings.EnableMDNS()
 	if got := settings.SiteURL(Site{Slug: "acme"}); got != "http://acme.local:8080/" {
-		t.Fatalf("LAN SiteURL = %q", got)
+		t.Fatalf("mDNS SiteURL = %q", got)
 	}
 
-	writeConfig(t, "[hostnames]\nlan = true\ntlds = \"dev.example.com\"\ntlds_fallback = [\"local\", \"dev.example.com\", \"test\"]\n")
+	writeConfig(t, "[hostnames]\nenable_mdns = true\ntlds = \"dev.example.com\"\ntlds_fallback = [\"local\", \"dev.example.com\", \"test\"]\n")
 	loaded, err := LoadSettings()
 	if err != nil {
 		t.Fatal(err)
@@ -81,13 +81,13 @@ func TestLANForcesLocalHostnames(t *testing.T) {
 	}
 	want := []string{"acme.local", "acme.dev.example.com", "acme.test"}
 	if !reflect.DeepEqual(hosts, want) {
-		t.Fatalf("LAN routes = %v, want %v", hosts, want)
+		t.Fatalf("mDNS routes = %v, want %v", hosts, want)
 	}
 	if got := loaded.PrimaryURLPattern(); got != "http://<slug>.local:8080/" {
-		t.Fatalf("LAN primary pattern = %q", got)
+		t.Fatalf("mDNS primary pattern = %q", got)
 	}
 	if got := loaded.FallbackURLPatterns(); !reflect.DeepEqual(got, []string{"http://<slug>.dev.example.com:8080/", "http://<slug>.test:8080/"}) {
-		t.Fatalf("LAN fallback patterns = %v", got)
+		t.Fatalf("mDNS fallback patterns = %v", got)
 	}
 	if err := SaveSettings(loaded); err != nil {
 		t.Fatal(err)
@@ -96,9 +96,12 @@ func TestLANForcesLocalHostnames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	reloaded.Hostnames.LAN = false
+	if got := reloaded.SiteURL(Site{Slug: "acme"}); got != "http://acme.local:8080/" {
+		t.Fatalf("saved mDNS setting was not restored: %q", got)
+	}
+	reloaded.Hostnames.EnableMDNS = false
 	if got := reloaded.SiteURL(Site{Slug: "acme"}); got != "http://acme.dev.example.com:8080/" {
-		t.Fatalf("saved LAN settings lost declared primary: %q", got)
+		t.Fatalf("saved mDNS settings lost declared primary: %q", got)
 	}
 }
 
@@ -303,9 +306,9 @@ func TestSettingsValidation(t *testing.T) {
 		{"empty primary", func(s *Settings) { s.Hostnames.TLD = "" }},
 		{"invalid primary", func(s *Settings) { s.Hostnames.TLD = "Bad" }},
 		{"invalid fallback", func(s *Settings) { s.Hostnames.TLDsFallback = []string{"test", "bad..suffix"} }},
-		{"invalid LAN primary", func(s *Settings) {
+		{"invalid mDNS primary", func(s *Settings) {
 			s.Hostnames.TLD = "Bad"
-			s.EnableLAN()
+			s.EnableMDNS()
 		}},
 		{"invalid port", func(s *Settings) { s.Hostnames.HTTPPort = 65536 }},
 		{"invalid hosts mode", func(s *Settings) { s.Hostnames.HostsMode = "sometimes" }},
@@ -332,7 +335,8 @@ func TestLoadSettingsRejectsInvalidHostnameSchema(t *testing.T) {
 		`tlds_fallback = [""]`,
 		`tlds_fallback = ["test", " bad"]`,
 		`tlds = " localhost"`,
-		"tlds = \"Bad\"\nlan = true",
+		"tlds = \"Bad\"\nenable_mdns = true",
+		`enable_mdns = "true"`,
 	} {
 		t.Run(content, func(t *testing.T) {
 			writeConfig(t, "[hostnames]\n"+content+"\n")
@@ -366,6 +370,34 @@ func TestLoadSettingsRejectsRemovedKeysBeforeSchemaMigration(t *testing.T) {
 			}
 			if !source.ConfigPresent {
 				t.Fatal("removed-key config was treated as absent")
+			}
+			data, err := os.ReadFile(settingsPath())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(data) != content {
+				t.Fatal("loader rewrote rejected config")
+			}
+		})
+	}
+}
+
+func TestLoadSettingsRejectsRenamedLANKey(t *testing.T) {
+	for _, settings := range []string{
+		"lan = true",
+		"lan = false",
+		"lan = true\nenable_mdns = false",
+		"lan = false\nenable_mdns = true",
+	} {
+		t.Run(settings, func(t *testing.T) {
+			content := "[hostnames]\n" + settings + "\n"
+			writeConfig(t, content)
+			_, source, err := LoadSettingsWithSource()
+			if err == nil || !strings.Contains(err.Error(), "hostnames.enable_mdns") {
+				t.Fatalf("expected mDNS rename guidance, got %v", err)
+			}
+			if !source.ConfigPresent {
+				t.Fatal("renamed-key config was treated as absent")
 			}
 			data, err := os.ReadFile(settingsPath())
 			if err != nil {

@@ -65,7 +65,7 @@ func newDoctorCmd() *cobra.Command {
 						fmt.Printf("  ✓ %s -> %v\n", hostname, result.Addresses)
 						continue
 					}
-					if settings.Hostnames.LAN || hostsfile.NeedsHostsFile(settings.Hostnames.TLD, "") {
+					if settings.Hostnames.EnableMDNS || hostsfile.NeedsHostsFile(settings.Hostnames.TLD, "") {
 						ok = false
 						fmt.Printf("  ✗ %s does not resolve to loopback; %s\n", hostname, hostsSyncInstruction())
 					} else {
@@ -74,7 +74,7 @@ func newDoctorCmd() *cobra.Command {
 				}
 			}
 
-			if !settings.Hostnames.LAN && hostsfile.NeedsHostsFile(settings.Hostnames.TLD, "") {
+			if !settings.Hostnames.EnableMDNS && hostsfile.NeedsHostsFile(settings.Hostnames.TLD, "") {
 				fmt.Println("Hosts-file sync:")
 				desired, err := primaryHostnames(settings, reg)
 				if err != nil {
@@ -94,8 +94,8 @@ func newDoctorCmd() *cobra.Command {
 				}
 			}
 
-			if settings.Hostnames.LAN {
-				fmt.Println("LAN mDNS publishing:")
+			if settings.Hostnames.EnableMDNS {
+				fmt.Println("mDNS publishing:")
 				if supported, hint := mdns.Supported(); supported {
 					fmt.Println("  ✓ platform publisher is available")
 				} else {

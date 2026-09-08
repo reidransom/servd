@@ -28,13 +28,13 @@ func startUserWorker(settings config.Settings, listener net.Listener) (workerPro
 	if err != nil {
 		return workerProcess{}, err
 	}
-	return spawnWorker(workerStartRequest{Worker: worker, Port: settings.Hostnames.HTTPPort, LAN: settings.Hostnames.LAN, Listener: listenerFile})
+	return spawnWorker(workerStartRequest{Worker: worker, Port: settings.Hostnames.HTTPPort, EnableMDNS: settings.Hostnames.EnableMDNS, Listener: listenerFile})
 }
 
 type workerStartRequest struct {
 	Worker     string
 	Port       int
-	LAN        bool
+	EnableMDNS bool
 	Listener   *os.File
 	Home       string
 	ConfigHome string
@@ -50,7 +50,7 @@ func spawnWorker(request workerStartRequest) (workerProcess, error) {
 	defer func() { _ = readyRead.Close() }()
 	defer func() { _ = readyWrite.Close() }()
 
-	cmd := exec.Command(request.Worker, workerArgs(request.Port, request.LAN)...)
+	cmd := exec.Command(request.Worker, workerArgs(request.Port, request.EnableMDNS)...)
 	cmd.ExtraFiles = []*os.File{request.Listener, readyWrite}
 	cmd.Stdin = nil
 	cmd.Env = workerEnvironment(request)

@@ -1,4 +1,4 @@
-// Package mdns publishes servd LAN hostnames for the lifetime of the proxy.
+// Package mdns publishes servd mDNS hostnames for the lifetime of the proxy.
 package mdns
 
 import (
@@ -45,7 +45,7 @@ func (p *Publisher) Supported() (bool, string) {
 		return false, hint
 	}
 	if _, err := p.lookPath(binary); err != nil {
-		return false, fmt.Sprintf("%s is required for LAN mode; %s", binary, hint)
+		return false, fmt.Sprintf("%s is required for mDNS publishing; %s", binary, hint)
 	}
 	return true, ""
 }
@@ -62,7 +62,7 @@ func (p *Publisher) Publish(ctx context.Context, hostname string, port int, ip s
 	}
 	if _, err := p.lookPath(binary); err != nil {
 		_, hint := publisherBinary()
-		return fmt.Errorf("%s is required for LAN mode; %s", binary, hint)
+		return fmt.Errorf("%s is required for mDNS publishing; %s", binary, hint)
 	}
 
 	p.mu.Lock()
@@ -183,7 +183,7 @@ func publisherBinary() (string, string) {
 	case "linux":
 		return "avahi-publish-address", "install avahi-utils"
 	default:
-		return "", "LAN mode is supported on macOS and Linux"
+		return "", "mDNS publishing is supported on macOS and Linux"
 	}
 }
 

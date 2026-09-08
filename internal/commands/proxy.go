@@ -11,7 +11,7 @@ import (
 )
 
 func newProxyCmd() *cobra.Command {
-	var lan bool
+	var enableMDNS bool
 	c := &cobra.Command{
 		Use:   "proxy",
 		Short: "Run the native hostname router (foreground)",
@@ -20,7 +20,7 @@ func newProxyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			settings, err = withLAN(settings, lan)
+			settings, err = withMDNS(settings, enableMDNS)
 			if err != nil {
 				return err
 			}
@@ -35,12 +35,12 @@ func newProxyCmd() *cobra.Command {
 			return proxy.New(settings).ListenAndServe()
 		},
 	}
-	c.PersistentFlags().BoolVar(&lan, "lan", false, "publish .local hostnames on the LAN with mDNS")
-	c.AddCommand(newProxyUpCmd(&lan), newProxyDownCmd(), newProxyStatusCmd(&lan))
+	c.PersistentFlags().BoolVar(&enableMDNS, "enable-mdns", false, "publish .local hostnames on the LAN with mDNS")
+	c.AddCommand(newProxyUpCmd(&enableMDNS), newProxyDownCmd(), newProxyStatusCmd(&enableMDNS))
 	return c
 }
 
-func newProxyUpCmd(lan *bool) *cobra.Command {
+func newProxyUpCmd(enableMDNS *bool) *cobra.Command {
 	return &cobra.Command{
 		Use:   "up",
 		Short: "Start the reverse proxy in the background",
@@ -49,7 +49,7 @@ func newProxyUpCmd(lan *bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			settings, err = withLAN(settings, *lan)
+			settings, err = withMDNS(settings, *enableMDNS)
 			if err != nil {
 				return err
 			}
@@ -96,7 +96,7 @@ func newProxyDownCmd() *cobra.Command {
 	}
 }
 
-func newProxyStatusCmd(lan *bool) *cobra.Command {
+func newProxyStatusCmd(enableMDNS *bool) *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
 		Short: "Show whether the reverse proxy is running",
@@ -105,7 +105,7 @@ func newProxyStatusCmd(lan *bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			settings, err = withLAN(settings, *lan)
+			settings, err = withMDNS(settings, *enableMDNS)
 			if err != nil {
 				return err
 			}
@@ -119,15 +119,15 @@ func newProxyStatusCmd(lan *bool) *cobra.Command {
 			default:
 				fmt.Println("stopped")
 			}
-			if settings.Hostnames.LAN {
+			if settings.Hostnames.EnableMDNS {
 				if supported, hint := mdns.Supported(); supported {
 					published := 0
 					if entry, exists := st.Get(proxy.Slug); exists {
 						published = len(entry.PublishedMDNS)
 					}
-					fmt.Printf("LAN mDNS: supported, %d hostname(s) published\n", published)
+					fmt.Printf("mDNS: supported, %d hostname(s) published\n", published)
 				} else {
-					fmt.Printf("LAN mDNS: unavailable — %s\n", hint)
+					fmt.Printf("mDNS: unavailable: %s\n", hint)
 				}
 			}
 			return nil
@@ -135,19 +135,19 @@ func newProxyStatusCmd(lan *bool) *cobra.Command {
 	}
 }
 
-func withLAN(settings config.Settings, enabled bool) (config.Settings, error) {
+func withMDNS(settings config.Settings, enabled bool) (config.Settings, error) {
 	if enabled {
-		settings.EnableLAN()
+		settings.EnableMDNS()
 	}
 	return settings, nil
 }
 
 func requireMDNSSupport(settings config.Settings) error {
-	if !settings.Hostnames.LAN {
+	if !settings.Hostnames.EnableMDNS {
 		return nil
 	}
 	if supported, hint := mdns.Supported(); !supported {
-		return fmt.Errorf("LAN mode is unavailable: %s", hint)
+		return fmt.Errorf("mDNS publishing is unavailable: %s", hint)
 	}
 	return nil
 }

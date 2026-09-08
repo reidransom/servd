@@ -52,7 +52,7 @@ type HostnameSettings struct {
 	HTTPS        bool      `toml:"https"`
 	HTTPPort     int       `toml:"http_port"`
 	HostsMode    HostsMode `toml:"hosts_mode"`
-	LAN          bool      `toml:"lan"`
+	EnableMDNS   bool      `toml:"enable_mdns"`
 	LANIP        string    `toml:"lan_ip"`
 }
 
@@ -90,9 +90,9 @@ func DefaultSettings() Settings {
 	}
 }
 
-// EnableLAN selects the .local hostname family required for mDNS publishing.
-func (s *Settings) EnableLAN() {
-	s.Hostnames.LAN = true
+// EnableMDNS selects the .local hostname family required for mDNS publishing.
+func (s *Settings) EnableMDNS() {
+	s.Hostnames.EnableMDNS = true
 }
 
 // ConfigDir is ~/.config/servd (honoring XDG_CONFIG_HOME).
@@ -131,7 +131,7 @@ func (s Settings) HostnameBase(site Site) (string, error) {
 }
 
 func (s Settings) primaryTLD() string {
-	if s.Hostnames.LAN {
+	if s.Hostnames.EnableMDNS {
 		return "local"
 	}
 	return s.Hostnames.TLD
@@ -252,7 +252,7 @@ type rawHostnameSettings struct {
 	HTTPPort     *int       `toml:"http_port"`
 	HostsMode    *HostsMode `toml:"hosts_mode"`
 	SyncHosts    *bool      `toml:"sync_hosts"`
-	LAN          *bool      `toml:"lan"`
+	EnableMDNS   *bool      `toml:"enable_mdns"`
 	LANIP        *string    `toml:"lan_ip"`
 }
 
@@ -289,6 +289,9 @@ func LoadSettingsWithSource() (Settings, SettingsSource, error) {
 		if _, present := keys.Hostnames[key]; present {
 			return s, source, fmt.Errorf("hostnames.%s has been removed: delete the key and explicitly choose any wanted suffix with hostnames.tlds (a string) or hostnames.tlds_fallback (a list of strings)", key)
 		}
+	}
+	if _, present := keys.Hostnames["lan"]; present {
+		return s, source, errors.New("hostnames.lan has been renamed to hostnames.enable_mdns: replace lan with enable_mdns and keep its boolean value")
 	}
 	if value, present := keys.Hostnames["tlds"]; present {
 		if _, ok := value.(string); !ok {
@@ -328,8 +331,8 @@ func LoadSettingsWithSource() (Settings, SettingsSource, error) {
 				s.Hostnames.HostsMode = HostsNever
 			}
 		}
-		if h.LAN != nil {
-			s.Hostnames.LAN = *h.LAN
+		if h.EnableMDNS != nil {
+			s.Hostnames.EnableMDNS = *h.EnableMDNS
 		}
 		if h.LANIP != nil {
 			s.Hostnames.LANIP = *h.LANIP

@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-func workerArgs(port int, lan bool) []string {
+func workerArgs(port int, enableMDNS bool) []string {
 	args := []string{"__proxy-worker", "--port", strconv.Itoa(port)}
-	if lan {
-		args = append(args, "--lan")
+	if enableMDNS {
+		args = append(args, "--enable-mdns")
 	}
 	return args
 }

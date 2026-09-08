@@ -18,7 +18,7 @@ func newProxyBindCmd() *cobra.Command {
 	var worker, groups, home, configHome, stateHome, bindHost string
 	var port int
 	var uid, gid uint32
-	var lan bool
+	var enableMDNS bool
 	command := &cobra.Command{
 		Use:    "__proxy-bind",
 		Hidden: true,
@@ -32,7 +32,7 @@ func newProxyBindCmd() *cobra.Command {
 				return err
 			}
 			pid, err := proxy.RunPrivilegedBind(proxy.BindRequest{
-				BindHost: bindHost, Worker: worker, Port: port, LAN: lan, UID: uid, GID: gid, Groups: parsedGroups,
+				BindHost: bindHost, Worker: worker, Port: port, EnableMDNS: enableMDNS, UID: uid, GID: gid, Groups: parsedGroups,
 				Home: home, ConfigHome: configHome, StateHome: stateHome,
 			})
 			if err != nil {
@@ -51,7 +51,7 @@ func newProxyBindCmd() *cobra.Command {
 	command.Flags().StringVar(&bindHost, "bind-host", "", "listener bind host")
 	command.Flags().StringVar(&configHome, "config-home", "", "worker XDG config directory")
 	command.Flags().StringVar(&stateHome, "state-home", "", "worker XDG state directory")
-	command.Flags().BoolVar(&lan, "lan", false, "enable LAN mode")
+	command.Flags().BoolVar(&enableMDNS, "enable-mdns", false, "enable mDNS publishing")
 	_ = command.MarkFlagRequired("worker")
 	_ = command.MarkFlagRequired("bind-host")
 	_ = command.MarkFlagRequired("port")

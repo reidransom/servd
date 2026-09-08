@@ -36,7 +36,7 @@ func startUserWorker(settings config.Settings, listener net.Listener) (workerPro
 	if err != nil {
 		return workerProcess{}, err
 	}
-	command := exec.Command(worker, workerArgs(settings.Hostnames.HTTPPort, settings.Hostnames.LAN)...)
+	command := exec.Command(worker, workerArgs(settings.Hostnames.HTTPPort, settings.Hostnames.EnableMDNS)...)
 	command.Stdin = nil
 	if err := command.Start(); err != nil {
 		return workerProcess{}, err

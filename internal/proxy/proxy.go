@@ -47,7 +47,7 @@ type Server struct {
 	regMtime     time.Time
 	lastErrMtime time.Time // mtime of the last sites.toml version we logged a reload error for
 	publisher    *mdns.Publisher
-	lanContext   context.Context
+	mdnsContext  context.Context
 	lanIP        string
 }
 
@@ -78,10 +78,10 @@ func (s *Server) serve(listener net.Listener, ready func()) error {
 	defer stop()
 
 	go s.watchRegistry(ctx)
-	if err := s.startLAN(ctx); err != nil {
+	if err := s.startMDNS(ctx); err != nil {
 		return err
 	}
-	defer s.stopLAN()
+	defer s.stopMDNS()
 
 	srv := &http.Server{Handler: s}
 	go func() {

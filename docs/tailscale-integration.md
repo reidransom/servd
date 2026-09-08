@@ -25,7 +25,7 @@ Browser: http://acme.servd.test:8080/
 - `hostnames.tlds` is one primary suffix string, and `hostnames.tlds_fallback` is an optional list of explicit aliases. Both accept multi-label suffixes. Only the primary controls landing-page links, CLI output and `servd open`. Incoming request hosts are case-folded, with an optional port and trailing root dot removed; configuration suffixes are validated without case folding or whitespace repair. There is no arbitrary-subdomain fallback. A request for the machine's MagicDNS name or an unconfigured `acme.machine.tailnet.ts.net` gets the site index, not the `acme` backend. [Settings][config], [routing and landing page][proxy], [open command](../internal/commands/run.go)
 - Generated URLs always use HTTP and `hostnames.http_port`. The settings default is `8080`; without a config file, startup prefers port `80` and can fall back to `8080`. Use the actual active port, not an assumed default. Setting `hostnames.https = true` currently fails validation. [Settings][config], [app loading](../internal/app/app.go), [proxy startup](../internal/proxy/control.go)
 - After selecting a site, servd rewrites backend Host to the backend address by default and supplies `X-Forwarded-Host`, `X-Forwarded-Proto` and `X-Forwarded-For`. A site's `preserve_host = true` keeps the original Host but requires the backend to allow that hostname. The Go reverse proxy supports HTTP/1.1 WebSocket upgrades. [Proxy][proxy]
-- `--lan` selects `.local` as the effective primary and publishes only that name through mDNS. Explicit fallbacks remain routes. It does not change `bind_host`. LAN discovery is not tailnet DNS, and Tailscale's mDNS support request remains open. Do not enable LAN mode for this setup. [EnableLAN][config], [publisher](../internal/proxy/lan.go), [Tailscale mDNS issue][mdns]
+- `hostnames.enable_mdns = true` or `--enable-mdns` selects `.local` as the effective primary and publishes only that name through mDNS. Explicit fallbacks remain routes. It does not change `bind_host`. LAN discovery is not tailnet DNS, and Tailscale's mDNS support request remains open. Leave `enable_mdns` false or omitted for this setup. [EnableMDNS][config], [publisher](../internal/proxy/mdns.go), [Tailscale mDNS issue][mdns]
 
 ## Usable setup
 
@@ -44,7 +44,7 @@ tlds_fallback = ["localhost"]
 http_port = 8080
 https = false
 hosts_mode = "never"
-lan = false
+enable_mdns = false
 ```
 
 `servd.test` is a private example namespace. `.test` is reserved for testing; it needs your explicit hosts entries or private DNS. `localhost` remains an explicitly requested local-only alias, not a second primary. Fallbacks are not redirects or automatic URL failover. [RFC 6761, sections 6.2 and 6.3][special-names]

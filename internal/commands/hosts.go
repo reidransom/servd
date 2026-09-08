@@ -30,8 +30,8 @@ func newHostsStatusCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if settings.Hostnames.LAN {
-				fmt.Println("LAN mode does not use the system hosts file.")
+			if settings.Hostnames.EnableMDNS {
+				fmt.Println("mDNS publishing does not use the system hosts file.")
 				return nil
 			}
 			desired, err := primaryHostnames(settings, registry)
@@ -84,8 +84,8 @@ func newHostsCleanCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if settings.Hostnames.LAN {
-				return errors.New("cannot clean hosts entries while LAN mode is enabled")
+			if settings.Hostnames.EnableMDNS {
+				return errors.New("cannot clean hosts entries while mDNS publishing is enabled")
 			}
 			if err := hostsfile.Clean(); err != nil {
 				return hostsWriteError(err)
@@ -131,8 +131,8 @@ func sameHostnames(left, right []string) bool {
 }
 
 func syncHosts(settings config.Settings, registry *config.Registry) error {
-	if settings.Hostnames.LAN {
-		return errors.New("LAN mode publishes .local hostnames through mDNS; it does not write the system hosts file")
+	if settings.Hostnames.EnableMDNS {
+		return errors.New("mDNS publishes .local hostnames; it does not write the system hosts file")
 	}
 	hostnames, err := primaryHostnames(settings, registry)
 	if err != nil {
@@ -145,7 +145,7 @@ func syncHosts(settings config.Settings, registry *config.Registry) error {
 }
 
 func syncHostsForProxy(settings config.Settings, registry *config.Registry) error {
-	if settings.Hostnames.LAN {
+	if settings.Hostnames.EnableMDNS {
 		return nil
 	}
 	customTLD := hostsfile.NeedsHostsFile(settings.Hostnames.TLD, "")

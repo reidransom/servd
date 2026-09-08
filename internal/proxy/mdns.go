@@ -12,12 +12,12 @@ import (
 	"github.com/reidransom/servd/internal/state"
 )
 
-func (s *Server) startLAN(ctx context.Context) error {
-	if !s.settings.Hostnames.LAN {
+func (s *Server) startMDNS(ctx context.Context) error {
+	if !s.settings.Hostnames.EnableMDNS {
 		return nil
 	}
 	if supported, hint := mdns.Supported(); !supported {
-		return fmt.Errorf("LAN mode is unavailable: %s", hint)
+		return fmt.Errorf("mDNS publishing is unavailable: %s", hint)
 	}
 	ip := s.settings.Hostnames.LANIP
 	if ip == "" {
@@ -30,7 +30,7 @@ func (s *Server) startLAN(ctx context.Context) error {
 	publisher := mdns.NewPublisher()
 	s.mu.Lock()
 	s.publisher = publisher
-	s.lanContext = ctx
+	s.mdnsContext = ctx
 	s.lanIP = ip
 	sites := append([]config.Site(nil), s.sites...)
 	s.mu.Unlock()
@@ -44,11 +44,11 @@ func (s *Server) startLAN(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) stopLAN() {
+func (s *Server) stopMDNS() {
 	s.mu.Lock()
 	publisher := s.publisher
 	s.publisher = nil
-	s.lanContext = nil
+	s.mdnsContext = nil
 	s.mu.Unlock()
 	s.recordPublishedMDNS(nil)
 	if publisher != nil {
@@ -90,7 +90,7 @@ func (s *Server) replaceLANIP(next, _ string) {
 
 func (s *Server) reconcileMDNS(sites []config.Site) error {
 	s.mu.RLock()
-	publisher, ctx, ip := s.publisher, s.lanContext, s.lanIP
+	publisher, ctx, ip := s.publisher, s.mdnsContext, s.lanIP
 	s.mu.RUnlock()
 	if publisher == nil || ctx == nil {
 		return nil

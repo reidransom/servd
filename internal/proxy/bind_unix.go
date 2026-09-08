@@ -31,7 +31,7 @@ type BindRequest struct {
 	BindHost   string
 	Worker     string
 	Port       int
-	LAN        bool
+	EnableMDNS bool
 	UID        uint32
 	GID        uint32
 	Groups     []uint32
@@ -58,7 +58,7 @@ func RunPrivilegedBind(request BindRequest) (int, error) {
 	process, err := spawnWorker(workerStartRequest{
 		Worker:     request.Worker,
 		Port:       request.Port,
-		LAN:        request.LAN,
+		EnableMDNS: request.EnableMDNS,
 		Listener:   listenerFile,
 		Home:       request.Home,
 		ConfigHome: request.ConfigHome,
@@ -110,8 +110,8 @@ func sudoBindArgs(worker string, settings config.Settings, groups []int) []strin
 		"--config-home", os.Getenv("XDG_CONFIG_HOME"),
 		"--state-home", os.Getenv("XDG_STATE_HOME"),
 	}
-	if settings.Hostnames.LAN {
-		args = append(args, "--lan")
+	if settings.Hostnames.EnableMDNS {
+		args = append(args, "--enable-mdns")
 	}
 	if !interactiveTerminal() {
 		args = append([]string{"-n"}, args...)
