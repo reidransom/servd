@@ -21,7 +21,7 @@ type siteInfo struct {
 	Path          string     `json:"path"`
 	Port          int        `json:"port"`
 	URL           string     `json:"url"` // via the reverse proxy (needs proxy.accepting)
-	FallbackURL   string     `json:"fallback_url,omitempty"`
+	FallbackURLs  []string   `json:"fallback_urls,omitempty"`
 	DirectURL     string     `json:"direct_url"` // straight to the dev server's port
 	Status        string     `json:"status"`     // stopped | starting | running | error
 	Error         string     `json:"error,omitempty"`
@@ -35,14 +35,14 @@ type siteInfo struct {
 // proxyInfo describes the background reverse proxy in --json output. running
 // is "pid alive"; accepting is the stronger "port answers connections".
 type proxyInfo struct {
-	Running            bool     `json:"running"`
-	Accepting          bool     `json:"accepting"`
-	PID                int      `json:"pid,omitempty"`
-	Port               int      `json:"port"`
-	PrimaryURLPattern  string   `json:"primary_url_pattern"`
-	FallbackURLPattern string   `json:"fallback_url_pattern,omitempty"`
-	TLDs               []string `json:"tlds"`
-	NipIO              bool     `json:"nip_io"`
+	Running             bool     `json:"running"`
+	Accepting           bool     `json:"accepting"`
+	PID                 int      `json:"pid,omitempty"`
+	Port                int      `json:"port"`
+	PrimaryURLPattern   string   `json:"primary_url_pattern"`
+	FallbackURLPatterns []string `json:"fallback_url_patterns,omitempty"`
+	TLD                 string   `json:"tlds"`
+	TLDsFallback        []string `json:"tlds_fallback"`
 }
 
 func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteInfo {
@@ -60,9 +60,7 @@ func newSiteInfo(settings config.Settings, s config.Site, st *state.State) siteI
 	if health.Kind == supervisor.Error {
 		info.Error = health.Reason
 	}
-	if fallback, ok := settings.FallbackURL(s); ok {
-		info.FallbackURL = fallback
-	}
+	info.FallbackURLs = settings.FallbackURLs(s)
 	if e, ok := st.Get(s.Slug); ok && state.EntryAlive(e) {
 		info.PID = e.PID
 		info.Cmd = e.Cmd
@@ -77,16 +75,14 @@ func newProxyInfo(settings config.Settings, st *state.State) proxyInfo {
 	settings = proxy.EffectiveSettings(settings, st)
 	running, pid := proxy.Running(st)
 	info := proxyInfo{
-		Running:           running,
-		Accepting:         proxy.Accepting(settings),
-		PID:               pid,
-		Port:              settings.Hostnames.HTTPPort,
-		PrimaryURLPattern: settings.PrimaryURLPattern(),
-		TLDs:              append([]string(nil), settings.Hostnames.TLDs...),
-		NipIO:             settings.Hostnames.NipIO,
-	}
-	if fallback, ok := settings.FallbackURLPattern(); ok {
-		info.FallbackURLPattern = fallback
+		Running:             running,
+		Accepting:           proxy.Accepting(settings),
+		PID:                 pid,
+		Port:                settings.Hostnames.HTTPPort,
+		PrimaryURLPattern:   settings.PrimaryURLPattern(),
+		FallbackURLPatterns: settings.FallbackURLPatterns(),
+		TLD:                 settings.Hostnames.TLD,
+		TLDsFallback:        append([]string{}, settings.Hostnames.TLDsFallback...),
 	}
 	return info
 }

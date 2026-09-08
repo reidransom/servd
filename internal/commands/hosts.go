@@ -104,13 +104,11 @@ func loadHostsContext() (config.Settings, *config.Registry, error) {
 func primaryHostnames(settings config.Settings, registry *config.Registry) ([]string, error) {
 	seen := make(map[string]struct{})
 	for _, site := range registry.Sites {
-		hostnames, err := settings.PrimaryHostnames(site)
+		hostname, err := settings.PrimaryHostname(site)
 		if err != nil {
 			return nil, fmt.Errorf("site %q: %w", site.Slug, err)
 		}
-		for _, hostname := range hostnames {
-			seen[hostname] = struct{}{}
-		}
+		seen[hostname] = struct{}{}
 	}
 	hostnames := make([]string, 0, len(seen))
 	for hostname := range seen {
@@ -150,11 +148,11 @@ func syncHostsForProxy(settings config.Settings, registry *config.Registry) erro
 	if settings.Hostnames.LAN {
 		return nil
 	}
-	customTLD := hostsfile.NeedsHostsFile(settings.Hostnames.TLDs, "")
+	customTLD := hostsfile.NeedsHostsFile(settings.Hostnames.TLD, "")
 	switch settings.Hostnames.HostsMode {
 	case config.HostsNever:
 		if customTLD {
-			fmt.Printf("warning: hosts-file synchronization is disabled; %v may not resolve locally\n", settings.Hostnames.TLDs)
+			fmt.Printf("warning: hosts-file synchronization is disabled; %s may not resolve locally\n", settings.Hostnames.TLD)
 		}
 		return nil
 	case config.HostsAlways:

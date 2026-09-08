@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -57,9 +58,6 @@ func TestNewSiteInfo(t *testing.T) {
 	if want := settings.SiteURL(dead); di.URL != want {
 		t.Errorf("dead URL = %q, want %q", di.URL, want)
 	}
-	if want, ok := settings.FallbackURL(dead); !ok || di.FallbackURL != want {
-		t.Errorf("dead fallback URL = %q, want %q", di.FallbackURL, want)
-	}
 	// omitempty must drop the runtime fields entirely for stopped sites.
 	data, err := json.Marshal(di)
 	if err != nil {
@@ -82,13 +80,13 @@ func TestNewSiteInfo(t *testing.T) {
 		}
 	}
 
-	settings.Hostnames.NipIO = false
+	settings.Hostnames.TLDsFallback = []string{"localhost"}
 	withoutFallback, err := json.Marshal(newSiteInfo(settings, dead, st))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(string(withoutFallback), `"fallback_url"`) {
-		t.Errorf("disabled fallback still appears in JSON: %s", withoutFallback)
+	if strings.Contains(string(withoutFallback), `"fallback_urls"`) || strings.Contains(string(withoutFallback), `"fallback_url"`) {
+		t.Errorf("empty effective fallbacks appear in JSON: %s", withoutFallback)
 	}
 
 	li := newSiteInfo(settings, live, st)
@@ -136,36 +134,83 @@ func TestNewSiteInfoError(t *testing.T) {
 	}
 }
 
-func TestNewProxyInfoUsesRoutingNeutralPatterns(t *testing.T) {
+func TestNewProxyInfoSerializesDefaultHostnameSettings(t *testing.T) {
 	settings := config.DefaultSettings()
-	info := newProxyInfo(settings, &state.State{})
-	if info.Port != settings.Hostnames.HTTPPort || info.PrimaryURLPattern != "http://<slug>.localhost:8080/" || info.FallbackURLPattern != "http://<slug>.127.0.0.1.nip.io:8080/" || !info.NipIO {
-		t.Fatalf("proxy info = %+v", info)
-	}
-
-	settings.Hostnames.NipIO = false
 	data, err := json.Marshal(newProxyInfo(settings, &state.State{}))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(string(data), `"fallback_url_pattern"`) {
-		t.Errorf("disabled fallback pattern appears in JSON: %s", data)
+	var got map[string]json.RawMessage
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatal(err)
+	}
+	if string(got["tlds"]) != `"localhost"` || string(got["tlds_fallback"]) != "[]" {
+		t.Fatalf("default hostname JSON = %s", data)
+	}
+	for _, key := range []string{"nip_io", "nip_io_suffix", "fallback_url_pattern", "fallback_url_patterns"} {
+		if _, exists := got[key]; exists {
+			t.Errorf("default proxy JSON contains %q: %s", key, data)
+		}
 	}
 }
 
-func TestNewProxyInfoUsesLiveRuntimePort(t *testing.T) {
+func TestInfoSerializesFallbacksAtLiveRuntimePort(t *testing.T) {
 	identity, err := state.ProcessIdentity(os.Getpid())
 	if err != nil {
 		t.Fatal(err)
 	}
 	settings := config.DefaultSettings()
 	settings.Hostnames.HTTPPort = 80
+	settings.Hostnames.TLDsFallback = []string{"dev.example.com", "localhost", "127.0.0.1.nip.io", "dev.example.com"}
 	st := &state.State{Entries: map[string]state.Entry{
 		"__proxy": {Slug: "__proxy", PID: os.Getpid(), Identity: identity, Port: 8080},
 	}}
-
-	info := newProxyInfo(settings, st)
-	if info.Port != 8080 || info.PrimaryURLPattern != "http://<slug>.localhost:8080/" {
-		t.Fatalf("proxy info = %+v, want live port 8080", info)
+	site := config.Site{Slug: "acme", HostPrefix: "auth", Path: t.TempDir(), Port: 1}
+	data, err := json.Marshal(struct {
+		Proxy proxyInfo `json:"proxy"`
+		Site  siteInfo  `json:"site"`
+	}{newProxyInfo(settings, st), newSiteInfo(settings, site, st)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got struct {
+		Proxy struct {
+			Port                int      `json:"port"`
+			TLD                 string   `json:"tlds"`
+			TLDsFallback        []string `json:"tlds_fallback"`
+			PrimaryURLPattern   string   `json:"primary_url_pattern"`
+			FallbackURLPatterns []string `json:"fallback_url_patterns"`
+		} `json:"proxy"`
+		Site struct {
+			URL          string   `json:"url"`
+			FallbackURLs []string `json:"fallback_urls"`
+			DirectURL    string   `json:"direct_url"`
+		} `json:"site"`
+	}
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.Proxy.Port != 8080 || got.Proxy.TLD != "localhost" || got.Proxy.PrimaryURLPattern != "http://<slug>.localhost:8080/" {
+		t.Fatalf("primary proxy JSON = %s", data)
+	}
+	wantDeclared := []string{"dev.example.com", "localhost", "127.0.0.1.nip.io", "dev.example.com"}
+	if !reflect.DeepEqual(got.Proxy.TLDsFallback, wantDeclared) {
+		t.Errorf("declared fallback JSON = %v, want %v", got.Proxy.TLDsFallback, wantDeclared)
+	}
+	wantPatterns := []string{"http://<slug>.dev.example.com:8080/", "http://<slug>.127.0.0.1.nip.io:8080/"}
+	if !reflect.DeepEqual(got.Proxy.FallbackURLPatterns, wantPatterns) {
+		t.Errorf("fallback pattern JSON = %v, want %v", got.Proxy.FallbackURLPatterns, wantPatterns)
+	}
+	if got.Site.URL != "http://auth.acme.localhost:8080/" || got.Site.DirectURL != "http://127.0.0.1:1/" {
+		t.Fatalf("primary or direct site URL JSON = %s", data)
+	}
+	wantURLs := []string{"http://auth.acme.dev.example.com:8080/", "http://auth.acme.127.0.0.1.nip.io:8080/"}
+	if !reflect.DeepEqual(got.Site.FallbackURLs, wantURLs) {
+		t.Errorf("fallback URL JSON = %v, want %v", got.Site.FallbackURLs, wantURLs)
+	}
+	for _, key := range []string{"nip_io", "nip_io_suffix", "fallback_url", "fallback_url_pattern"} {
+		if strings.Contains(string(data), `"`+key+`"`) {
+			t.Errorf("JSON contains retired key %q: %s", key, data)
+		}
 	}
 }
