@@ -89,19 +89,23 @@ func TestExtractManagedBlockIgnoresCommentsAndOtherAddresses(t *testing.T) {
 
 func TestNeedsHostsFile(t *testing.T) {
 	cases := []struct {
-		tlds    []string
+		tld     string
 		browser string
 		want    bool
 	}{
-		{[]string{"localhost"}, "", false},
-		{[]string{"localhost"}, "Safari", true},
-		{[]string{"test"}, "", true},
-		{[]string{"localhost", "dev.example.com"}, "", true},
+		{"localhost", "", false},
+		{"localhost", "Safari", true},
+		{" LOCALHOST. ", "Firefox", false},
+		{"localhost", " safari ", true},
+		{"test", "", true},
+		{"dev.example.com", "", true},
+		{"100.101.102.103.nip.io", "", true},
+		{"local", "", true},
 	}
 	for _, tc := range cases {
-		t.Run(strings.Join(tc.tlds, ",")+tc.browser, func(t *testing.T) {
-			if got := NeedsHostsFile(tc.tlds, tc.browser); got != tc.want {
-				t.Fatalf("NeedsHostsFile(%v, %q) = %v, want %v", tc.tlds, tc.browser, got, tc.want)
+		t.Run(tc.tld+tc.browser, func(t *testing.T) {
+			if got := NeedsHostsFile(tc.tld, tc.browser); got != tc.want {
+				t.Fatalf("NeedsHostsFile(%q, %q) = %v, want %v", tc.tld, tc.browser, got, tc.want)
 			}
 		})
 	}
