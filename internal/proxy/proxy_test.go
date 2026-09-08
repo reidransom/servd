@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"bufio"
+	"context"
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
@@ -10,6 +11,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"path/filepath"
+	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -46,25 +51,41 @@ func TestBuildRouteTableUsesExactGeneratedHostnames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, host := range []string{"auth.acme.localhost", "auth.acme.127.0.0.1.nip.io"} {
-		if routes[host] == nil {
-			t.Errorf("missing generated route %q", host)
-		}
+	if len(routes) != 1 || routes["auth.acme.localhost"] == nil {
+		t.Fatalf("default routes = %v, want only auth.acme.localhost", routes)
 	}
-	for _, host := range []string{"acme.localhost", "acme.extra.localhost", "auth.acme.extra.localhost"} {
+	for _, host := range []string{"auth.acme.127.0.0.1.nip.io", "acme.localhost", "acme.extra.localhost", "auth.acme.extra.localhost"} {
 		if routes[host] != nil {
 			t.Errorf("unexpected alias route %q", host)
 		}
 	}
-	if routes["auth.acme.localhost"] != routes["auth.acme.127.0.0.1.nip.io"] {
+}
+
+func TestBuildRouteTableDeduplicatesExplicitFallbacks(t *testing.T) {
+	settings := proxySettings()
+	settings.Hostnames.TLDsFallback = []string{"127.0.0.1.nip.io", "dev.example.com", "localhost", "dev.example.com"}
+	site := config.Site{Slug: "acme", HostPrefix: "auth", Port: 4001}
+	routes, err := buildRouteTable(settings, []config.Site{site})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"auth.acme.localhost", "auth.acme.127.0.0.1.nip.io", "auth.acme.dev.example.com"}
+	if len(routes) != len(want) {
+		t.Fatalf("route count = %d, want %d", len(routes), len(want))
+	}
+	for _, host := range want {
+		if routes[host] == nil {
+			t.Errorf("missing generated route %q", host)
+		}
+	}
+	if routes[want[0]] != routes[want[1]] || routes[want[0]] != routes[want[2]] {
 		t.Fatal("primary and fallback routes do not share one backend proxy")
 	}
 }
 
 func TestBuildRouteTableSupportsCustomTLDAndDetectsCollisions(t *testing.T) {
 	settings := proxySettings()
-	settings.Hostnames.TLDs = []string{"dev.example.com"}
-	settings.Hostnames.NipIO = false
+	settings.Hostnames.TLD = "dev.example.com"
 	routes, err := buildRouteTable(settings, []config.Site{{Slug: "acme", Port: 4001}})
 	if err != nil {
 		t.Fatal(err)
@@ -76,20 +97,78 @@ func TestBuildRouteTableSupportsCustomTLDAndDetectsCollisions(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "hostname collision") {
 		t.Fatalf("collision error = %v", err)
 	}
+
+	settings.Hostnames.TLD = "acme.localhost"
+	settings.Hostnames.TLDsFallback = []string{"localhost"}
+	_, err = buildRouteTable(settings, []config.Site{{Slug: "auth", Port: 4001}, {Slug: "acme", HostPrefix: "auth", Port: 4002}})
+	if err == nil || !strings.Contains(err.Error(), "hostname collision") {
+		t.Fatalf("primary/fallback collision error = %v", err)
+	}
 }
 
 func TestBuildRouteTableUsesLocalHostnamesInLANMode(t *testing.T) {
 	settings := proxySettings()
 	settings.Hostnames.LAN = true
+	settings.Hostnames.TLDsFallback = []string{"127.0.0.1.nip.io", "dev.example.com", "local"}
 	routes, err := buildRouteTable(settings, []config.Site{{Slug: "acme", Port: 4001}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if routes["acme.local"] == nil {
-		t.Fatal("LAN route missing")
+	if len(routes) != 3 || routes["acme.local"] == nil {
+		t.Fatalf("LAN routes = %v, want primary and two fallbacks", routes)
 	}
 	if routes["acme.localhost"] != nil {
 		t.Fatal("non-LAN hostname was routed in LAN mode")
+	}
+	for _, host := range []string{"acme.127.0.0.1.nip.io", "acme.dev.example.com"} {
+		if routes[host] != routes["acme.local"] {
+			t.Fatalf("LAN fallback %q does not share primary backend", host)
+		}
+	}
+}
+
+func TestLANPublishesOnlyPrimaryHostnames(t *testing.T) {
+	var binary string
+	switch runtime.GOOS {
+	case "darwin":
+		binary = "dns-sd"
+	case "linux":
+		binary = "avahi-publish-address"
+	default:
+		t.Skip("mDNS publishing is unsupported on this platform")
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, binary), []byte("#!/bin/sh\nexec /bin/sleep 30\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir)
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	settings := proxySettings()
+	settings.Hostnames.TLD = "dev.example.com"
+	settings.Hostnames.LAN = true
+	settings.Hostnames.LANIP = "192.168.1.23"
+	settings.Hostnames.TLDsFallback = []string{"localhost", "127.0.0.1.nip.io", "local"}
+	server := &Server{
+		settings: settings,
+		sites: []config.Site{
+			{Slug: "acme", Port: 4001},
+			{Slug: "acme", HostPrefix: "auth", Port: 4002},
+		},
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := server.startLAN(ctx); err != nil {
+		t.Fatal(err)
+	}
+	defer server.stopLAN()
+	if got, want := server.publisher.Published(), []string{"acme.local", "auth.acme.local"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("published = %v, want %v", got, want)
+	}
+	if err := server.reconcileMDNS(server.sites[1:]); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := server.publisher.Published(), []string{"auth.acme.local"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("published after removing site = %v, want %v", got, want)
 	}
 }
 
@@ -107,31 +186,60 @@ func TestServerRoutesExactHostsAndKeepsForwardedHeaders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	configHome := t.TempDir()
-	t.Setenv("XDG_CONFIG_HOME", configHome)
-	settings := proxySettings()
-	reg := &config.Registry{Sites: []config.Site{{Slug: "acme", Port: port}}}
-	if err := reg.Save(); err != nil {
-		t.Fatal(err)
-	}
-	server := New(settings)
+	for _, tc := range []struct {
+		name      string
+		fallbacks []string
+		hosts     []string
+		unknown   []string
+	}{
+		{
+			name:    "default",
+			hosts:   []string{"ACME.LOCALHOST.:48080", "auth.acme.localhost"},
+			unknown: []string{"acme.127.0.0.1.nip.io", "auth.acme.127.0.0.1.nip.io"},
+		},
+		{
+			name:      "explicit fallbacks",
+			fallbacks: []string{"127.0.0.1.nip.io", "dev.example.com"},
+			hosts: []string{
+				"ACME.LOCALHOST.:48080", "acme.127.0.0.1.nip.io:48080", "acme.dev.example.com",
+				"auth.acme.localhost", "auth.acme.127.0.0.1.nip.io", "auth.acme.dev.example.com",
+			},
+			unknown: []string{"acme.extra.localhost", "auth.acme.extra.localhost", "acme.unconfigured.example.com"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+			settings := proxySettings()
+			settings.Hostnames.TLDsFallback = tc.fallbacks
+			reg := &config.Registry{Sites: []config.Site{
+				{Slug: "acme", Port: port},
+				{Slug: "acme", HostPrefix: "auth", Port: port},
+			}}
+			if err := reg.Save(); err != nil {
+				t.Fatal(err)
+			}
+			server := New(settings)
 
-	for _, host := range []string{"ACME.LOCALHOST.:48080", "acme.127.0.0.1.nip.io:48080"} {
-		rec := httptest.NewRecorder()
-		req := httptest.NewRequest(http.MethodGet, "http://"+host+"/", nil)
-		req.Host = host
-		server.ServeHTTP(rec, req)
-		if got := rec.Body.String(); got != "127.0.0.1:"+strconv.Itoa(port)+"|"+host+"|http" {
-			t.Fatalf("route %q body = %q", host, got)
-		}
-	}
+			for _, host := range tc.hosts {
+				rec := httptest.NewRecorder()
+				req := httptest.NewRequest(http.MethodGet, "http://"+host+"/", nil)
+				req.Host = host
+				server.ServeHTTP(rec, req)
+				if got := rec.Body.String(); got != "127.0.0.1:"+strconv.Itoa(port)+"|"+host+"|http" {
+					t.Fatalf("route %q body = %q", host, got)
+				}
+			}
 
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "http://acme.extra.localhost/", nil)
-	req.Host = "acme.extra.localhost"
-	server.ServeHTTP(rec, req)
-	if strings.Contains(rec.Body.String(), "127.0.0.1:"+strconv.Itoa(port)) {
-		t.Fatal("unconfigured alias reached the backend")
+			for _, host := range tc.unknown {
+				rec := httptest.NewRecorder()
+				req := httptest.NewRequest(http.MethodGet, "http://"+host+"/", nil)
+				req.Host = host
+				server.ServeHTTP(rec, req)
+				if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `href="http://acme.localhost:48080/"`) {
+					t.Fatalf("unknown host %q did not reach landing page: %s", host, rec.Body.String())
+				}
+			}
+		})
 	}
 }
 
@@ -192,6 +300,7 @@ func TestServerRoutesWebSocketUpgradesByHostname(t *testing.T) {
 
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	settings := proxySettings()
+	settings.Hostnames.TLDsFallback = []string{"127.0.0.1.nip.io", "dev.example.com"}
 	registry := &config.Registry{Sites: []config.Site{
 		{Slug: "first", Port: firstPort},
 		{Slug: "second", Port: secondPort},
@@ -204,8 +313,12 @@ func TestServerRoutesWebSocketUpgradesByHostname(t *testing.T) {
 
 	const websocketKey = "dGhlIHNhbXBsZSBub25jZQ=="
 	for host, want := range map[string]string{
-		"first.localhost":  "first",
-		"second.localhost": "second",
+		"first.localhost":           "first",
+		"first.127.0.0.1.nip.io":     "first",
+		"first.dev.example.com":     "first",
+		"second.localhost":          "second",
+		"second.127.0.0.1.nip.io":    "second",
+		"second.dev.example.com":    "second",
 	} {
 		connection, err := net.DialTimeout("tcp", proxyServer.Listener.Addr().String(), time.Second)
 		if err != nil {
@@ -397,19 +510,20 @@ func TestReloadKeepsLastValidRoutesAfterCollision(t *testing.T) {
 
 func TestLandingRendersSiteLink(t *testing.T) {
 	settings := proxySettings()
+	settings.Hostnames.TLDsFallback = []string{"127.0.0.1.nip.io", "dev.example.com"}
 	s := &Server{
 		settings: settings,
-		sites:    []config.Site{{Slug: "ok", Port: 4001}},
+		sites:    []config.Site{{Slug: "acme", HostPrefix: "auth", Port: 4001}},
 	}
 	rec := httptest.NewRecorder()
 	s.landing(rec, httptest.NewRequest("GET", "http://localhost/", nil))
 	body := rec.Body.String()
-	if !strings.Contains(body, s.settings.SiteURL(s.sites[0])) {
-		t.Error("expected site link in landing page")
+	if !strings.Contains(body, `href="http://auth.acme.localhost:48080/"`) {
+		t.Error("expected primary site link in landing page")
 	}
-	for _, removed := range []string{`class="kind"`, "launcher", "source:"} {
-		if strings.Contains(body, removed) {
-			t.Errorf("landing page contains removed command metadata %q: %s", removed, body)
+	for _, suffix := range settings.Hostnames.TLDsFallback {
+		if strings.Contains(body, suffix) {
+			t.Errorf("landing page contains fallback suffix %q: %s", suffix, body)
 		}
 	}
 }

@@ -97,13 +97,11 @@ func (s *Server) reconcileMDNS(sites []config.Site) error {
 	}
 	desired := make(map[string]struct{})
 	for _, site := range sites {
-		siteHostnames, err := s.settings.PrimaryHostnames(site)
+		hostname, err := s.settings.PrimaryHostname(site)
 		if err != nil {
 			return fmt.Errorf("site %q: %w", site.Slug, err)
 		}
-		for _, hostname := range siteHostnames {
-			desired[hostname] = struct{}{}
-		}
+		desired[hostname] = struct{}{}
 	}
 	for _, hostname := range publisher.Published() {
 		if _, keep := desired[hostname]; keep {

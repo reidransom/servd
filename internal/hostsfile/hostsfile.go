@@ -170,19 +170,14 @@ func CheckResolution(hostname string) (ResolutionResult, error) {
 	return result, nil
 }
 
-// NeedsHostsFile reports whether the configured TLDs require managed hosts
+// NeedsHostsFile reports whether the primary suffix requires managed hosts
 // entries for normal browser resolution. Safari is included because it can fail
 // to resolve .localhost subdomains even though that TLD is normally loopback.
-func NeedsHostsFile(tlds []string, browser string) bool {
+func NeedsHostsFile(tld string, browser string) bool {
 	if strings.EqualFold(strings.TrimSpace(browser), "safari") {
 		return true
 	}
-	for _, tld := range tlds {
-		if !strings.EqualFold(strings.Trim(strings.TrimSpace(tld), "."), "localhost") {
-			return true
-		}
-	}
-	return false
+	return !strings.EqualFold(strings.Trim(strings.TrimSpace(tld), "."), "localhost")
 }
 
 func managedBlockRange(lines []string) (int, int) {
