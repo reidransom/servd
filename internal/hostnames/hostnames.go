@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 )
@@ -328,7 +327,7 @@ func ParseHostname(input, tld string) (string, error) {
 	}
 	hostname := normalizeInput(input)
 	suffix := "." + tld
-	if tld != "localhost" && strings.HasSuffix(hostname, ".localhost") {
+	if tld != "localhost" && !strings.HasSuffix(hostname, suffix) && strings.HasSuffix(hostname, ".localhost") {
 		hostname = strings.TrimSuffix(hostname, ".localhost")
 	}
 	if hostname == "" || hostname == suffix {
@@ -345,42 +344,6 @@ func ParseHostname(input, tld string) (string, error) {
 		return "", fmt.Errorf("invalid hostname %q: exceeds 253-character DNS limit", hostname)
 	}
 	return hostname, nil
-}
-
-// ParseHostnames normalizes input for each configured TLD. If input already
-// ends with a configured TLD, the longest matching suffix is stripped first.
-// Invalid TLD-specific results are skipped while valid results are retained.
-func ParseHostnames(input string, tlds []string) ([]string, error) {
-	uniqueTLDs := uniqueStrings(tlds)
-	if len(uniqueTLDs) == 0 {
-		return nil, errors.New("at least one TLD is required")
-	}
-	base := normalizeInput(input)
-	sortedTLDs := append([]string(nil), uniqueTLDs...)
-	sort.SliceStable(sortedTLDs, func(i, j int) bool { return len(sortedTLDs[i]) > len(sortedTLDs[j]) })
-	for _, tld := range sortedTLDs {
-		if strings.HasSuffix(base, "."+tld) {
-			base = strings.TrimSuffix(base, "."+tld)
-			break
-		}
-	}
-
-	var hostnames []string
-	var firstErr error
-	for _, tld := range uniqueTLDs {
-		hostname, err := ParseHostname(base, tld)
-		if err != nil {
-			if firstErr == nil {
-				firstErr = err
-			}
-			continue
-		}
-		hostnames = append(hostnames, hostname)
-	}
-	if len(hostnames) == 0 {
-		return nil, firstErr
-	}
-	return hostnames, nil
 }
 
 func normalizeInput(input string) string {
@@ -415,17 +378,4 @@ func validDottedName(name string) bool {
 		}
 	}
 	return true
-}
-
-func uniqueStrings(values []string) []string {
-	seen := make(map[string]struct{}, len(values))
-	unique := make([]string, 0, len(values))
-	for _, value := range values {
-		if _, ok := seen[value]; ok {
-			continue
-		}
-		seen[value] = struct{}{}
-		unique = append(unique, value)
-	}
-	return unique
 }
