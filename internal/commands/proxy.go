@@ -29,8 +29,8 @@ func newProxyCmd() *cobra.Command {
 			}
 			fmt.Printf("servd proxy listening on %s:%d — sites at %s\n",
 				settings.BindHost, settings.Hostnames.HTTPPort, settings.PrimaryURLPattern())
-			if fallback, ok := settings.FallbackURLPattern(); ok {
-				fmt.Printf("nip.io fallback: %s\n", fallback)
+			for _, fallback := range settings.FallbackURLPatterns() {
+				fmt.Printf("Fallback URL: %s\n", fallback)
 			}
 			return proxy.New(settings).ListenAndServe()
 		},
@@ -74,8 +74,8 @@ func newProxyUpCmd(lan *bool) *cobra.Command {
 				fmt.Println("Falling back to 127.0.0.1:8080.")
 			}
 			fmt.Printf("Proxy started on :%d — sites at %s\n", result.Port, settings.PrimaryURLPattern())
-			if fallback, ok := settings.FallbackURLPattern(); ok {
-				fmt.Printf("nip.io fallback: %s\n", fallback)
+			for _, fallback := range settings.FallbackURLPatterns() {
+				fmt.Printf("Fallback URL: %s\n", fallback)
 			}
 			return nil
 		},

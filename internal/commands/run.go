@@ -232,7 +232,7 @@ func newLogsCmd() *cobra.Command {
 func newOpenCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "open <slug>",
-		Short: "Open a site's nip.io URL in the browser",
+		Short: "Open a site's primary URL in the browser",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
