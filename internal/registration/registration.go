@@ -79,6 +79,9 @@ func AddSite(reg *config.Registry, settings config.Settings, in AddParams) (conf
 		return config.Site{}, fmt.Errorf("port %d already assigned", port)
 	}
 	site := config.Site{Slug: slug, HostPrefix: prefix, Path: abs, Port: port, Cmd: in.Cmd}
+	if _, err := settings.RouteHostnames(site); err != nil {
+		return config.Site{}, fmt.Errorf("site %q: %w", site.Slug, err)
+	}
 	if _, err := launcher.Resolve(site, settings); err != nil {
 		return config.Site{}, err
 	}

@@ -28,6 +28,11 @@ func Load() (config.Settings, *config.Registry, *state.State, error) {
 	if err != nil {
 		return settings, nil, nil, fmt.Errorf("loading registry: %w", err)
 	}
+	for _, site := range reg.Sites {
+		if _, err := settings.RouteHostnames(site); err != nil {
+			return settings, reg, nil, fmt.Errorf("validating hostnames for site %q: %w", site.Slug, err)
+		}
+	}
 	st, err := state.Load()
 	if err != nil {
 		return settings, reg, nil, fmt.Errorf("loading state: %w", err)

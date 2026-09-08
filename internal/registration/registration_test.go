@@ -97,6 +97,22 @@ func TestAddSiteValidatesSlugAndHostPrefix(t *testing.T) {
 	}
 }
 
+func TestAddSiteRejectsHostnameOverflowWithoutRegistering(t *testing.T) {
+	settings := testSettings()
+	label := strings.Repeat("a", 62)
+	settings.Hostnames.TLDsFallback = []string{strings.Join([]string{label, label, label, label}, ".")}
+	reg := &config.Registry{}
+	_, err := AddSite(reg, settings, AddParams{
+		Path: t.TempDir(), Slug: "acme", HostPrefix: "auth", Port: 42101, Cmd: "serve",
+	})
+	if err == nil || !strings.Contains(err.Error(), "253-character") {
+		t.Fatalf("AddSite must reject an overflowing fallback: %v", err)
+	}
+	if reg.Find("acme") != nil {
+		t.Fatal("invalid hostname was registered")
+	}
+}
+
 func TestAddSiteUndetectable(t *testing.T) {
 	root := t.TempDir()
 	dir := filepath.Join(root, "empty")
