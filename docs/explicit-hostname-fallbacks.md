@@ -1,6 +1,6 @@
 # Explicit hostname fallbacks
 
-Status: Implementation plan; not yet implemented.
+Status: Implemented and locally verified, 2026-09-08. This document retains the original implementation requirements.
 
 ## Decision
 
@@ -69,7 +69,7 @@ In [internal/config/config.go](../internal/config/config.go):
 - Replace singular `FallbackURL` and `FallbackURLPattern` with `FallbackURLs` and `FallbackURLPatterns`. Derive them from the same effective fallback list used by `RouteHostnames`, rather than duplicating suffix rules in callers.
 - Keep composition and validation inside the config/hostname modules. Consumers must not join suffixes or decide which fallback counts as primary.
 
-The current [ParseHostnames](../internal/hostnames/hostnames.go) skips invalid suffix-specific results and can return a later hostname when an earlier result is invalid. Do not use that behavior for the new primary/fallback contract. Use the existing single-hostname composition rules and propagate each error. Once production callers have migrated, remove the unused multi-primary parser and its implementation-only helpers and tests. Retain helpers that still have real callers.
+The former [ParseHostnames](../internal/hostnames/hostnames.go) skipped invalid suffix-specific results and could return a later hostname when an earlier result was invalid. That parser and its implementation-only helpers and tests have been removed. The primary/fallback implementation uses single-hostname composition and propagates each error.
 
 ## CLI and JSON contract
 
@@ -104,7 +104,7 @@ This makes migration from a multi-primary array observable: entries moved into `
 
 Reject removed hostname keys with an actionable error, even when `nip_io = false` or a new configuration key is also present. Do not silently ignore them, automatically turn `nip_io = true` into a fallback, rewrite the user's file, or accept both array and string forms of `tlds`.
 
-The loader currently ignores unknown fields. Add a targeted removed-key check for `hostnames.nip_io` and `hostnames.nip_io_suffix` so deletion cannot silently discard a user's intended routes. Removed-key detection is an error path only, not a second accepted settings model. Leave unrelated unknown-key handling unchanged.
+The loader otherwise ignores unknown fields. A targeted removed-key check for `hostnames.nip_io` and `hostnames.nip_io_suffix` prevents deletion from silently discarding a user's intended routes. Removed-key detection is an error path only, not a second accepted settings model. Unrelated unknown-key handling is unchanged.
 
 Document manual migration:
 
@@ -155,4 +155,4 @@ Existing tests in `internal/config`, `internal/proxy`, `internal/commands`, `int
 - Old hostname configuration fails with migration guidance instead of being silently accepted or partially ignored.
 - Documentation describes the implemented contract, and focused tests plus a real CLI/proxy smoke check demonstrate it.
 
-This plan changes neither application code nor current runtime behavior. The existing Tailscale research note continues to describe the current implementation until this plan is implemented.
+Verification completed with focused package tests, `go build ./...`, `go vet ./...`, and `go test ./... -race`. A real foreground CLI/proxy smoke check exercised primary, two explicit fallbacks, worktree-prefixed and unknown Host headers, primary-only landing links, JSON shapes and startup output. A second run with fallbacks omitted confirmed the former implicit nip.io route takes the unknown-host path. Temporary processes were stopped. The Tailscale note now uses the implemented schema and preserves its earlier experiment as dated historical evidence.

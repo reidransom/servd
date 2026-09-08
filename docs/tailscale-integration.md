@@ -1,6 +1,6 @@
 # Tailscale access to servd
 
-Status: Research and proposed setup, 2026-09-08. No application changes or live Tailscale configuration changes.
+Status: Setup updated for explicit hostname fallbacks, 2026-09-08. No live Tailscale configuration changes. The earlier experiment is retained below as historical evidence.
 
 ## Recommendation
 
@@ -21,11 +21,11 @@ Browser: http://acme.servd.test:8080/
 ## Existing servd behavior
 
 - `bind_host` defaults to `127.0.0.1`. The proxy uses it both for its listener and its backend dial address. Launch commands receive it through `{host}` and `HOST`. Changing it is therefore not a proxy-only operation. Explicit project commands can still bind somewhere else. [Settings][config], [proxy][proxy], [launcher](../internal/launcher/launcher.go), [supervisor](../internal/supervisor/supervisor.go)
-- Default primary names are `<slug>.localhost`, or `<prefix>.<slug>.localhost` for a stored worktree prefix. Optional fallback names end in `127.0.0.1.nip.io`. Both point clients back to themselves and are unsuitable as remote URLs. `.localhost` is reserved for loopback, not a suffix to remap to a remote machine. [Hostname generation][config], [RFC 6761, section 6.3][special-names]
-- `hostnames.tlds` accepts multi-label suffixes and creates an exact route for every configured suffix. The first suffix controls primary links, including the landing page, CLI output and `servd open`. Names are case-folded, with an optional port and trailing root dot removed. There is no arbitrary-subdomain fallback. A request for the machine's MagicDNS name or an unconfigured `acme.machine.tailnet.ts.net` gets the site index, not the `acme` backend. [Settings][config], [routing and landing page][proxy], [open command](../internal/commands/run.go)
+- Default primary names are `<slug>.localhost`, or `<prefix>.<slug>.localhost` for a stored worktree prefix. There are no default fallbacks. `.localhost` points clients back to themselves and is unsuitable for remote access. An explicitly configured `127.0.0.1.nip.io` suffix also resolves to the client's loopback address. [Hostname generation][config], [RFC 6761, section 6.3][special-names]
+- `hostnames.tlds` is one primary suffix string, and `hostnames.tlds_fallback` is an optional list of explicit aliases. Both accept multi-label suffixes. Only the primary controls landing-page links, CLI output and `servd open`. Incoming request hosts are case-folded, with an optional port and trailing root dot removed; configuration suffixes are validated without case folding or whitespace repair. There is no arbitrary-subdomain fallback. A request for the machine's MagicDNS name or an unconfigured `acme.machine.tailnet.ts.net` gets the site index, not the `acme` backend. [Settings][config], [routing and landing page][proxy], [open command](../internal/commands/run.go)
 - Generated URLs always use HTTP and `hostnames.http_port`. The settings default is `8080`; without a config file, startup prefers port `80` and can fall back to `8080`. Use the actual active port, not an assumed default. Setting `hostnames.https = true` currently fails validation. [Settings][config], [app loading](../internal/app/app.go), [proxy startup](../internal/proxy/control.go)
 - After selecting a site, servd rewrites backend Host to the backend address by default and supplies `X-Forwarded-Host`, `X-Forwarded-Proto` and `X-Forwarded-For`. A site's `preserve_host = true` keeps the original Host but requires the backend to allow that hostname. The Go reverse proxy supports HTTP/1.1 WebSocket upgrades. [Proxy][proxy]
-- `--lan` selects `.local` and mDNS publication. It does not change `bind_host`. LAN discovery is not tailnet DNS, and Tailscale's mDNS support request remains open. Do not enable LAN mode for this setup. [EnableLAN][config], [publisher](../internal/proxy/lan.go), [Tailscale mDNS issue][mdns]
+- `--lan` selects `.local` as the effective primary and publishes only that name through mDNS. Explicit fallbacks remain routes. It does not change `bind_host`. LAN discovery is not tailnet DNS, and Tailscale's mDNS support request remains open. Do not enable LAN mode for this setup. [EnableLAN][config], [publisher](../internal/proxy/lan.go), [Tailscale mDNS issue][mdns]
 
 ## Usable setup
 
@@ -39,15 +39,15 @@ Merge this into `~/.config/servd/config.toml`, or its `XDG_CONFIG_HOME` equivale
 bind_host = "127.0.0.1"
 
 [hostnames]
-tlds = ["servd.test", "localhost"]
+tlds = "servd.test"
+tlds_fallback = ["localhost"]
 http_port = 8080
 https = false
 hosts_mode = "never"
 lan = false
-nip_io = false
 ```
 
-`servd.test` is a private example namespace. `.test` is reserved for testing; it needs your explicit hosts entries or private DNS. `localhost` remains a local-only alternative. [RFC 6761, sections 6.2 and 6.3][special-names]
+`servd.test` is a private example namespace. `.test` is reserved for testing; it needs your explicit hosts entries or private DNS. `localhost` remains an explicitly requested local-only alias, not a second primary. Fallbacks are not redirects or automatic URL failover. [RFC 6761, sections 6.2 and 6.3][special-names]
 
 On each remote Linux client, add the exact registered names to `/etc/hosts`:
 
@@ -57,7 +57,7 @@ On each remote Linux client, add the exact registered names to `/etc/hosts`:
 
 Hosts files contain explicit names, not wildcard patterns. Include each worktree-prefixed name and update the entries when sites change. For use on the servd machine itself, map these names to `127.0.0.1` there. [hosts file format][hosts-man]
 
-`hosts_mode = "never"` disables automatic hosts synchronization when starting the proxy. It does not remove old entries or disable an explicit `servd hosts sync` command. Inspect existing entries before using external DNS: servd's own hosts synchronization writes `127.0.0.1`, not the Tailscale IP, and does not configure remote clients. [Hosts implementation](../internal/hostsfile/hostsfile.go), [hosts commands](../internal/commands/hosts.go)
+`hosts_mode = "never"` disables automatic hosts synchronization when starting the proxy. It does not remove old entries or disable an explicit `servd hosts sync` command. Hosts synchronization now owns only primary names and writes `127.0.0.1`, not the Tailscale IP. It never writes fallback names or configures remote clients. Inspect stale managed entries with `servd hosts status` when migrating an old multi-primary list. Names moved to `tlds_fallback` lose managed-block ownership; supply their DNS or hosts entries yourself. [Hosts implementation](../internal/hostsfile/hostsfile.go), [hosts commands](../internal/commands/hosts.go)
 
 ### 2. Start servd and the TCP forwarder
 
@@ -118,10 +118,10 @@ This is resolver configuration, not a complete DNS-server installation. Split DN
 For the least DNS administration, replace only the `tlds` line in the setup with:
 
 ```toml
-tlds = ["100.101.102.103.nip.io", "localhost"]
+tlds = "100.101.102.103.nip.io"
 ```
 
-Leave `nip_io = false`. The first entry is a primary suffix using nip.io's public IP-to-DNS service; servd's separately named fallback feature is not needed. Generated URLs become `http://acme.100.101.102.103.nip.io:8080/`, including correct worktree-prefixed URLs. Alternatively, `nip_io = true` and `nip_io_suffix = "100.101.102.103.nip.io"` add remote fallback routes but do not change the primary landing-page links. [nip.io operator documentation][nip], [servd hostname generation][config]
+Keep `tlds_fallback = ["localhost"]` for the explicit local alias. The primary suffix uses nip.io's public IP-to-DNS service; servd treats it like any other suffix. Generated URLs become `http://acme.100.101.102.103.nip.io:8080/`, including correct worktree-prefixed URLs. Alternatively, keep `tlds = "localhost"` and set `tlds_fallback = ["100.101.102.103.nip.io"]` to accept remote aliases without changing primary links. Delete any old `nip_io` or `nip_io_suffix` keys; the loader rejects them, even when disabled. [nip.io operator documentation][nip], [servd hostname generation][config], [migration guide](../README.md#migrating-the-old-hostname-schema)
 
 The nip.io option depends on a third party and the client's resolver. Public DNS services can disclose queries and addresses, and filtering or rebinding protection may reject answers under local resolver policy. Whether a particular resolver blocks this Tailscale address is unverified; do not disable protection globally to make a demo work. Use hosts or controlled DNS when this matters. [DNS filtering controls][dnsmasq]
 
@@ -166,9 +166,17 @@ Access to this single port gives access to every registered site routed by that 
 
 ## Evidence and remaining uncertainty
 
+### Historical experiment, 2026-09-08, before the schema change
+
+The following experiment used the retired array-valued schema. It is historical evidence, not a configuration example for the current release.
+
 Source inspection and an isolated local experiment support the recommendation. The experiment loaded the real servd proxy handler with `bind_host = "127.0.0.1"`, configured URL port `8080`, `tlds = ["100.101.102.103.nip.io", "localhost"]` and `nip_io = false`. The HTTP server, backend and byte-copy TCP relay used ephemeral loopback ports. The two remote-suffix site names and `acme.localhost` reached a real local backend with the original `X-Forwarded-Host`. Machine and unconfigured subdomain requests returned the index, with remote-first-suffix links on port `8080`. The throwaway program was removed.
 
 That experiment was not Tailscale Serve, public DNS, a browser, an ACL check or a second-node connection. No cross-node outcome is claimed. Actual deployment still depends on the installed client version, running daemon, port availability, policy, resolver and backend URL/HMR behavior.
+
+### Current hostname verification, 2026-09-08
+
+An isolated smoke check ran the actual foreground servd CLI and a disposable loopback backend with temporary XDG config and state. Scalar primary `localhost` and explicit fallback suffixes `127.0.0.1.nip.io` and `dev.example.com` routed both ordinary and worktree-prefixed sites to that backend. Unconfigured names returned the landing page, whose links used only the primary. JSON preserved the declared fallback list but emitted distinct alternatives on the active unprivileged port. With fallbacks omitted, the former implicit nip.io names returned the landing page instead. This check did not run Tailscale or public DNS and does not replace the historical TCP-relay experiment.
 
 There is a documentation discrepancy worth preserving. The general Serve guide says HTTPS certificates are required; the current CLI source only runs the certificate-enable flow for HTTPS mode, not raw TCP. Raw `--tcp` also does not terminate TLS. This recommendation follows the documented TCP mode and source, not a blanket assumption that every Serve mode needs a certificate. The inspected upstream revision was `a8b023c063b608fcead5446f3d885c4fc847c944`; it may be newer than an installed stable client. [General guide][serve], [CLI feature gate][serve-cli-source]
 

@@ -10,8 +10,8 @@ Run and manage many local dev servers at once.
 `servd` runs registered web projects on stable backend ports and reverse-proxies
 them by exact hostname. A folder of client sites becomes
 `http://acme.localhost/`, `http://blog.localhost/`, and so on, all managed from
-one CLI or interactive TUI. Optional [nip.io](https://nip.io) hostnames remain
-available for compatibility.
+one CLI or interactive TUI. Additional hostnames require explicit fallback
+suffixes; none are enabled by default.
 
 Each registered project supplies its command explicitly, either at registration
 or in the repository's root `.servd.toml`. That keeps command selection local
@@ -123,6 +123,96 @@ An explicit privileged port fails when it cannot be acquired; it never silently
 falls back. While running, status, site URLs, the TUI, and browser-open actions
 use the proxy's recorded runtime port. Route changes in `sites.toml` reload
 without restarting the proxy.
+
+## Hostname configuration
+
+Each site has one primary hostname. The default hostname settings are:
+
+```toml
+[hostnames]
+tlds = "localhost"
+tlds_fallback = []
+```
+
+Omitting either key uses its default. `tlds` must be a nonempty string;
+`tlds_fallback` must be a list of nonempty strings. Multi-label suffixes are
+valid, but uppercase letters, surrounding whitespace and invalid DNS labels
+are rejected rather than repaired. Each complete site hostname, including its
+stored worktree prefix, must fit the DNS length limit.
+
+To accept explicit alternatives for the same backend:
+
+```toml
+[hostnames]
+tlds = "localhost"
+tlds_fallback = ["127.0.0.1.nip.io", "dev.example.com"]
+http_port = 8080
+```
+
+For `acme`, the primary URL is `http://acme.localhost:8080/`. Both
+`acme.127.0.0.1.nip.io` and `acme.dev.example.com` are exact aliases.
+Fallbacks are not redirects or DNS failover, and servd never tries them
+automatically. The landing page, `servd open`, status tables and TUI links
+always use the primary. Duplicate fallback suffixes and a fallback equal to
+the effective primary create no additional routes or URLs. Saving settings
+preserves the declared list and its order.
+
+You supply DNS or hosts entries for fallbacks. Automatic hosts synchronization
+and `servd hosts sync` manage only primary names, using `127.0.0.1`.
+They never map fallback names to loopback. `hosts_mode` remains `auto`,
+`always` or `never`; `never` disables automatic sync, not explicit hosts
+commands. Safari may need primary `.localhost` hosts entries in `auto` mode.
+
+LAN mode selects `.local` as the effective primary and publishes only that
+name through mDNS. Explicit fallbacks remain routable, but LAN mode adds no
+other aliases and does not change backend binding. The declared primary
+suffix remains saved for use outside LAN mode.
+
+For remote access, a primary such as `tlds = "100.101.102.103.nip.io"`
+with `tlds_fallback = ["localhost"]` makes remote links primary while keeping
+an explicit local alias. Replace that address with the server's Tailscale IP.
+This does not configure DNS, Tailscale or a public listener. See the
+[Tailscale setup](docs/tailscale-integration.md).
+
+### Migrating the old hostname schema
+
+This is a breaking change. Edit `config.toml` manually; servd rejects the old
+hostname keys and array-valued `tlds`, even alongside new settings. It never
+rewrites the file or silently enables a previously disabled alternative.
+
+| Old setting | Manual replacement |
+| --- | --- |
+| `tlds = ["localhost"]` | `tlds = "localhost"`, with no fallbacks unless wanted |
+| `tlds = ["dev.example.com", "localhost"]` | `tlds = "dev.example.com"` and, if wanted, `tlds_fallback = ["localhost"]` |
+| `nip_io = false` | Delete the key; there is no replacement |
+| `nip_io = true` with the default suffix | Delete the key; add `"127.0.0.1.nip.io"` to `tlds_fallback` only if wanted |
+| `nip_io_suffix = "100.101.102.103.nip.io"` | Delete the key; explicitly choose that suffix as primary or fallback |
+| No config file | Keep the default `.localhost` primary; the implicit nip.io route disappears |
+
+An empty primary array remains invalid. For longer arrays, choose the first
+entry as the scalar primary and retain remaining entries as fallbacks only
+when intended. Names moved into `tlds_fallback` remain routes but are no
+longer owned by servd's managed hosts block. Inspect stale entries with
+`servd hosts status` before running `servd hosts sync`, which replaces the
+managed block with current primary names. Preserve any needed fallback
+entries separately with their intended addresses.
+
+Legacy `proxy_port` and `hostnames.sync_hosts` migration still works.
+An explicit legacy `domain_suffix` becomes the scalar primary only when
+`hostnames.tlds` is absent, including when that suffix is a nip.io domain.
+It never creates an implicit fallback.
+
+Update scripts for scalar JSON `proxy.tlds`, plural `fallback_urls` and
+`fallback_url_patterns`, and the removal of `proxy.nip_io`. Restart an
+already-running proxy after editing hostname settings:
+
+```sh
+servd proxy down
+servd proxy up
+```
+
+Do not restart backends or change their bind addresses solely for this schema
+change.
 
 ## Commands
 
@@ -297,10 +387,10 @@ with `servd static`.
 | `servd down [slug…] [--all]` | stop sites (`--all` stops every registered site) |
 | `servd restart [slug…] [--all]` | restart sites (`--all` restarts every registered site) |
 | `servd logs <slug> [-f]` | show / follow a site's server output |
-| `servd open <slug>` | open the nip.io URL in a browser |
+| `servd open <slug>` | open the primary URL in a browser |
 | `servd proxy up\|down\|status` | manage the background reverse proxy |
 | `servd proxy` | run the proxy in the foreground |
-| `servd doctor` | check settings, ports, and nip.io resolution |
+| `servd doctor` | check settings, ports, primary resolution and configured fallback names |
 | `servd version` / `servd --version` | report version, commit, and build date |
 | `servd` / `servd tui` | interactive dashboard |
 
@@ -339,6 +429,15 @@ reason; live records carry `pid`, `cmd`, `log`, `started_at`, and
 `uptime_seconds`. Match your project by `path` to find its slug, then hit
 `direct_url` (or `url` if the proxy is accepting).
 
+`proxy.primary_url_pattern` uses the primary suffix. `proxy.tlds` is a string,
+and `proxy.tlds_fallback` is the declared ordered array, including redundant
+entries, or `[]` when empty. `proxy.fallback_url_patterns` and each site's
+`fallback_urls` contain only distinct effective alternatives in declaration
+order and are omitted when empty. Site `url` remains primary-only. All proxy
+URLs and patterns use the active listener port, including a first-run fallback
+from port 80 to 8080. The old `fallback_url`, `fallback_url_pattern` and
+`nip_io` fields are absent.
+
 `up --wait` polls until the server actually accepts connections (default
 `--timeout 30s`), and exits non-zero — with the log tail in the error — if the
 process dies or never binds. Failed launches remain in `error` until a
@@ -353,8 +452,8 @@ internal and may change.
 
 ## Files
 
-- `~/.config/servd/config.toml` — settings (`port_range_start`, `proxy_port`,
-  `domain_suffix`, `bind_host`)
+- `~/.config/servd/config.toml` — settings such as `port_range_start`,
+  `bind_host` and the `[hostnames]` table
 - `~/.config/servd/sites.toml` — the site registry and site-specific explicit
   commands
 - `<project>/.servd.toml` — the repository command at the registered root
@@ -372,13 +471,15 @@ The reverse proxy passes through websocket upgrades, so live-reload / HMR works.
 ## Platform behavior
 
 - LAN mDNS publishing is available on macOS and Linux. Windows reports it as
-  unsupported in `servd doctor`; regular loopback and nip.io routing still
-  work.
+  unsupported in `servd doctor`; regular primary and explicit fallback routing
+  still work.
 - Hosts-file synchronization requires an elevated terminal. The hosts file is
   `/etc/hosts` on macOS and Linux, and
   `%SystemRoot%\System32\drivers\etc\hosts` on Windows.
-- `servd doctor` checks Servd settings, ports, and nip.io resolution; command
-  selection does not depend on framework-specific tools.
+- `servd doctor` checks settings, ports and primary resolution. It also resolves
+  actual registered fallback names when configured, without assuming wildcard
+  DNS. Fallback-resolution failures are advisory, and remote addresses are
+  valid. Command selection does not depend on framework-specific tools.
 - Repository and explicit commands run from the registered repository through
   `sh` on macOS and Linux and through `cmd.exe` on Windows. Commands that
   depend on POSIX shell syntax are not portable to Windows.
@@ -398,9 +499,9 @@ The proxy rewrites the `Host` header to the backend's own address
 out of the box. The original
 host is still available to the backend via `X-Forwarded-Host` / `X-Forwarded-Proto`.
 
-If a site builds absolute URLs from `Host` and needs the nip.io address
-instead, set `preserve_host = true` on its `[[site]]` entry in `sites.toml` —
-and add the nip.io hostname to that dev server's own allowed-hosts setting.
+If a site builds absolute URLs from `Host` and needs the original routed
+hostname, set `preserve_host = true` on its `[[site]]` entry in `sites.toml`
+and add every hostname it accepts to that dev server's allowed-hosts setting.
 
 ---
 
