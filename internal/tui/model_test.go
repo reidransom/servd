@@ -31,7 +31,7 @@ func TestAddModalRegistersSite(t *testing.T) {
 	ti := textinput.New()
 	ti.SetValue(proj)
 	m := &model{
-		settings: config.Settings{PortRangeStart: 42201, BindHost: "127.0.0.1", Hostnames: config.HostnameSettings{HTTPPort: 42200}},
+		settings: config.Settings{PortRangeStart: 42201, BindHost: "127.0.0.1", Hostnames: config.HostnameSettings{TLD: "localhost", HTTPPort: 42200}},
 		reg:      &config.Registry{},
 		mode:     modeAdd,
 		addInput: ti,
@@ -314,7 +314,7 @@ func TestAddModalKeepsOpenOnError(t *testing.T) {
 
 	ti := textinput.New()
 	m := &model{
-		settings: config.Settings{PortRangeStart: 42201, BindHost: "127.0.0.1", Hostnames: config.HostnameSettings{HTTPPort: 42200}},
+		settings: config.Settings{PortRangeStart: 42201, BindHost: "127.0.0.1", Hostnames: config.HostnameSettings{TLD: "localhost", HTTPPort: 42200}},
 		reg:      &config.Registry{},
 		mode:     modeAdd,
 		addInput: ti,

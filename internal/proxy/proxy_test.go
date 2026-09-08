@@ -313,12 +313,12 @@ func TestServerRoutesWebSocketUpgradesByHostname(t *testing.T) {
 
 	const websocketKey = "dGhlIHNhbXBsZSBub25jZQ=="
 	for host, want := range map[string]string{
-		"first.localhost":           "first",
-		"first.127.0.0.1.nip.io":     "first",
-		"first.dev.example.com":     "first",
-		"second.localhost":          "second",
-		"second.127.0.0.1.nip.io":    "second",
-		"second.dev.example.com":    "second",
+		"first.localhost":         "first",
+		"first.127.0.0.1.nip.io":  "first",
+		"first.dev.example.com":   "first",
+		"second.localhost":        "second",
+		"second.127.0.0.1.nip.io": "second",
+		"second.dev.example.com":  "second",
 	} {
 		connection, err := net.DialTimeout("tcp", proxyServer.Listener.Addr().String(), time.Second)
 		if err != nil {

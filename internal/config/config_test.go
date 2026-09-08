@@ -428,7 +428,7 @@ func TestRouteHostnamesPreserveStoredIdentity(t *testing.T) {
 			settings.Hostnames.TLDsFallback = []string{"example.com", "localhost"}
 			base := tc.site.Slug
 			if tc.site.HostPrefix != "" {
-				base = tc.site.HostPrefix+"."+base
+				base = tc.site.HostPrefix + "." + base
 			}
 			primary, err := settings.PrimaryHostname(tc.site)
 			if err != nil || primary != base+"."+tc.tld {
@@ -438,7 +438,7 @@ func TestRouteHostnamesPreserveStoredIdentity(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			want := []string{base+"."+tc.tld, base+".example.com"}
+			want := []string{base + "." + tc.tld, base + ".example.com"}
 			if tc.tld != "localhost" {
 				want = append(want, base+".localhost")
 			}
