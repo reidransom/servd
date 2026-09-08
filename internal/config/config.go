@@ -47,14 +47,13 @@ const (
 // HostnameSettings holds public hostname and listener settings separately from
 // backend process binding and port allocation.
 type HostnameSettings struct {
-	TLDs        []string  `toml:"tlds"`
-	HTTPS       bool      `toml:"https"`
-	HTTPPort    int       `toml:"http_port"`
-	HostsMode   HostsMode `toml:"hosts_mode"`
-	LAN         bool      `toml:"lan"`
-	LANIP       string    `toml:"lan_ip"`
-	NipIO       bool      `toml:"nip_io"`
-	NipIOSuffix string    `toml:"nip_io_suffix"`
+	TLD          string    `toml:"tlds"`
+	TLDsFallback []string  `toml:"tlds_fallback"`
+	HTTPS        bool      `toml:"https"`
+	HTTPPort     int       `toml:"http_port"`
+	HostsMode    HostsMode `toml:"hosts_mode"`
+	LAN          bool      `toml:"lan"`
+	LANIP        string    `toml:"lan_ip"`
 }
 
 // Site is one registered project in the registry.
@@ -82,12 +81,11 @@ func DefaultSettings() Settings {
 		PortRangeStart: 4001,
 		BindHost:       "127.0.0.1",
 		Hostnames: HostnameSettings{
-			TLDs:        []string{"localhost"},
-			HTTPS:       false,
-			HTTPPort:    8080,
-			HostsMode:   HostsAuto,
-			NipIO:       true,
-			NipIOSuffix: "127.0.0.1.nip.io",
+			TLD:          "localhost",
+			TLDsFallback: []string{},
+			HTTPS:        false,
+			HTTPPort:     8080,
+			HostsMode:    HostsAuto,
 		},
 	}
 }
@@ -95,7 +93,6 @@ func DefaultSettings() Settings {
 // EnableLAN selects the .local hostname family required for mDNS publishing.
 func (s *Settings) EnableLAN() {
 	s.Hostnames.LAN = true
-	s.Hostnames.TLDs = []string{"local"}
 }
 
 // ConfigDir is ~/.config/servd (honoring XDG_CONFIG_HOME).
@@ -133,93 +130,97 @@ func (s Settings) HostnameBase(site Site) (string, error) {
 	return hostnames.ApplyWorktreePrefix(site.Slug, site.HostPrefix), nil
 }
 
-// PrimaryHostnames returns the configured hostname for every primary TLD in
-// declaration order.
-func (s Settings) PrimaryHostnames(site Site) ([]string, error) {
-	base, err := s.HostnameBase(site)
-	if err != nil {
-		return nil, err
-	}
-	tlds := s.Hostnames.TLDs
+func (s Settings) primaryTLD() string {
 	if s.Hostnames.LAN {
-		tlds = []string{"local"}
+		return "local"
 	}
-	return hostnames.ParseHostnames(base, tlds)
+	return s.Hostnames.TLD
 }
 
-// PrimaryHostname returns the preferred, first configured hostname.
+// fallbackTLDs preserves declaration order without repeating the primary or
+// another fallback. It never modifies the declared settings.
+func (s Settings) fallbackTLDs() []string {
+	primary := s.primaryTLD()
+	seen := make(map[string]struct{}, len(s.Hostnames.TLDsFallback))
+	var fallbacks []string
+	for _, tld := range s.Hostnames.TLDsFallback {
+		if tld == primary {
+			continue
+		}
+		if _, ok := seen[tld]; ok {
+			continue
+		}
+		seen[tld] = struct{}{}
+		fallbacks = append(fallbacks, tld)
+	}
+	return fallbacks
+}
+
+// PrimaryHostname returns the site's single primary hostname.
 func (s Settings) PrimaryHostname(site Site) (string, error) {
-	hosts, err := s.PrimaryHostnames(site)
-	if err != nil {
-		return "", err
-	}
-	if len(hosts) == 0 {
-		return "", errors.New("at least one primary hostname is required")
-	}
-	return hosts[0], nil
-}
-
-// NipIOHostname returns the compatibility hostname when fallback routing is
-// enabled.
-func (s Settings) NipIOHostname(site Site) (string, error) {
-	if !s.Hostnames.NipIO {
-		return "", errors.New("nip.io fallback routing is disabled")
-	}
 	base, err := s.HostnameBase(site)
 	if err != nil {
 		return "", err
 	}
-	return hostnames.ParseHostname(base, s.Hostnames.NipIOSuffix)
+	tld := s.primaryTLD()
+	return hostnames.ParseHostname(base+"."+tld, tld)
 }
 
-// RouteHostnames returns every exact hostname served for site.
+// RouteHostnames returns the primary followed by every distinct explicit
+// fallback. Any invalid hostname fails the entire route list.
 func (s Settings) RouteHostnames(site Site) ([]string, error) {
-	hosts, err := s.PrimaryHostnames(site)
+	base, err := s.HostnameBase(site)
 	if err != nil {
 		return nil, err
 	}
-	if s.Hostnames.NipIO {
-		nip, err := s.NipIOHostname(site)
+	tld := s.primaryTLD()
+	primary, err := hostnames.ParseHostname(base+"."+tld, tld)
+	if err != nil {
+		return nil, fmt.Errorf("primary hostname: %w", err)
+	}
+	fallbacks := s.fallbackTLDs()
+	hosts := make([]string, 1, 1+len(fallbacks))
+	hosts[0] = primary
+	for _, suffix := range fallbacks {
+		host, err := hostnames.ParseHostname(base+"."+suffix, suffix)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("fallback hostname for %q: %w", suffix, err)
 		}
-		hosts = append(hosts, nip)
+		hosts = append(hosts, host)
 	}
 	return hosts, nil
 }
 
-// FallbackURL returns the nip.io compatibility URL, if configured.
-func (s Settings) FallbackURL(site Site) (string, bool) {
-	host, err := s.NipIOHostname(site)
+// FallbackURLs returns the distinct explicit alternative URLs.
+// app.Load validates settings and registry routes before URL helpers are used.
+func (s Settings) FallbackURLs(site Site) []string {
+	hosts, err := s.RouteHostnames(site)
 	if err != nil {
-		return "", false
+		return nil
 	}
-	return hostnames.FormatURL(host, s.Hostnames.HTTPPort, false) + "/", true
+	var urls []string
+	for _, host := range hosts[1:] {
+		urls = append(urls, hostnames.FormatURL(host, s.Hostnames.HTTPPort, false)+"/")
+	}
+	return urls
 }
 
-// PrimaryURLPattern returns the preferred route shape for command output.
+// PrimaryURLPattern returns the primary route shape for command output.
 func (s Settings) PrimaryURLPattern() string {
-	tld := "<invalid-tld>"
-	tlds := s.Hostnames.TLDs
-	if s.Hostnames.LAN {
-		tlds = []string{"local"}
-	}
-	if len(tlds) > 0 {
-		tld = tlds[0]
-	}
-	return hostnames.FormatURL("<slug>."+tld, s.Hostnames.HTTPPort, false) + "/"
+	return hostnames.FormatURL("<slug>."+s.primaryTLD(), s.Hostnames.HTTPPort, false) + "/"
 }
 
-// FallbackURLPattern returns the optional nip.io route shape.
-func (s Settings) FallbackURLPattern() (string, bool) {
-	if !s.Hostnames.NipIO || s.Hostnames.NipIOSuffix == "" {
-		return "", false
+// FallbackURLPatterns returns the distinct explicit alternative route shapes.
+func (s Settings) FallbackURLPatterns() []string {
+	var patterns []string
+	for _, tld := range s.fallbackTLDs() {
+		patterns = append(patterns, hostnames.FormatURL("<slug>."+tld, s.Hostnames.HTTPPort, false)+"/")
 	}
-	return hostnames.FormatURL("<slug>."+s.Hostnames.NipIOSuffix, s.Hostnames.HTTPPort, false) + "/", true
+	return patterns
 }
 
 // SiteURL is the preferred HTTP URL a site is reachable at through the proxy.
-// app.Load validates Settings before callers can use this helper.
+// app.Load validates settings and registry routes before URL helpers are used.
 func (s Settings) SiteURL(site Site) string {
 	host, err := s.PrimaryHostname(site)
 	if err != nil {
@@ -245,15 +246,14 @@ type rawSettings struct {
 }
 
 type rawHostnameSettings struct {
-	TLDs        *[]string  `toml:"tlds"`
-	HTTPS       *bool      `toml:"https"`
-	HTTPPort    *int       `toml:"http_port"`
-	HostsMode   *HostsMode `toml:"hosts_mode"`
-	SyncHosts   *bool      `toml:"sync_hosts"`
-	LAN         *bool      `toml:"lan"`
-	LANIP       *string    `toml:"lan_ip"`
-	NipIO       *bool      `toml:"nip_io"`
-	NipIOSuffix *string    `toml:"nip_io_suffix"`
+	TLD          *string    `toml:"tlds"`
+	TLDsFallback *[]string  `toml:"tlds_fallback"`
+	HTTPS        *bool      `toml:"https"`
+	HTTPPort     *int       `toml:"http_port"`
+	HostsMode    *HostsMode `toml:"hosts_mode"`
+	SyncHosts    *bool      `toml:"sync_hosts"`
+	LAN          *bool      `toml:"lan"`
+	LANIP        *string    `toml:"lan_ip"`
 }
 
 // LoadSettings reads config.toml and migrates legacy keys into the hostname
@@ -277,6 +277,25 @@ func LoadSettingsWithSource() (Settings, SettingsSource, error) {
 	}
 	source := SettingsSource{ConfigPresent: true}
 
+	// Check removed keys before typed decoding so even a mixed old/new schema
+	// reports the required migration instead of silently losing a route.
+	var keys struct {
+		Hostnames map[string]any `toml:"hostnames"`
+	}
+	if err := toml.Unmarshal(data, &keys); err != nil {
+		return s, source, err
+	}
+	for _, key := range []string{"nip_io", "nip_io_suffix"} {
+		if _, present := keys.Hostnames[key]; present {
+			return s, source, fmt.Errorf("hostnames.%s has been removed: delete the key and explicitly choose any wanted suffix with hostnames.tlds (a string) or hostnames.tlds_fallback (a list of strings)", key)
+		}
+	}
+	if value, present := keys.Hostnames["tlds"]; present {
+		if _, ok := value.(string); !ok {
+			return s, source, errors.New("hostnames.tlds must be one nonempty string: replace the old array with its chosen primary suffix and move any wanted alternatives to hostnames.tlds_fallback")
+		}
+	}
+
 	var raw rawSettings
 	if err := toml.Unmarshal(data, &raw); err != nil {
 		return s, source, err
@@ -288,8 +307,11 @@ func LoadSettingsWithSource() (Settings, SettingsSource, error) {
 		s.BindHost = *raw.BindHost
 	}
 	if h := raw.Hostnames; h != nil {
-		if h.TLDs != nil {
-			s.Hostnames.TLDs = *h.TLDs
+		if h.TLD != nil {
+			s.Hostnames.TLD = *h.TLD
+		}
+		if h.TLDsFallback != nil {
+			s.Hostnames.TLDsFallback = *h.TLDsFallback
 		}
 		if h.HTTPS != nil {
 			s.Hostnames.HTTPS = *h.HTTPS
@@ -312,23 +334,12 @@ func LoadSettingsWithSource() (Settings, SettingsSource, error) {
 		if h.LANIP != nil {
 			s.Hostnames.LANIP = *h.LANIP
 		}
-		if h.NipIO != nil {
-			s.Hostnames.NipIO = *h.NipIO
-		}
-		if h.NipIOSuffix != nil {
-			s.Hostnames.NipIOSuffix = *h.NipIOSuffix
-		}
 	}
 	if raw.ProxyPort != nil && (raw.Hostnames == nil || raw.Hostnames.HTTPPort == nil) {
 		s.Hostnames.HTTPPort = *raw.ProxyPort
 	}
-	if raw.DomainSuffix != nil &&
-		(raw.Hostnames == nil || raw.Hostnames.TLDs == nil) &&
-		*raw.DomainSuffix != "127.0.0.1.nip.io" {
-		s.Hostnames.TLDs = []string{*raw.DomainSuffix}
-	}
-	if s.Hostnames.LAN {
-		s.EnableLAN()
+	if raw.DomainSuffix != nil && (raw.Hostnames == nil || raw.Hostnames.TLD == nil) {
+		s.Hostnames.TLD = *raw.DomainSuffix
 	}
 	return s, source, s.Validate()
 }
@@ -338,21 +349,12 @@ func (s Settings) Validate() error {
 	if s.Hostnames.HTTPPort < 1 || s.Hostnames.HTTPPort > 65535 {
 		return fmt.Errorf("hostnames.http_port must be between 1 and 65535")
 	}
-	tlds := s.Hostnames.TLDs
-	if s.Hostnames.LAN {
-		tlds = []string{"local"}
+	if err := hostnames.ValidateTLD(s.Hostnames.TLD); err != nil {
+		return fmt.Errorf("hostnames.tlds: %w", err)
 	}
-	if len(tlds) == 0 {
-		return errors.New("hostnames.tlds must contain at least one TLD")
-	}
-	for _, tld := range tlds {
+	for i, tld := range s.Hostnames.TLDsFallback {
 		if err := hostnames.ValidateTLD(tld); err != nil {
-			return fmt.Errorf("hostnames.tlds: %w", err)
-		}
-	}
-	if s.Hostnames.NipIO {
-		if err := hostnames.ValidateTLD(s.Hostnames.NipIOSuffix); err != nil {
-			return fmt.Errorf("hostnames.nip_io_suffix: %w", err)
+			return fmt.Errorf("hostnames.tlds_fallback[%d]: %w", i, err)
 		}
 	}
 	if s.Hostnames.HTTPS {
@@ -369,9 +371,6 @@ func (s Settings) Validate() error {
 // SaveSettings writes config.toml atomically using only the active hostname
 // model; legacy migration keys are intentionally omitted.
 func SaveSettings(s Settings) error {
-	if s.Hostnames.LAN {
-		s.EnableLAN()
-	}
 	if err := s.Validate(); err != nil {
 		return err
 	}

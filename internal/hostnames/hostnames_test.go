@@ -77,6 +77,7 @@ func TestParseHostname(t *testing.T) {
 		{"api.myapp", "test", "api.myapp.test"},
 		{"api.myapp.localhost", "test", "api.myapp.test"},
 		{"myapp", "local.example.dev", "myapp.local.example.dev"},
+		{"api.myapp.dev.localhost", "dev.localhost", "api.myapp.dev.localhost"},
 	}
 	for _, test := range tests {
 		got, err := ParseHostname(test.input, test.tld)
@@ -99,35 +100,6 @@ func TestParseHostnameRejectsInvalidNames(t *testing.T) {
 	}
 	if _, err := ParseHostname("app", "Bad"); err == nil {
 		t.Fatal("uppercase TLD succeeded")
-	}
-}
-
-func TestParseHostnames(t *testing.T) {
-	hosts, err := ParseHostnames("app.dev.example.com", []string{"example.com", "dev.example.com"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := []string{"app.example.com", "app.dev.example.com"}
-	if strings.Join(hosts, ",") != strings.Join(want, ",") {
-		t.Fatalf("ParseHostnames() = %v, want %v", hosts, want)
-	}
-
-	hosts, err = ParseHostnames("app", []string{"test", "test"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(hosts) != 1 || hosts[0] != "app.test" {
-		t.Fatalf("ParseHostnames deduplication = %v", hosts)
-	}
-
-	label := strings.Repeat("a", 62)
-	longTLD := strings.Join([]string{label, label, label, label}, ".")
-	hosts, err = ParseHostnames("app", []string{"localhost", longTLD})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(hosts) != 1 || hosts[0] != "app.localhost" {
-		t.Fatalf("TLD-specific overflow should be skipped: %v", hosts)
 	}
 }
 
