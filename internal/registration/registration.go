@@ -92,7 +92,7 @@ func AddSite(reg *config.Registry, settings config.Settings, in AddParams) (conf
 // RenameSite changes a site's slug after applying the same validation and
 // uniqueness checks used when adding a site. All other site settings are
 // preserved. The caller supplies the registry lock and saves the registry.
-func RenameSite(reg *config.Registry, oldSlug, newSlug string) (config.Site, error) {
+func RenameSite(reg *config.Registry, settings config.Settings, oldSlug, newSlug string) (config.Site, error) {
 	site := reg.Find(oldSlug)
 	if site == nil {
 		return config.Site{}, fmt.Errorf("unknown site %q", oldSlug)
@@ -106,8 +106,13 @@ func RenameSite(reg *config.Registry, oldSlug, newSlug string) (config.Site, err
 	if reg.Find(newSlug) != nil {
 		return config.Site{}, fmt.Errorf("slug %q already in use", newSlug)
 	}
-	site.Slug = newSlug
-	return *site, nil
+	renamed := *site
+	renamed.Slug = newSlug
+	if _, err := settings.RouteHostnames(renamed); err != nil {
+		return config.Site{}, fmt.Errorf("site %q: %w", newSlug, err)
+	}
+	*site = renamed
+	return renamed, nil
 }
 
 // RemoveSite removes the named site from reg. The caller supplies the lock via

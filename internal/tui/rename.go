@@ -39,7 +39,7 @@ func (m *model) handleRenameKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 
 		preview := &config.Registry{Sites: append([]config.Site(nil), m.reg.Sites...)}
-		if _, err := registration.RenameSite(preview, oldSite.Slug, newSlug); err != nil {
+		if _, err := registration.RenameSite(preview, m.settings, oldSite.Slug, newSlug); err != nil {
 			m.status = "ERROR: " + firstLine(err.Error())
 			return m, nil
 		}
@@ -60,7 +60,7 @@ func (m *model) handleRenameKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			var renamed config.Site
 			err := config.MutateRegistry(func(reg *config.Registry) error {
 				var err error
-				renamed, err = registration.RenameSite(reg, site.Slug, newSlug)
+				renamed, err = registration.RenameSite(reg, settings, site.Slug, newSlug)
 				return err
 			})
 			if err != nil {

@@ -153,7 +153,7 @@ func TestRenameSite(t *testing.T) {
 		{Slug: "beta", Path: "/beta", Port: 42102},
 	}}
 
-	renamed, err := RenameSite(reg, "alpha", "gamma")
+	renamed, err := RenameSite(reg, testSettings(), "alpha", "gamma")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,11 +168,28 @@ func TestRenameSite(t *testing.T) {
 func TestRenameSiteRejectsInvalidOrDuplicateSlug(t *testing.T) {
 	for _, newSlug := range []string{"Bad Slug", "beta"} {
 		reg := &config.Registry{Sites: []config.Site{{Slug: "alpha"}, {Slug: "beta"}}}
-		if _, err := RenameSite(reg, "alpha", newSlug); err == nil {
+		if _, err := RenameSite(reg, testSettings(), "alpha", newSlug); err == nil {
 			t.Errorf("rename to %q succeeded", newSlug)
 		}
 		if reg.Find("alpha") == nil {
 			t.Errorf("rename to %q mutated registry after error: %+v", newSlug, reg.Sites)
 		}
+	}
+}
+
+func TestRenameSiteRejectsHostnameOverflowWithoutChangingIdentity(t *testing.T) {
+	settings := testSettings()
+	label := strings.Repeat("a", 60)
+	settings.Hostnames.TLDsFallback = []string{strings.Join([]string{label, label, label, label}, ".")}
+	reg := &config.Registry{Sites: []config.Site{{Slug: "a", HostPrefix: "auth"}}}
+	if _, err := settings.RouteHostnames(reg.Sites[0]); err != nil {
+		t.Fatal(err)
+	}
+	_, err := RenameSite(reg, settings, "a", strings.Repeat("b", 63))
+	if err == nil || !strings.Contains(err.Error(), "253-character") {
+		t.Fatalf("RenameSite must reject an overflowing fallback: %v", err)
+	}
+	if reg.Sites[0].Slug != "a" || reg.Sites[0].HostPrefix != "auth" {
+		t.Fatalf("failed rename changed stored identity: %+v", reg.Sites[0])
 	}
 }
