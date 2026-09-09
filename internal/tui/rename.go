@@ -50,6 +50,8 @@ func (m *model) handleRenameKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.mode = modeNormal
 		m.cmdCache = map[string]string{}
 		m.cmdErrors = map[string]error{}
+		// A periodic refresh may observe the rename before its restart finishes.
+		m.pendingSelection = newSlug
 		return m.action("renaming "+site.Slug+" to "+newSlug+"…", func() actionDoneMsg {
 			if wasRunning {
 				if err := supervisor.Stop(site.Slug); err != nil {
@@ -74,7 +76,7 @@ func (m *model) handleRenameKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			if wasRunning {
 				err = supervisor.Start(renamed, settings)
 			}
-			return actionDoneMsg{verb: "renamed " + site.Slug + " to", slug: newSlug, err: err}
+			return actionDoneMsg{verb: "renamed " + site.Slug + " to", slug: newSlug, renamed: true, err: err}
 		})
 	}
 

@@ -72,9 +72,9 @@ func spawnWorker(request workerStartRequest) (workerProcess, error) {
 		return workerProcess{}, fmt.Errorf("identify proxy worker %d: %w", cmd.Process.Pid, err)
 	}
 	process := workerProcess{PID: cmd.Process.Pid, PGID: processGroupID(cmd.Process.Pid), Identity: identity}
-	if err := cmd.Process.Release(); err != nil {
-		return workerProcess{}, err
-	}
+	// Reap exits while a long-lived caller (the TUI) is still running. The
+	// detached process group still survives the caller exiting first.
+	go func() { _ = cmd.Wait() }()
 	return process, nil
 }
 

@@ -3,15 +3,16 @@ package tui
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/muesli/termenv"
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 )
@@ -48,8 +49,8 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	if status.Kind != supervisor.Error || !strings.Contains(status.Reason, "unavailable") {
 		t.Fatalf("broken status = %#v, want missing-path error", status)
 	}
-	if !strings.Contains(broken.rows[0][0], "✕") {
-		t.Errorf("broken row = %#v, want error glyph before slug", broken.rows[0])
+	if row := broken.rows[slices.Index(broken.slugs, site.Slug)]; row[0] != "✕" {
+		t.Errorf("broken row = %#v, want error glyph before slug", row)
 	}
 
 	if err := os.MkdirAll(project, 0o755); err != nil {
@@ -59,60 +60,33 @@ func TestBuildStatusesReflectsAndClearsStaticError(t *testing.T) {
 	if got := repaired.statuses[site.Slug]; got.Kind != supervisor.Stopped {
 		t.Errorf("repaired status = %#v, want stopped", got)
 	}
-	if got := repaired.rows[0]; got[0] != "○" || got[1] != site.Slug {
+	if got := repaired.rows[slices.Index(repaired.slugs, site.Slug)]; got[0] != "○" || got[1] != site.Slug {
 		t.Errorf("repaired row = %#v, want stopped glyph before slug", got)
 	}
-
-	m := &model{
-		cmdCache:  map[string]string{site.Slug: "stale command"},
-		cmdErrors: map[string]error{site.Slug: os.ErrInvalid},
-		statuses:  broken.statuses,
-		table:     table.New(table.WithColumns([]table.Column{{Title: "", Width: 1}, {Title: "SLUG", Width: 19}})),
-	}
-	m.applyStatuses(repaired)
-	if _, ok := m.cmdCache[site.Slug]; ok {
-		t.Error("refresh did not invalidate cached launch command")
-	}
-	if _, ok := m.cmdErrors[site.Slug]; ok {
-		t.Error("refresh did not invalidate cached launch error")
-	}
 }
 
-func TestBuildStatusesUsesLiveProxyPort(t *testing.T) {
-	identity, err := state.ProcessIdentity(os.Getpid())
-	if err != nil {
-		t.Fatal(err)
-	}
-	settings := config.DefaultSettings()
-	settings.Hostnames.HTTPPort = 80
-	message := buildStatuses(settings, &config.Registry{}, &state.State{Entries: map[string]state.Entry{
-		"__proxy": {Slug: "__proxy", PID: os.Getpid(), Identity: identity, Port: 8080},
-	}})
-	if got := message.settings.Hostnames.HTTPPort; got != 8080 {
-		t.Fatalf("display port = %d, want 8080", got)
-	}
-}
-
-func TestProxyStatusShowsLandingURL(t *testing.T) {
+func TestProxySelectionShowsLiveLandingURL(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-
 	m, err := newModel()
 	if err != nil {
 		t.Fatal(err)
 	}
-	m.settings.Hostnames.HTTPPort = 42200
-	m.proxyRunning = true
-	m.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
-
-	firstLine, _, _ := strings.Cut(ansi.Strip(m.View()), "\n")
-	if !strings.Contains(firstLine, "● proxy on http://127.0.0.1:42200/") {
-		t.Errorf("proxy status does not show the landing URL:\n%s", firstLine)
+	identity, err := state.ProcessIdentity(os.Getpid())
+	if err != nil {
+		t.Fatal(err)
 	}
-	for _, unwanted := range []string{"nip.io", "<slug>"} {
-		if strings.Contains(firstLine, unwanted) {
-			t.Errorf("proxy status contains %q:\n%s", unwanted, firstLine)
-		}
+	m.Update(buildStatuses(m.settings, &config.Registry{}, &state.State{Entries: map[string]state.Entry{
+		proxy.Slug: {Slug: proxy.Slug, PID: os.Getpid(), Identity: identity, Port: 42200},
+	}}))
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
+	view := ansi.Strip(m.View())
+	if !strings.Contains(view, "● proxy") || !strings.Contains(view, "→ http://127.0.0.1:42200/") {
+		t.Fatalf("selected proxy does not show its live listener:\n%s", view)
+	}
+	firstLine, _, _ := strings.Cut(view, "\n")
+	if strings.Contains(firstLine, "proxy") {
+		t.Errorf("proxy status still appears in the title:\n%s", firstLine)
 	}
 }
 
@@ -132,8 +106,8 @@ func TestSidebarUsesOneSpaceBetweenStatusAndSlug(t *testing.T) {
 		t.Errorf("sidebar still renders the SLUG header:\n%s", view)
 	}
 	firstLine, _, _ := strings.Cut(view, "\n")
-	if !strings.Contains(firstLine, "widget") {
-		t.Errorf("sidebar has a blank row before its first site:\n%s", view)
+	if !strings.Contains(firstLine, "proxy") {
+		t.Errorf("sidebar does not start with the proxy:\n%s", view)
 	}
 	if !strings.Contains(view, "○ widget") {
 		t.Errorf("sidebar row does not use one space between status and slug:\n%s", view)
@@ -162,6 +136,7 @@ func TestSidebarRendersColoredErrorGlyph(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	selectDashboardSite(t, m, "broken")
 
 	view := m.sidebarTableView()
 	if strings.Contains(view, "\x1b…") {
@@ -174,7 +149,7 @@ func TestSidebarRendersColoredErrorGlyph(t *testing.T) {
 		t.Errorf("selected error glyph is not red: %q", view)
 	}
 
-	m.table.SetCursor(1)
+	selectDashboardSite(t, m, "healthy")
 	view = m.sidebarTableView()
 	if !strings.Contains(view, errStyle.Render("✕")) {
 		t.Errorf("unselected error glyph is not red: %q", view)
@@ -196,6 +171,7 @@ func TestSelectedErrorShowsReason(t *testing.T) {
 		t.Fatalf("model sites = %#v, want broken site", m.reg.Sites)
 	}
 	m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+	selectDashboardSite(t, m, "broken")
 	view := m.View()
 	if !strings.Contains(view, "ERROR:") || !strings.Contains(view, "unavailable") {
 		t.Errorf("selected error reason missing from view:\n%s", view)

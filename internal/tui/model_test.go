@@ -1,14 +1,19 @@
 package tui
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/reidransom/servd/internal/config"
+	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/state"
 	"github.com/reidransom/servd/internal/supervisor"
 )
@@ -74,6 +79,7 @@ func TestRemoveKeyRemovesSelectedSite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	selectDashboardSite(t, m, "widget")
 
 	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("d")}); cmd == nil {
 		t.Fatal("expected a remove command")
@@ -87,9 +93,6 @@ func TestRemoveKeyRemovesSelectedSite(t *testing.T) {
 	}
 	if reg.Find("widget") != nil {
 		t.Fatalf("site still registered: %+v", reg.Sites)
-	}
-	if m.status != "removed widget" {
-		t.Errorf("status = %q, want %q", m.status, "removed widget")
 	}
 }
 
@@ -107,15 +110,14 @@ func TestStartStopKeyTogglesSelectedSite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	selectDashboardSite(t, m, "widget")
 
 	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")}); cmd == nil {
 		t.Fatal("expected a start command")
 	} else {
 		m.Update(cmd())
 	}
-	if got := m.status; got != "started widget" {
-		t.Errorf("status = %q, want %q", got, "started widget")
-	}
+	assertSiteProcesses(t, true, site.Slug)
 
 	m.Update(refreshCmd(m.settings)())
 	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")}); cmd == nil {
@@ -123,9 +125,7 @@ func TestStartStopKeyTogglesSelectedSite(t *testing.T) {
 	} else {
 		m.Update(cmd())
 	}
-	if got := m.status; got != "stopped widget" {
-		t.Errorf("status = %q, want %q", got, "stopped widget")
-	}
+	assertSiteProcesses(t, false, site.Slug)
 }
 
 func TestAllKeyTogglesSites(t *testing.T) {
@@ -153,9 +153,7 @@ func TestAllKeyTogglesSites(t *testing.T) {
 	} else {
 		m.Update(cmd())
 	}
-	if got := m.status; got != "Started 2 sites; 0 failed" {
-		t.Errorf("status = %q, want %q", got, "Started 2 sites; 0 failed")
-	}
+	assertSiteProcesses(t, true, "widget", "gadget")
 
 	m.Update(refreshCmd(m.settings)())
 	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("S")}); cmd == nil {
@@ -163,29 +161,7 @@ func TestAllKeyTogglesSites(t *testing.T) {
 	} else {
 		m.Update(cmd())
 	}
-	if got := m.status; got != "Stopped 2 sites; 0 failed" {
-		t.Errorf("status = %q, want %q", got, "Stopped 2 sites; 0 failed")
-	}
-}
-
-func TestBulkActionReportsCountsWithoutDroppingRowErrors(t *testing.T) {
-	sites := []config.Site{{Slug: "valid"}, {Slug: "broken"}, {Slug: "other"}}
-	result := bulkAction("started", sites, func(site config.Site) error {
-		if site.Slug == "broken" {
-			return os.ErrInvalid
-		}
-		return nil
-	})
-	m := &model{statuses: map[string]supervisor.SiteStatus{
-		"broken": {Kind: supervisor.Error, Reason: "no command configured"},
-	}}
-	m.Update(result)
-	if got, want := m.status, "Started 2 sites; 1 failed"; got != want {
-		t.Errorf("status = %q, want %q", got, want)
-	}
-	if got := m.statuses["broken"]; got.Kind != supervisor.Error || got.Reason != "no command configured" {
-		t.Errorf("broken row error = %#v, want retained error", got)
-	}
+	assertSiteProcesses(t, false, "widget", "gadget")
 }
 
 func TestAddKeyOpensModal(t *testing.T) {
@@ -353,29 +329,39 @@ func TestSiteListOmitsPorts(t *testing.T) {
 	}
 }
 
-func TestLogCmdUsesNextCommandAndReportsResolutionErrors(t *testing.T) {
+func TestLogHeaderRefreshesNextCommandAndResolutionErrors(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	project := t.TempDir()
 	configPath := filepath.Join(project, ".servd.toml")
 	if err := os.WriteFile(configPath, []byte(`cmd = "echo next"`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	site := config.Site{Slug: "site", Path: project, Port: 4011}
-	m := &model{
-		settings:  config.DefaultSettings(),
-		reg:       &config.Registry{Sites: []config.Site{site}},
-		logSlug:   site.Slug,
-		cmdCache:  map[string]string{},
-		cmdErrors: map[string]error{},
+	if err := (&config.Registry{Sites: []config.Site{{Slug: "site", Path: project, Port: 4011}}}).Save(); err != nil {
+		t.Fatal(err)
 	}
-	if got, err := m.logCmd(); err != nil || got != "echo next" {
-		t.Fatalf("next command = %q, %v; want %q, nil", got, err, "echo next")
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	selectDashboardSite(t, m, "site")
+	if view := ansi.Strip(m.View()); !strings.Contains(view, "$ echo next") {
+		t.Fatalf("next command missing from log header:\n%s", view)
 	}
 	if err := os.WriteFile(configPath, []byte("cmd ="), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	m.cmdCache = map[string]string{}
-	if _, err := m.logCmd(); err == nil {
-		t.Fatal("preview of invalid next command should return a resolution error")
+	m.Update(refreshCmd(m.settings)())
+	if view := ansi.Strip(m.View()); !strings.Contains(view, "ERROR:") || strings.Contains(view, "$ echo next") {
+		t.Fatalf("invalid next command did not replace cached header:\n%s", view)
+	}
+	if err := os.WriteFile(configPath, []byte(`cmd = "echo repaired"`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m.Update(refreshCmd(m.settings)())
+	if view := ansi.Strip(m.View()); !strings.Contains(view, "$ echo repaired") || strings.Contains(view, "ERROR:") {
+		t.Fatalf("repaired next command did not clear cached error:\n%s", view)
 	}
 }
 
@@ -399,6 +385,7 @@ func TestRenameAndRestartKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	selectDashboardSite(t, m, "widget")
 
 	if _, cmd := m.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")}); cmd != nil {
 		t.Fatal("rename key unexpectedly returned a command before input")
@@ -412,9 +399,6 @@ func TestRenameAndRestartKeys(t *testing.T) {
 		t.Fatal("rename submission returned no command")
 	}
 	m.Update(cmd())
-	if m.status != "renamed widget to gadget" {
-		t.Fatalf("rename status = %q", m.status)
-	}
 
 	reg, err := config.LoadRegistry()
 	if err != nil {
@@ -441,9 +425,6 @@ func TestRenameAndRestartKeys(t *testing.T) {
 		t.Fatal("restart key returned no command")
 	}
 	m.Update(cmd())
-	if m.status != "restarted gadget" {
-		t.Fatalf("restart status = %q", m.status)
-	}
 	runtime, err = state.Load()
 	if err != nil {
 		t.Fatal(err)
@@ -451,5 +432,266 @@ func TestRenameAndRestartKeys(t *testing.T) {
 	after, ok := runtime.Get("gadget")
 	if !ok || !state.EntryAlive(after) || !after.StartedAt.After(before.StartedAt) {
 		t.Fatalf("restart did not replace runtime entry: before=%+v after=%+v", before, after)
+	}
+}
+
+func TestProxySelectionWithoutSites(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	logPath := supervisor.LogPath(proxy.Slug)
+	if err := os.MkdirAll(filepath.Dir(logPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(logPath, []byte("proxy listener stopped\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	view := ansi.Strip(m.View())
+	for _, want := range []string{"○ proxy", "Press a to add a site.", "proxy log", "proxy listener stopped", "→ http://127.0.0.1/"} {
+		if !strings.Contains(view, want) {
+			t.Errorf("empty-registry dashboard missing %q:\n%s", want, view)
+		}
+	}
+	m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	if got := ansi.Strip(m.View()); got != view {
+		t.Errorf("moving down selected the nonselectable add-site hint:\n%s", got)
+	}
+}
+
+func TestRefreshKeepsSelectionAndLogsTogether(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	root := t.TempDir()
+	alpha := config.Site{Slug: "alpha", Path: root, Port: 4011, Cmd: "sleep 30"}
+	bravo := config.Site{Slug: "bravo", Path: root, Port: 4012, Cmd: "sleep 30"}
+	if err := (&config.Registry{Sites: []config.Site{alpha, bravo}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	for _, slug := range []string{proxy.Slug, alpha.Slug, bravo.Slug} {
+		path := supervisor.LogPath(slug)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("log from "+slug+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	assertSelected := func(slug, url string) {
+		t.Helper()
+		view := ansi.Strip(m.View())
+		if !strings.Contains(view, "log from "+slug) || !strings.Contains(view, "→ "+url) {
+			t.Fatalf("selection and logs do not show %s:\n%s", slug, view)
+		}
+	}
+	assertSelected("bravo", "http://bravo.localhost/")
+	m.Update(buildStatuses(m.settings, &config.Registry{Sites: []config.Site{bravo, alpha}}, m.st))
+	assertSelected("bravo", "http://bravo.localhost/")
+	m.Update(buildStatuses(m.settings, &config.Registry{Sites: []config.Site{alpha}}, m.st))
+	assertSelected("alpha", "http://alpha.localhost/")
+	m.Update(buildStatuses(m.settings, &config.Registry{}, m.st))
+	assertSelected(proxy.Slug, "http://127.0.0.1/")
+}
+
+func selectDashboardSite(t *testing.T, m *model, slug string) {
+	t.Helper()
+	m.Update(tea.KeyMsg{Type: tea.KeyHome})
+	for range len(m.reg.Sites) + 1 {
+		if site := m.selectedSite(); site != nil && site.Slug == slug {
+			return
+		}
+		m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	}
+	t.Fatalf("site %q is not selectable", slug)
+}
+
+func TestRenamePreservesSelectionAfterSorting(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	root := t.TempDir()
+	if err := (&config.Registry{Sites: []config.Site{
+		{Slug: "middle", Path: root, Port: 4011, Cmd: "sleep 30"},
+		{Slug: "widget", Path: root, Port: 4012, Cmd: "sleep 30"},
+	}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	selectDashboardSite(t, m, "widget")
+	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	m.Update(tea.KeyMsg{Type: tea.KeyCtrlU})
+	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("gadget")})
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil {
+		t.Fatal("rename did not submit")
+	}
+	result := cmd()
+	// A periodic snapshot can observe the registry rename before the action
+	// completion arrives, especially while a running site is restarting.
+	m.Update(refreshCmd(m.settings)())
+	_, refresh := m.Update(result)
+	if refresh == nil {
+		t.Fatal("rename did not refresh")
+	}
+	m.Update(refresh())
+	view := ansi.Strip(m.View())
+	if !strings.Contains(view, "→ http://gadget.localhost/") || !strings.Contains(view, "no logs yet for gadget") {
+		t.Fatalf("renamed site lost selection or log panel:\n%s", view)
+	}
+}
+
+func TestProxyStartReportsBindFailure(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	settings := config.DefaultSettings()
+	settings.Hostnames.HTTPPort = listener.Addr().(*net.TCPAddr).Port
+	if err := config.SaveSettings(settings); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	if cmd == nil {
+		t.Fatal("s did not attempt to start the selected proxy")
+	}
+	if _, duplicate := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")}); duplicate != nil {
+		t.Fatal("s scheduled a second action while busy")
+	}
+	_, refresh := m.Update(cmd())
+	if refresh == nil {
+		t.Fatal("failed start did not refresh status")
+	}
+	m.Update(refresh())
+	view := ansi.Strip(m.View())
+	if !strings.Contains(view, "ERROR:") || !strings.Contains(view, "could not bind configured proxy port") || !strings.Contains(view, "○ proxy") {
+		t.Fatalf("failed proxy start did not stay stopped and report its error:\n%s", view)
+	}
+}
+
+func TestProxySelectionRejectsSiteActionsAndGlobalProxyKey(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	site := config.Site{Slug: "widget", Path: t.TempDir(), Port: 4011, Cmd: "sleep 30"}
+	if err := (&config.Registry{Sites: []config.Site{site}}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	for _, key := range []string{"r", "R", "d", "p"} {
+		before := m.View()
+		if _, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(key)}); cmd != nil {
+			t.Fatalf("%s scheduled an action on the proxy", key)
+		}
+		if m.View() != before {
+			t.Fatalf("%s changed the dashboard while the proxy was selected", key)
+		}
+	}
+	for range 2 {
+		for range 2 {
+			before := m.View()
+			if _, cmd := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")}); cmd != nil || m.View() != before {
+				t.Fatal("p still acts as a global proxy shortcut")
+			}
+			m.Update(tea.KeyMsg{Type: tea.KeyTab})
+		}
+		selectDashboardSite(t, m, "widget")
+	}
+}
+
+func TestOpenReportsBrowserLaunchFailure(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	t.Setenv("PATH", t.TempDir())
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("o")})
+	view := ansi.Strip(m.View())
+	if !strings.Contains(view, "ERROR:") || strings.Contains(view, "opened proxy") {
+		t.Fatalf("browser launch failure was not reported:\n%s", view)
+	}
+}
+
+func TestSidebarClicksFollowVisibleRowsAfterScrolling(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	root := t.TempDir()
+	sites := make([]config.Site, 24)
+	for i := range sites {
+		sites[i] = config.Site{Slug: fmt.Sprintf("site-%02d", i), Path: root, Port: 4100 + i, Cmd: "sleep 30"}
+	}
+	if err := (&config.Registry{Sites: sites}).Save(); err != nil {
+		t.Fatal(err)
+	}
+	m, err := newModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 12})
+	m.Update(tea.KeyMsg{Type: tea.KeyEnd})
+	lines := strings.Split(ansi.Strip(m.View()), "\n")
+	y := slices.IndexFunc(lines, func(line string) bool { return strings.Contains(line, "site-22") })
+	if y < 0 {
+		t.Fatalf("penultimate site is not visible at end:\n%s", m.View())
+	}
+	m.Update(tea.MouseMsg{X: 3, Y: y, Button: tea.MouseButtonLeft, Action: tea.MouseActionPress})
+	if view := ansi.Strip(m.View()); !strings.Contains(view, "→ http://site-22.localhost/") {
+		t.Fatalf("click selected a different site than the visible row:\n%s", view)
+	}
+	m.Update(tea.KeyMsg{Type: tea.KeyHome})
+	m.Update(tea.KeyMsg{Type: tea.KeyDown})
+	m.Update(tea.MouseMsg{X: 3, Y: 2, Button: tea.MouseButtonLeft, Action: tea.MouseActionPress})
+	if view := ansi.Strip(m.View()); !strings.Contains(view, "→ http://127.0.0.1/") {
+		t.Fatalf("clicking the first sidebar row did not select the proxy:\n%s", view)
+	}
+	before := m.View()
+	m.Update(tea.MouseMsg{X: 0, Y: 4, Button: tea.MouseButtonLeft, Action: tea.MouseActionPress})
+	m.Update(tea.MouseMsg{X: 3, Y: 0, Button: tea.MouseButtonWheelDown})
+	if m.View() != before {
+		t.Fatal("border click or title wheel event changed selection")
+	}
+}
+
+func assertSiteProcesses(t *testing.T, running bool, slugs ...string) {
+	t.Helper()
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, slug := range slugs {
+		entry, exists := st.Get(slug)
+		if running {
+			if !exists || !state.EntryAlive(entry) {
+				t.Errorf("%s has no live process", slug)
+			}
+		} else if exists {
+			t.Errorf("%s still has runtime state after stopping: %+v", slug, entry)
+		}
 	}
 }

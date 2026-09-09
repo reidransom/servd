@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -58,12 +60,13 @@ func tick() tea.Cmd {
 
 // actionDoneMsg reports the result of an async supervisor/proxy action.
 type actionDoneMsg struct {
-	verb   string // "started", "stopped", ...
-	slug   string // empty for bulk actions
-	n      int    // succeeded count, for bulk actions
-	failed int    // failed count, for bulk actions
-	bulk   bool   // true when the action covered multiple sites
-	err    error
+	verb    string // "started", "stopped", ...
+	slug    string // empty for bulk actions
+	n       int    // succeeded count, for bulk actions
+	failed  int    // failed count, for bulk actions
+	bulk    bool   // true when the action covered multiple sites
+	err     error
+	renamed bool // registry rename succeeded, even if restart failed
 }
 
 type model struct {
@@ -71,14 +74,17 @@ type model struct {
 	reg      *config.Registry
 	st       *state.State
 
-	statuses  map[string]supervisor.SiteStatus
-	table     table.Model
-	slugs     []string // parallel to table rows
-	focus     focus
-	logSlug   string            // site the log panel is currently showing
-	cmdCache  map[string]string // slug -> resolved next launch command
-	cmdErrors map[string]error  // slug -> next launch resolution error
-	viewport  viewport.Model
+	statuses         map[string]supervisor.SiteStatus
+	table            table.Model
+	rows             []table.Row
+	slugs            []string // keys parallel to rows; the table renders only the visible window
+	rowOffset        int      // first visible row in the full snapshot
+	focus            focus
+	logSlug          string            // site or proxy key shown in the log panel
+	cmdCache         map[string]string // slug -> resolved next launch command
+	pendingSelection string            // rename target to follow when a snapshot observes it
+	cmdErrors        map[string]error  // slug -> next launch resolution error
+	viewport         viewport.Model
 
 	proxyRunning bool
 	width        int
@@ -98,8 +104,6 @@ var (
 	titleStyle  = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7aa2f7"))
 	dimStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 	helpStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	okStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("42"))
-	offStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	followStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("42"))
 	pausedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#e0af68"))
 	statusStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#bb9af7"))
@@ -141,7 +145,6 @@ func newModel() (*model, error) {
 
 	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, cmdErrors: map[string]error{}, viewport: viewport.New(80, 20), showHelp: true}
 	m.applyStatuses(buildStatuses(settings, reg, st))
-	m.syncLogSelection()
 	return m, nil
 }
 
@@ -167,26 +170,28 @@ func refreshCmd(_ config.Settings) tea.Cmd {
 	}
 }
 
-// applyStatuses swaps in a fresh snapshot, preserving the cursor position.
+// applyStatuses swaps in a fresh snapshot, preserving the selected row by key.
 func (m *model) applyStatuses(msg statusesMsg) {
 	if msg.reg == nil {
 		return
 	}
+	selected, cur := m.selectedSlug(), m.rowOffset+m.table.Cursor()
 	m.settings, m.reg, m.st = msg.settings, msg.reg, msg.st
 	m.proxyRunning = msg.proxyRunning
 	m.cmdCache = map[string]string{}
 	m.cmdErrors = map[string]error{}
 	m.statuses = msg.statuses
-	m.table.SetRows(msg.rows)
-	m.slugs = msg.slugs
-	cur := m.table.Cursor()
-	if cur >= len(msg.rows) {
-		cur = len(msg.rows) - 1
+	m.rows, m.slugs = msg.rows, msg.slugs
+	if idx := slices.Index(m.slugs, selected); idx >= 0 {
+		cur = idx
 	}
-	if cur < 0 {
-		cur = 0
+	if m.pendingSelection != "" {
+		if idx := slices.Index(m.slugs, m.pendingSelection); idx >= 0 {
+			cur = idx
+			m.pendingSelection = ""
+		}
 	}
-	m.table.SetCursor(cur)
+	m.selectRow(cur)
 }
 
 // resize recomputes the pane dimensions from the terminal size and which
@@ -204,6 +209,7 @@ func (m *model) resize() {
 		chrome++
 	}
 	inner := max(5, m.height-chrome)
+	cur := m.rowOffset + m.table.Cursor()
 	m.table.SetHeight(inner + 1) // table height includes its omitted header row
 	// The sidebar box hugs the table's rendered width; both boxes add 2 cols
 	// of border, so the log viewport gets whatever's left.
@@ -211,6 +217,7 @@ func (m *model) resize() {
 	// One row inside the log box is the "$ command" header, so the viewport
 	// gets inner-1 and both boxes still render `inner` content rows.
 	m.viewport.Height = max(4, inner-1)
+	m.selectRow(cur)
 }
 
 // sidebarTableView removes the table component's mandatory header row and
@@ -224,6 +231,13 @@ func (m *model) sidebarTableView() string {
 		rows = view
 	}
 	lines := strings.Split(rows, "\n")
+	if len(m.slugs) == 1 && m.slugs[0] == proxy.Slug {
+		for i, hint := range []string{"No sites.", "Press a to add a site."} {
+			if i+1 < len(lines) {
+				lines[i+1] = dimStyle.Width(lipgloss.Width(lines[0])).Render(hint)
+			}
+		}
+	}
 	for i, line := range lines {
 		plain := ansi.Strip(line)
 		glyph := strings.Index(plain, "✕")
@@ -252,7 +266,7 @@ func (m *model) sidebarWidth() int {
 // logCmd returns the next resolved launch command for the selected site.
 // Resolution hits the filesystem, so it is cached until the next refresh.
 func (m *model) logCmd() (string, error) {
-	if m.logSlug == "" {
+	if m.logSlug == "" || m.logSlug == proxy.Slug {
 		return "", nil
 	}
 	if err, ok := m.cmdErrors[m.logSlug]; ok {
@@ -279,15 +293,36 @@ func (m *model) logCmd() (string, error) {
 	return "", nil
 }
 
-func (m *model) selectedSite() *config.Site {
-	if len(m.slugs) == 0 {
-		return nil
-	}
-	idx := m.table.Cursor()
+func (m *model) selectedSlug() string {
+	idx := m.rowOffset + m.table.Cursor()
 	if idx < 0 || idx >= len(m.slugs) {
+		return ""
+	}
+	return m.slugs[idx]
+}
+
+func (m *model) selectedSite() *config.Site {
+	slug := m.selectedSlug()
+	if slug == "" || slug == proxy.Slug {
 		return nil
 	}
-	return m.reg.Find(m.slugs[idx])
+	return m.reg.Find(slug)
+}
+
+// selectRow owns scrolling so rendering and mouse hit-testing share the same
+// offset. Bubbles' table does not expose its internal viewport offset.
+func (m *model) selectRow(index int) {
+	index = max(0, min(index, len(m.rows)-1))
+	height := max(1, m.table.Height())
+	m.rowOffset = max(0, min(m.rowOffset, len(m.rows)-height))
+	if index < m.rowOffset {
+		m.rowOffset = index
+	} else if index >= m.rowOffset+height {
+		m.rowOffset = index - height + 1
+	}
+	m.table.SetRows(m.rows[m.rowOffset:min(len(m.rows), m.rowOffset+height)])
+	m.table.SetCursor(index - m.rowOffset)
+	m.syncLogSelection()
 }
 
 // allSitesRunning reports whether every registered site has a live process.
@@ -324,6 +359,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case actionDoneMsg:
 		m.busy = false
+		if msg.err != nil && !msg.renamed {
+			m.pendingSelection = ""
+		}
 		switch {
 		case msg.bulk:
 			m.status = fmt.Sprintf("%s %d sites; %d failed", strings.ToUpper(msg.verb[:1])+msg.verb[1:], msg.n, msg.failed)
@@ -347,8 +385,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	if m.focus == focusLog {
 		m.viewport, cmd = m.viewport.Update(msg)
-	} else {
-		m.table, cmd = m.table.Update(msg)
 	}
 	return m, cmd
 }
@@ -421,6 +457,22 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.resize()
 		return m, nil
 	case "s":
+		if m.selectedSlug() == proxy.Slug && !m.busy {
+			running, settings := m.proxyRunning, m.settings
+			status, verb := "starting proxy…", "proxy started"
+			if running {
+				status, verb = "stopping proxy…", "proxy stopped"
+			}
+			return m.action(status, func() actionDoneMsg {
+				var err error
+				if running {
+					err = proxy.StopBackground()
+				} else {
+					_, err = proxy.StartBackground(settings)
+				}
+				return actionDoneMsg{verb: verb, err: err}
+			})
+		}
 		if s := m.selectedSite(); s != nil && !m.busy {
 			site, settings := *s, m.settings
 			if entry, ok := m.st.Get(site.Slug); ok && state.EntryAlive(entry) {
@@ -464,29 +516,21 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				})}
 			})
 		}
+		return m, nil
 	case "o":
-		if s := m.selectedSite(); s != nil {
-			_ = app.OpenBrowser(m.settings.SiteURL(*s))
-			m.status = "opened " + s.Slug
+		url, label := "", ""
+		if m.selectedSlug() == proxy.Slug {
+			url, label = m.proxyURL(), "proxy"
+		} else if s := m.selectedSite(); s != nil {
+			url, label = m.settings.SiteURL(*s), s.Slug
 		}
-	case "p":
-		if m.busy {
-			break
-		}
-		running, settings := m.proxyRunning, m.settings
-		status, verb := "starting proxy…", "proxy started"
-		if running {
-			status, verb = "stopping proxy…", "proxy stopped"
-		}
-		return m.action(status, func() actionDoneMsg {
-			var err error
-			if running {
-				err = proxy.StopBackground()
+		if url != "" {
+			if err := app.OpenBrowser(url); err != nil {
+				m.status = "ERROR: " + firstLine(err.Error())
 			} else {
-				_, err = proxy.StartBackground(settings)
+				m.status = "opened " + label
 			}
-			return actionDoneMsg{verb: verb, err: err}
-		})
+		}
 	}
 
 	// Unhandled keys go to the focused widget.
@@ -495,10 +539,29 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.viewport, cmd = m.viewport.Update(msg)
 		return m, cmd
 	}
-	var cmd tea.Cmd
-	m.table, cmd = m.table.Update(msg)
-	m.syncLogSelection() // re-point the panel if the cursor moved
-	return m, cmd
+	cur := m.rowOffset + m.table.Cursor()
+	switch {
+	case key.Matches(msg, m.table.KeyMap.LineUp):
+		cur--
+	case key.Matches(msg, m.table.KeyMap.LineDown):
+		cur++
+	case key.Matches(msg, m.table.KeyMap.PageUp):
+		cur -= m.table.Height()
+	case key.Matches(msg, m.table.KeyMap.PageDown):
+		cur += m.table.Height()
+	case key.Matches(msg, m.table.KeyMap.HalfPageUp):
+		cur -= m.table.Height() / 2
+	case key.Matches(msg, m.table.KeyMap.HalfPageDown):
+		cur += m.table.Height() / 2
+	case key.Matches(msg, m.table.KeyMap.GotoTop):
+		cur = 0
+	case key.Matches(msg, m.table.KeyMap.GotoBottom):
+		cur = len(m.rows) - 1
+	default:
+		return m, nil
+	}
+	m.selectRow(cur)
+	return m, nil
 }
 
 // handleAddKey drives the add-site modal: esc cancels, enter submits the typed
@@ -619,18 +682,23 @@ func expandHome(path string) string {
 	return path
 }
 
-// firstRowY is the terminal row of the first site row in the sidebar: the
-// title (1) + the box's top border (1) + the table header (1) sit above it.
-const firstRowY = 3
+// firstRowY is zero-based: the title and top border precede sidebar content.
+const firstRowY = 2
 
 // handleMouse routes clicks and wheel events to the pane under the pointer:
-// clicking a site row selects it (and shows its log), clicking either pane
+// clicking a server row selects it (and shows its log), clicking either pane
 // focuses it, and the wheel scrolls whichever pane it's over.
 func (m *model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
-	if m.mode == modeAdd {
+	if m.mode != modeNormal {
 		return m, nil // the modal owns the screen; ignore clicks underneath
 	}
-	overLog := msg.X >= m.sidebarWidth()
+	sidebarWidth := m.sidebarWidth()
+	insideRows := msg.Y >= firstRowY && msg.Y < firstRowY+m.table.Height()
+	overList := insideRows && msg.X >= 1 && msg.X < sidebarWidth+1
+	overLog := insideRows && msg.X >= sidebarWidth+3 && msg.X < sidebarWidth+3+m.viewport.Width
+	if !overList && !overLog {
+		return m, nil
+	}
 
 	switch msg.Button {
 	case tea.MouseButtonWheelUp, tea.MouseButtonWheelDown:
@@ -639,14 +707,12 @@ func (m *model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 			m.viewport, cmd = m.viewport.Update(msg)
 			return m, cmd
 		}
-		// The table itself ignores mouse events, so drive its cursor directly;
-		// moving it re-points the log panel via syncLogSelection.
+		cur := m.rowOffset + m.table.Cursor()
 		if msg.Button == tea.MouseButtonWheelUp {
-			m.table.MoveUp(1)
+			m.selectRow(cur - 1)
 		} else {
-			m.table.MoveDown(1)
+			m.selectRow(cur + 1)
 		}
-		m.syncLogSelection()
 		return m, nil
 	}
 
@@ -658,46 +724,51 @@ func (m *model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	m.focus = focusList
-	if idx := msg.Y - firstRowY; idx >= 0 && idx < len(m.slugs) {
-		m.table.SetCursor(idx)
-		m.syncLogSelection()
+	if idx := m.rowOffset + msg.Y - firstRowY; idx < len(m.rows) {
+		m.selectRow(idx)
 	}
 	return m, nil
 }
 
-// syncLogSelection points the log panel at the highlighted site, resetting
+// syncLogSelection points the log panel at the highlighted row, resetting
 // scroll to the bottom when the selection actually changed.
 func (m *model) syncLogSelection() {
-	slug := ""
-	if s := m.selectedSite(); s != nil {
-		slug = s.Slug
-	}
+	slug := m.selectedSlug()
 	if slug == m.logSlug {
 		return
 	}
+	m.pendingSelection = ""
 	m.logSlug = slug
 	m.loadLog()
 	m.viewport.GotoBottom()
 }
 
-// loadLog reads the selected site's logfile into the viewport. It preserves the
+// loadLog reads the selected row's logfile into the viewport. It preserves the
 // user's scroll position unless they were already at the bottom, in which case
 // it stays pinned there (tail/follow).
 func (m *model) loadLog() {
 	if m.logSlug == "" {
-		m.viewport.SetContent(dimStyle.Render("(no site selected)"))
+		m.viewport.SetContent(dimStyle.Render("(no server selected)"))
 		return
 	}
 	follow := m.viewport.AtBottom()
 	data, err := os.ReadFile(supervisor.LogPath(m.logSlug))
 	if err != nil {
-		m.viewport.SetContent(dimStyle.Render("(no logs yet for " + m.logSlug + ")"))
+		label := m.logSlug
+		if label == proxy.Slug {
+			label = "proxy"
+		}
+		m.viewport.SetContent(dimStyle.Render("(no logs yet for " + label + ")"))
 		return
 	}
 	m.viewport.SetContent(string(data))
 	if follow {
 		m.viewport.GotoBottom()
 	}
+}
+
+func (m *model) proxyURL() string {
+	return hostnames.FormatURL(m.settings.BindHost, m.settings.Hostnames.HTTPPort, false) + "/"
 }
 
 func (m *model) View() string {
@@ -710,31 +781,19 @@ func (m *model) View() string {
 
 	var b strings.Builder
 
-	// Title row: name on the left, proxy status on the right.
-	left := titleStyle.Render("servd") + dimStyle.Render(" — local dev servers")
-	var right string
-	if m.proxyRunning {
-		landingURL := hostnames.FormatURL(m.settings.BindHost, m.settings.Hostnames.HTTPPort, false) + "/"
-		right = okStyle.Render("● proxy on") + dimStyle.Render(" "+landingURL)
-	} else {
-		right = offStyle.Render("○ proxy off") + dimStyle.Render("  press p")
-	}
-	b.WriteString(rowLR(left, right, m.width) + "\n")
+	b.WriteString(titleStyle.Render("servd") + dimStyle.Render(" — local dev servers") + "\n")
 
-	// Panes: site list on the left, live log tail on the right.
-	var sidebar string
-	if len(m.reg.Sites) == 0 {
-		hint := dimStyle.Render("No sites.\nPress a to add a site.")
-		sidebar = box(m.focus == focusList).Width(m.sidebarWidth()).Height(m.viewport.Height).Render(hint)
-	} else {
-		sidebar = box(m.focus == focusList).Render(m.sidebarTableView())
-	}
-	// The log pane leads with the next launch command and any resolution error.
-	cmd, cmdErr := m.logCmd()
-	if cmdErr != nil {
-		cmd = errStyle.Render("ERROR: " + firstLine(cmdErr.Error()))
-	} else if cmd == "" {
-		cmd = "(unknown)"
+	sidebar := box(m.focus == focusList).Render(m.sidebarTableView())
+	// Sites show their next command; the proxy has no site launch command.
+	logTitle := dimStyle.Render("proxy log")
+	if m.logSlug != proxy.Slug {
+		cmd, cmdErr := m.logCmd()
+		if cmdErr != nil {
+			cmd = errStyle.Render("ERROR: " + firstLine(cmdErr.Error()))
+		} else if cmd == "" {
+			cmd = "(unknown)"
+		}
+		logTitle = dimStyle.Render("$ ") + cmd
 	}
 	// Tail indicator: green LIVE when pinned to the bottom (new lines stream in),
 	// amber scroll-percent when the user has scrolled back into history.
@@ -745,13 +804,15 @@ func (m *model) View() string {
 		badge = pausedStyle.Render(fmt.Sprintf("↑ %d%%", int(m.viewport.ScrollPercent()*100)))
 	}
 	cmdCell := lipgloss.NewStyle().MaxWidth(max(1, m.viewport.Width-lipgloss.Width(badge)-1)).
-		Render(dimStyle.Render("$ ") + cmd)
+		Render(logTitle)
 	header := rowLR(cmdCell, badge, m.viewport.Width)
 	logPane := box(m.focus == focusLog).Render(header + "\n" + m.viewport.View())
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, sidebar, logPane) + "\n")
 
-	// Footer detail: selected-site URL and any transient status message.
-	if s := m.selectedSite(); s != nil {
+	// Footer detail: selected-server URL and any transient status message.
+	if m.selectedSlug() == proxy.Slug {
+		b.WriteString(dimStyle.Render("→ ") + m.proxyURL())
+	} else if s := m.selectedSite(); s != nil {
 		b.WriteString(dimStyle.Render("→ ") + m.settings.SiteURL(*s))
 		if health, ok := m.statuses[s.Slug]; ok && health.Kind == supervisor.Error {
 			b.WriteString("   " + errStyle.Render("ERROR: "+health.Reason))
@@ -766,7 +827,12 @@ func (m *model) View() string {
 	}
 	if m.showHelp {
 		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("s start/stop · r rename · R restart · d remove · S start/stop-all · a add · o open · p proxy · tab focus · h help · q quit"))
+		help := "s start/stop"
+		if m.selectedSite() != nil {
+			help += " · r rename · R restart · d remove"
+		}
+		help += " · S start/stop-all · a add · o open · tab focus · h help · q quit"
+		b.WriteString(helpStyle.Render(help))
 	}
 	return b.String()
 }

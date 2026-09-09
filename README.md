@@ -403,20 +403,29 @@ with `servd static`.
 | `servd` / `servd tui` | interactive dashboard |
 
 ### Dashboard
-The dashboard is a split view: the site list on the left, and a live tail of
-the highlighted site's log on the right, led by the `$ command` that started
-(or would start) it. Moving the selection switches the log panel; `tab` moves
-focus to the log so `↑/↓` scroll it (scroll up to pause the tail, scroll back to
-the bottom to resume following).
+The dashboard is a split view: the proxy followed by registered sites on the
+left, and a live tail of the selected server's log on the right. The proxy is
+selected initially, including when no sites are registered. Its pane is labeled
+`proxy log`; site panes show the next `$ command`. The footer shows the proxy's
+landing URL or the selected site's primary URL, using the active proxy port.
+
+Moving the selection switches the log panel; `tab` moves focus to the log so
+`↑/↓` scroll it. Scroll up to pause the tail, then back to the bottom to resume.
+The proxy scrolls with the sites rather than staying pinned above them.
 
 Site glyphs are `○` stopped, `◐` starting, `●` running, and red `✕` error.
 Select an error row to see its concise reason while the site log remains visible.
 
 ### TUI keys
 
-`↑/↓` move · `tab` focus list/log · `s` start/stop · `r` rename · `R` restart ·
-`S` start/stop all · `a` add a site (type a path, `tab` completes) · `o` open · `p` toggle proxy ·
-`h` show/hide this key help · `q` quit
+`↑/↓` move · `tab` focus list/log · `s` start/stop selected server ·
+`r` rename site · `R` restart site · `d` remove site ·
+`S` start/stop all sites · `a` add a site (type a path, `tab` completes) ·
+`o` open selected server's URL · `h` show/hide this key help · `q` quit
+
+Select the proxy and press `s` to start or stop it. The global `p` shortcut has
+been removed. Rename, restart, and remove are site-only actions; `S` never
+starts or stops the proxy. The help bar reflects the current selection.
 
 ## Agents and scripts
 

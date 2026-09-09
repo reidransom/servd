@@ -26,8 +26,14 @@ type statusesMsg struct {
 func buildStatuses(settings config.Settings, reg *config.Registry, st *state.State) statusesMsg {
 	effectiveSettings := proxy.EffectiveSettings(settings, st)
 	running, _ := proxy.Running(st)
-	rows := make([]table.Row, 0, len(reg.Sites))
-	slugs := make([]string, 0, len(reg.Sites))
+	rows := make([]table.Row, 0, len(reg.Sites)+1)
+	slugs := make([]string, 0, len(reg.Sites)+1)
+	glyph := "○"
+	if running {
+		glyph = "●"
+	}
+	rows = append(rows, table.Row{glyph, "proxy"})
+	slugs = append(slugs, proxy.Slug)
 	statuses := make(map[string]supervisor.SiteStatus, len(reg.Sites))
 	for _, site := range reg.Sites {
 		status := supervisor.Evaluate(site, effectiveSettings, st)
