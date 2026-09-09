@@ -33,7 +33,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	_, err = tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
+	_, err = tea.NewProgram(m, tea.WithOutput(m.output), tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
 	return err
 }
 
@@ -85,6 +85,8 @@ type model struct {
 	pendingSelection string            // rename target to follow when a snapshot observes it
 	cmdErrors        map[string]error  // slug -> next launch resolution error
 	viewport         viewport.Model
+	selection        *textSelection
+	output           *terminalOutput
 
 	proxyRunning bool
 	width        int
@@ -144,6 +146,7 @@ func newModel() (*model, error) {
 	t.SetStyles(s)
 
 	m := &model{settings: settings, reg: reg, st: st, table: t, cmdCache: map[string]string{}, cmdErrors: map[string]error{}, viewport: viewport.New(80, 20), showHelp: true}
+	m.output = &terminalOutput{File: os.Stdout}
 	m.applyStatuses(buildStatuses(settings, reg, st))
 	return m, nil
 }
@@ -344,6 +347,7 @@ func (m *model) Init() tea.Cmd { return tick() }
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		m.selection = nil
 		m.width, m.height = msg.Width, msg.Height
 		m.resize()
 		return m, nil
@@ -374,11 +378,19 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, refreshCmd(m.settings)
 
+	case clipboardDoneMsg:
+		if msg.err != nil {
+			m.selection = nil
+			m.status = "ERROR: copying selection: " + firstLine(msg.err.Error())
+		}
+		return m, nil
+
 	case tea.KeyMsg:
+		m.selection = nil
 		return m.handleKey(msg)
 
 	case tea.MouseMsg:
-		return m.handleMouse(msg)
+		return m.handleSelectionMouse(msg)
 	}
 
 	// Delegate to the focused widget.
@@ -772,6 +784,9 @@ func (m *model) proxyURL() string {
 }
 
 func (m *model) View() string {
+	if m.selection != nil {
+		return m.selection.view()
+	}
 	switch m.mode {
 	case modeAdd:
 		return m.addView()

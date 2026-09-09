@@ -661,12 +661,14 @@ func TestSidebarClicksFollowVisibleRowsAfterScrolling(t *testing.T) {
 		t.Fatalf("penultimate site is not visible at end:\n%s", m.View())
 	}
 	m.Update(tea.MouseMsg{X: 3, Y: y, Button: tea.MouseButtonLeft, Action: tea.MouseActionPress})
+	m.Update(tea.MouseMsg{X: 3, Y: y, Button: tea.MouseButtonLeft, Action: tea.MouseActionRelease})
 	if view := ansi.Strip(m.View()); !strings.Contains(view, "→ http://site-22.localhost/") {
 		t.Fatalf("click selected a different site than the visible row:\n%s", view)
 	}
 	m.Update(tea.KeyMsg{Type: tea.KeyHome})
 	m.Update(tea.KeyMsg{Type: tea.KeyDown})
 	m.Update(tea.MouseMsg{X: 3, Y: 2, Button: tea.MouseButtonLeft, Action: tea.MouseActionPress})
+	m.Update(tea.MouseMsg{X: 3, Y: 2, Button: tea.MouseButtonLeft, Action: tea.MouseActionRelease})
 	if view := ansi.Strip(m.View()); !strings.Contains(view, "→ http://127.0.0.1/") {
 		t.Fatalf("clicking the first sidebar row did not select the proxy:\n%s", view)
 	}

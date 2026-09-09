@@ -416,6 +416,17 @@ The proxy scrolls with the sites rather than staying pinned above them.
 Site glyphs are `○` stopped, `◐` starting, `●` running, and red `✕` error.
 Select an error row to see its concise reason while the site log remains visible.
 
+Drag with the left mouse button to highlight text; releasing automatically copies
+it to the system clipboard. No Shift key or terminal copy-on-select setting is
+needed. Clipboard delivery uses OSC 52, supported by Ghostty and other modern
+terminals. Selections begun inside a pane stay within that pane, excluding its
+borders and the neighboring pane.
+
+The highlighted view stays stable while logs and statuses refresh underneath.
+The next click, keypress (including `esc`), wheel scroll, or resize clears the
+selection and shows the latest content. A click without dragging still selects
+a server or focuses a pane; wheel scrolling works as before.
+
 ### TUI keys
 
 `↑/↓` move · `tab` focus list/log · `s` start/stop selected server ·
