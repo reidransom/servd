@@ -381,7 +381,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case clipboardDoneMsg:
 		if msg.err != nil {
 			m.selection = nil
-			m.status = "ERROR: copying selection: " + firstLine(msg.err.Error())
+			m.status = "ERROR: copying to clipboard: " + firstLine(msg.err.Error())
 		}
 		return m, nil
 
@@ -529,7 +529,7 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			})
 		}
 		return m, nil
-	case "o":
+	case "o", "c":
 		url, label := "", ""
 		if m.selectedSlug() == proxy.Slug {
 			url, label = m.proxyURL(), "proxy"
@@ -537,6 +537,9 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			url, label = m.settings.SiteURL(*s), s.Slug
 		}
 		if url != "" {
+			if msg.String() == "c" {
+				return m, m.output.copy(url)
+			}
 			if err := app.OpenBrowser(url); err != nil {
 				m.status = "ERROR: " + firstLine(err.Error())
 			} else {
@@ -846,7 +849,7 @@ func (m *model) View() string {
 		if m.selectedSite() != nil {
 			help += " · r rename · R restart · d remove"
 		}
-		help += " · S start/stop-all · a add · o open · tab focus · h help · q quit"
+		help += " · S start/stop-all · a add · o open · c copy URL · tab focus · h help · q quit"
 		b.WriteString(helpStyle.Render(help))
 	}
 	return b.String()

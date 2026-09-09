@@ -432,7 +432,8 @@ a server or focuses a pane; wheel scrolling works as before.
 `↑/↓` move · `tab` focus list/log · `s` start/stop selected server ·
 `r` rename site · `R` restart site · `d` remove site ·
 `S` start/stop all sites · `a` add a site (type a path, `tab` completes) ·
-`o` open selected server's URL · `h` show/hide this key help · `q` quit
+`o` open selected server's URL · `c` copy its URL to the clipboard ·
+`h` show/hide this key help · `q` quit
 
 Select the proxy and press `s` to start or stop it. The global `p` shortcut has
 been removed. Rename, restart, and remove are site-only actions; `S` never
