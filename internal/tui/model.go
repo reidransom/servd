@@ -50,6 +50,7 @@ const (
 	modeNormal mode = iota
 	modeAdd
 	modeRename
+	modeQR
 )
 
 type tickMsg struct{}
@@ -95,11 +96,12 @@ type model struct {
 	busy         bool   // an async action is in flight
 	showHelp     bool   // help bar visible (toggled with h)
 
-	mode        mode            // normal dashboard vs. the add-site modal
+	mode        mode            // normal dashboard vs. a modal
 	addInput    textinput.Model // path entry for the add-site modal
 	addMatches  []string        // last tab-completion candidates, shown under the field
 	renameInput textinput.Model
 	renameFrom  string
+	qr          qrModal
 }
 
 var (
@@ -390,6 +392,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleKey(msg)
 
 	case tea.MouseMsg:
+		if m.mode == modeQR {
+			return m, nil
+		}
 		return m.handleSelectionMouse(msg)
 	}
 
@@ -430,10 +435,15 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleAddKey(msg)
 	case modeRename:
 		return m.handleRenameKey(msg)
+	case modeQR:
+		return m.handleQRKey(msg)
 	}
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Quit
+	case "Q":
+		m.openQR()
+		return m, nil
 	case "S":
 		if !m.busy {
 			sites := append([]config.Site(nil), m.reg.Sites...)
@@ -795,6 +805,8 @@ func (m *model) View() string {
 		return m.addView()
 	case modeRename:
 		return m.renameView()
+	case modeQR:
+		return m.qrView()
 	}
 
 	var b strings.Builder
@@ -849,7 +861,7 @@ func (m *model) View() string {
 		if m.selectedSite() != nil {
 			help += " · r rename · R restart · d remove"
 		}
-		help += " · S start/stop-all · a add · o open · c copy URL · tab focus · h help · q quit"
+		help += " · S start/stop-all · a add · o open · c copy URL · Q QR code · tab focus · h help · q quit"
 		b.WriteString(helpStyle.Render(help))
 	}
 	return b.String()

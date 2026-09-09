@@ -101,6 +101,13 @@ Then visit `http://<slug>.localhost/` for any site, or `http://127.0.0.1/`
 for a landing page listing them all. `.localhost` resolves to loopback without
 DNS setup.
 
+Expand **QR code** beside a site on the landing page to scan its primary URL.
+Codes are generated locally, include the active proxy port, and require no
+external QR service. The scanning device must be able to reach the proxy and
+resolve the hostname: `.localhost` and loopback addresses refer to that device,
+not the computer running servd. Generating a code does not change DNS or expose
+the proxy to the network.
+
 ### Proxy port selection
 
 When `config.toml` is absent, `servd proxy up` first tries `127.0.0.1:80`.
@@ -433,11 +440,17 @@ a server or focuses a pane; wheel scrolling works as before.
 `r` rename site · `R` restart site · `d` remove site ·
 `S` start/stop all sites · `a` add a site (type a path, `tab` completes) ·
 `o` open selected server's URL · `c` copy its URL to the clipboard ·
-`h` show/hide this key help · `q` quit
+`Q` show its QR code · `h` show/hide this key help · `q` quit
 
 Select the proxy and press `s` to start or stop it. The global `p` shortcut has
 been removed. Rename, restart, and remove are site-only actions; `S` never
 starts or stops the proxy. The help bar reflects the current selection.
+
+Press uppercase `Q` to display a QR code directly in the terminal for the
+selected site's primary URL or the proxy's landing URL. `Esc`, `Q`, or `q`
+closes the QR view; `Ctrl-C` quits. The displayed URL stays fixed while the view
+is open. If the terminal is too small, servd shows the required dimensions
+instead of clipping the code; enlarge the terminal to display it.
 
 ## Agents and scripts
 

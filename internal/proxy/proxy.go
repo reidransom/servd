@@ -17,6 +17,7 @@ package proxy
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"html"
@@ -35,6 +36,7 @@ import (
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/mdns"
+	"github.com/skip2/go-qrcode"
 )
 
 // Server is a running proxy instance.
@@ -246,10 +248,13 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	var b strings.Builder
-	b.WriteString(`<!doctype html><html><head><meta charset="utf-8"><title>servd</title>`)
+	b.WriteString(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>servd</title>`)
 	b.WriteString(`<style>body{font:16px/1.5 system-ui,sans-serif;max-width:640px;margin:3rem auto;padding:0 1rem;color:#222}`)
 	b.WriteString(`h1{font-size:1.4rem}a{color:#0a58ca;text-decoration:none}a:hover{text-decoration:underline}`)
-	b.WriteString(`li{margin:.4rem 0}.port{color:#888;font-size:.85em}</style></head><body>`)
+	b.WriteString(`ul{padding-left:1.25rem}li{margin:.8rem 0;overflow-wrap:anywhere}.port{color:#888;font-size:.85em}`)
+	b.WriteString(`details{display:inline-block;vertical-align:top}details[open]{display:block}summary{cursor:pointer;color:#0a58ca}`)
+	b.WriteString(`.qr-image{display:block;max-width:100%;height:auto;image-rendering:pixelated;margin:.75rem 0;background:#fff}`)
+	b.WriteString(`.qr-url{display:block}.qr-notice{font-size:.85em;color:#555;max-width:32rem}</style></head><body>`)
 	b.WriteString(`<h1>servd &mdash; local sites</h1>`)
 	if len(sites) == 0 {
 		b.WriteString(`<p>No sites registered yet. Run <code>servd add /path/to/project</code>.</p>`)
@@ -259,6 +264,23 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 			u := s.settings.SiteURL(site)
 			b.WriteString("<li><a href=\"" + html.EscapeString(u) + "\">" + html.EscapeString(site.Slug) + "</a> ")
 			b.WriteString(fmt.Sprintf(`<span class="port">:%d</span> `, site.Port))
+			b.WriteString(`<details><summary>QR code</summary>`)
+			qr, err := qrcode.New(u, qrcode.Medium)
+			var png []byte
+			if err == nil {
+				// An integer module scale retains the default four-module quiet zone.
+				// Even the largest QR version is bounded to 740 pixels per side.
+				png, err = qr.PNG(-4)
+			}
+			if err != nil {
+				b.WriteString(`<p>QR code unavailable for this URL.</p>`)
+			} else {
+				b.WriteString(`<img class="qr-image" src="data:image/png;base64,`)
+				b.WriteString(base64.StdEncoding.EncodeToString(png))
+				b.WriteString(`" alt="QR code for ` + html.EscapeString(u) + `">`)
+			}
+			b.WriteString(`<a class="qr-url" href="` + html.EscapeString(u) + `">` + html.EscapeString(u) + `</a>`)
+			b.WriteString(`<p class="qr-notice">The scanning device needs network and DNS access to this address. Localhost and loopback addresses refer to the scanning device itself.</p></details>`)
 			b.WriteString("</li>")
 		}
 		b.WriteString("</ul>")
