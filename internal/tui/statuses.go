@@ -32,7 +32,7 @@ func buildStatuses(settings config.Settings, reg *config.Registry, st *state.Sta
 	if running {
 		glyph = "●"
 	}
-	rows = append(rows, table.Row{glyph, "proxy"})
+	rows = append(rows, table.Row{glyph, "servd"})
 	slugs = append(slugs, proxy.Slug)
 	statuses := make(map[string]supervisor.SiteStatus, len(reg.Sites))
 	for _, site := range reg.Sites {

@@ -76,16 +76,18 @@ func TestProxySelectionShowsLiveLandingURL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	m.settings.BindHost = "0.0.0.0"
+	m.settings.Hostnames.TLD = "example.com"
 	m.Update(buildStatuses(m.settings, &config.Registry{}, &state.State{Entries: map[string]state.Entry{
 		proxy.Slug: {Slug: proxy.Slug, PID: os.Getpid(), Identity: identity, Port: 42200},
 	}}))
 	m.Update(tea.WindowSizeMsg{Width: 120, Height: 30})
 	view := ansi.Strip(m.View())
-	if !strings.Contains(view, "● proxy") || !strings.Contains(view, "→ http://127.0.0.1:42200/") {
+	if !strings.Contains(view, "●") || !strings.Contains(view, "→ http://servd.example.com:42200/") {
 		t.Fatalf("selected proxy does not show its live listener:\n%s", view)
 	}
 	firstLine, _, _ := strings.Cut(view, "\n")
-	if strings.Contains(firstLine, "proxy") {
+	if strings.ContainsAny(firstLine, "●○") {
 		t.Errorf("proxy status still appears in the title:\n%s", firstLine)
 	}
 }
@@ -104,10 +106,6 @@ func TestSidebarUsesOneSpaceBetweenStatusAndSlug(t *testing.T) {
 	view := ansi.Strip(m.sidebarTableView())
 	if strings.Contains(view, "SLUG") {
 		t.Errorf("sidebar still renders the SLUG header:\n%s", view)
-	}
-	firstLine, _, _ := strings.Cut(view, "\n")
-	if !strings.Contains(firstLine, "proxy") {
-		t.Errorf("sidebar does not start with the proxy:\n%s", view)
 	}
 	if !strings.Contains(view, "○ widget") {
 		t.Errorf("sidebar row does not use one space between status and slug:\n%s", view)

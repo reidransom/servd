@@ -4,7 +4,7 @@ Status: Implemented, reviewed, and verified on 2026-09-09. This document retains
 
 ## Decision
 
-Add a selectable `proxy` row before the registered sites in the left sidebar. Use the existing table, selection styling, and status-glyph column. Selecting the proxy shows its log in the right pane and its landing URL in the footer.
+Add a selectable `servd` row before the registered sites in the left sidebar. Use the existing table, selection styling, and status-glyph column. Selecting the proxy shows its log in the right pane and its landing URL in the footer.
 
 Move proxy status out of the title row rather than displaying it twice. Keep the title and both pane borders.
 
@@ -20,11 +20,11 @@ Example layout, with the proxy selected:
 ```text
 servd
 ╭──────────────────────╮╭──────────────────────────────────╮
-│ ● proxy              ││ proxy log                   LIVE │
+│ ● servd              ││ proxy log                   LIVE │
 │ ○ acme               ││ <existing proxy log output>      │
 │ ● blog               ││                                  │
 ╰──────────────────────╯╰──────────────────────────────────╯
-→ http://127.0.0.1:8080/
+→ http://servd.localhost:8080/
 ```
 
 The example URL is illustrative. Render the effective bind host and listener port, not a hard-coded address.
@@ -43,7 +43,7 @@ The example URL is illustrative. Render the effective bind host and listener por
 
 In `internal/tui/statuses.go`:
 
-- Prepend a plain-text row with label `proxy` and glyph `●` when `proxy.Running` is true, otherwise `○`.
+- Prepend a plain-text row with label `servd` and glyph `●` when `proxy.Running` is true, otherwise `○`.
 - Include `proxy.Slug` in the row-key list before the site slugs. Keep the visible label separate from the reserved runtime key.
 - Continue evaluating only registered sites with `supervisor.Evaluate`. Do not insert a synthetic site into the registry or site-status map.
 - Preserve the existing live-port calculation and background refresh cadence. Do not add a second health poll or new proxy health states.
@@ -65,7 +65,7 @@ In `internal/tui/model.go`:
 - Give the proxy pane a descriptive `proxy log` header. Do not call `launcher.Resolve` for it or display an invented site launch command.
 - Keep the existing command header and resolution errors for site selections.
 - When proxy logs do not exist, show a proxy-specific empty-log message. Keep old logs readable when the proxy is stopped.
-- Move the existing landing-URL calculation into one private helper shared by the proxy footer and browser-open action. Continue using `hostnames.FormatURL` with effective settings and the trailing slash.
+- Share one private landing-URL helper across the proxy footer, browser-open, clipboard, and QR actions. Use `Settings.SiteURL` with the `servd` label to follow the effective primary suffix and runtime port, including the trailing slash, instead of displaying the listener's bind address. DNS must resolve this hostname to the proxy.
 - Show the landing URL for a selected proxy even while stopped. Its row glyph communicates that the listener is not running.
 - Remove the old title-row proxy indicator. Preserve transient action errors in the footer.
 

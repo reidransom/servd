@@ -410,11 +410,13 @@ with `servd static`.
 | `servd` / `servd tui` | interactive dashboard |
 
 ### Dashboard
-The dashboard is a split view: the proxy followed by registered sites on the
+The dashboard is a split view: the proxy labeled `servd` followed by registered sites on the
 left, and a live tail of the selected server's log on the right. The proxy is
 selected initially, including when no sites are registered. Its pane is labeled
 `proxy log`; site panes show the next `$ command`. The footer shows the proxy's
-landing URL or the selected site's primary URL, using the active proxy port.
+landing URL (`http://servd.<primary-domain>/`) or the selected site's primary URL,
+using the active proxy port. The servd address uses the configured primary hostname
+suffix, not the listener's bind address; DNS must resolve it to the proxy.
 
 Moving the selection switches the log panel; `tab` moves focus to the log so
 `↑/↓` scroll it. Scroll up to pause the tail, then back to the bottom to resume.

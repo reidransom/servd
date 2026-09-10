@@ -19,7 +19,6 @@ import (
 
 	"github.com/reidransom/servd/internal/app"
 	"github.com/reidransom/servd/internal/config"
-	"github.com/reidransom/servd/internal/hostnames"
 	"github.com/reidransom/servd/internal/launcher"
 	"github.com/reidransom/servd/internal/proxy"
 	"github.com/reidransom/servd/internal/registration"
@@ -793,7 +792,7 @@ func (m *model) loadLog() {
 }
 
 func (m *model) proxyURL() string {
-	return hostnames.FormatURL(m.settings.BindHost, m.settings.Hostnames.HTTPPort, false) + "/"
+	return m.settings.SiteURL(config.Site{Slug: "servd"})
 }
 
 func (m *model) View() string {

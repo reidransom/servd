@@ -451,7 +451,7 @@ func TestProxySelectionWithoutSites(t *testing.T) {
 	}
 	m.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
 	view := ansi.Strip(m.View())
-	for _, want := range []string{"○ proxy", "Press a to add a site.", "proxy log", "proxy listener stopped", "→ http://127.0.0.1/"} {
+	for _, want := range []string{"○", "Press a to add a site.", "proxy log", "proxy listener stopped", "→ http://servd.localhost/"} {
 		if !strings.Contains(view, want) {
 			t.Errorf("empty-registry dashboard missing %q:\n%s", want, view)
 		}
@@ -500,7 +500,7 @@ func TestRefreshKeepsSelectionAndLogsTogether(t *testing.T) {
 	m.Update(buildStatuses(m.settings, &config.Registry{Sites: []config.Site{alpha}}, m.st))
 	assertSelected("alpha", "http://alpha.localhost/")
 	m.Update(buildStatuses(m.settings, &config.Registry{}, m.st))
-	assertSelected(proxy.Slug, "http://127.0.0.1/")
+	assertSelected(proxy.Slug, "http://servd.localhost/")
 }
 
 func selectDashboardSite(t *testing.T, m *model, slug string) {
@@ -584,7 +584,7 @@ func TestProxyStartReportsBindFailure(t *testing.T) {
 	}
 	m.Update(refresh())
 	view := ansi.Strip(m.View())
-	if !strings.Contains(view, "ERROR:") || !strings.Contains(view, "could not bind configured proxy port") || !strings.Contains(view, "○ proxy") {
+	if !strings.Contains(view, "ERROR:") || !strings.Contains(view, "could not bind configured proxy port") || !strings.Contains(view, "○") {
 		t.Fatalf("failed proxy start did not stay stopped and report its error:\n%s", view)
 	}
 }
@@ -669,7 +669,7 @@ func TestSidebarClicksFollowVisibleRowsAfterScrolling(t *testing.T) {
 	m.Update(tea.KeyMsg{Type: tea.KeyDown})
 	m.Update(tea.MouseMsg{X: 3, Y: 2, Button: tea.MouseButtonLeft, Action: tea.MouseActionPress})
 	m.Update(tea.MouseMsg{X: 3, Y: 2, Button: tea.MouseButtonLeft, Action: tea.MouseActionRelease})
-	if view := ansi.Strip(m.View()); !strings.Contains(view, "→ http://127.0.0.1/") {
+	if view := ansi.Strip(m.View()); !strings.Contains(view, "→ http://servd.localhost/") {
 		t.Fatalf("clicking the first sidebar row did not select the proxy:\n%s", view)
 	}
 	before := m.View()

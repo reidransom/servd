@@ -79,7 +79,7 @@ func TestQRProxyModalHidesMatrixUntilItFits(t *testing.T) {
 	dashboard := m.View()
 	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("Q")})
 	full := m.View()
-	if !strings.Contains(ansi.Strip(full), "http://127.0.0.1:8088/") || !strings.ContainsAny(full, "▀▄█") {
+	if !strings.Contains(ansi.Strip(full), "http://servd.localhost:8088/") || !strings.ContainsAny(full, "▀▄█") {
 		t.Fatalf("proxy-only dashboard did not show a QR code:\n%s", full)
 	}
 	for _, size := range []tea.WindowSizeMsg{{Width: 20, Height: 50}, {Width: 100, Height: 8}} {
