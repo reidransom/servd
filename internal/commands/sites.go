@@ -70,18 +70,20 @@ func newAddCmd() *cobra.Command {
 
 func newRmCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "rm <slug>",
+		Use:   "rm [slug]",
 		Short: "Remove a site from the registry (stops it first)",
-		Args:  cobra.ExactArgs(1),
+		Long:  "Remove a site from the registry (stops it first). Without a slug, target the registered current directory if it contains .servd.toml. Project files are not deleted.",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			reg, err := config.LoadRegistry()
 			if err != nil {
 				return err
 			}
-			slug := args[0]
-			if reg.Find(slug) == nil {
-				return fmt.Errorf("unknown site %q", slug)
+			s, err := selectSite(cmd, reg, args)
+			if err != nil {
+				return err
 			}
+			slug := s.Slug
 			// Stop outside the registry lock — it can take several seconds.
 			_ = supervisor.Stop(slug)
 			err = config.MutateRegistry(func(reg *config.Registry) error {
@@ -98,17 +100,18 @@ func newRmCmd() *cobra.Command {
 
 func newWhichCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "which <slug>",
+		Use:   "which [slug]",
 		Short: "Show the resolved launch command for a site",
-		Args:  cobra.ExactArgs(1),
+		Long:  "Show the resolved launch command for a site. Without a slug, target the registered current directory if it contains .servd.toml.",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}
-			s := reg.Find(args[0])
-			if s == nil {
-				return fmt.Errorf("unknown site %q", args[0])
+			s, err := selectSite(cmd, reg, args)
+			if err != nil {
+				return err
 			}
 			res, err := launcher.Resolve(*s, settings)
 			if err != nil {

@@ -80,6 +80,22 @@ func selectSites(reg *config.Registry, args []string, all bool) ([]config.Site, 
 	return out, nil
 }
 
+// selectSite resolves one explicit slug or the configured current directory.
+func selectSite(cmd *cobra.Command, reg *config.Registry, args []string) (*config.Site, error) {
+	args, err := defaultSiteArgs(reg, args)
+	if err != nil {
+		return nil, err
+	}
+	if err := cobra.ExactArgs(1)(cmd, args); err != nil {
+		return nil, err
+	}
+	site := reg.Find(args[0])
+	if site == nil {
+		return nil, fmt.Errorf("unknown site %q", args[0])
+	}
+	return site, nil
+}
+
 // defaultSiteArgs targets the registered cwd only when it contains .servd.toml.
 // Explicit slugs bypass directory detection.
 func defaultSiteArgs(reg *config.Registry, args []string) ([]string, error) {

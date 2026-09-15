@@ -242,7 +242,7 @@ that site. Otherwise, Servd reads only the registered root's `.servd.toml`;
 it never searches parent directories or infers a command from Procfiles,
 framework files, package scripts, recipes, directory contents, installed
 tools, or global rules. A missing, unreadable, malformed, or invalid repository
-configuration leaves the site in error. `servd which <slug>` shows the source
+configuration leaves the site in error. `servd which [slug]` shows the source
 (`explicit` or `.servd.toml`) and the resolved command for the next start.
 
 Repository commands use a one-field file at the registered root:
@@ -395,30 +395,37 @@ with `servd static`.
 | Command | Purpose |
 |---|---|
 | `servd add <path> [--slug] [--port] [-- <command>…]` | register one project with a repository or explicit command |
-| `servd rm <slug>` | stop and unregister a site |
-| `servd which <slug>` | show the source and resolved command for the next start |
+| `servd rm [slug]` | stop and unregister a named site or the configured current directory; leave project files intact |
+| `servd which [slug]` | show the source and resolved command for a named site or the configured current directory |
 | `servd static [--host <host>] [--port <port>] [--dir <directory>]` | run the foreground static server |
 | `servd status [slug]` (alias `ls`) | show a named site, the configured current directory, or all sites otherwise (`--json` for machines) |
 | `servd up [slug…] [--all]` | start named sites or the configured current directory (`--all` starts every registered site; `--wait`/`--json` for scripts) |
 | `servd down [slug…] [--all]` | stop named sites or the configured current directory (`--all` stops every registered site) |
 | `servd restart [slug…] [--all]` | restart named sites or the configured current directory (`--all` restarts every registered site) |
-| `servd logs <slug> [-f]` | show / follow a site's server output |
-| `servd open <slug>` | open the primary URL in a browser |
+| `servd logs [slug] [-f]` | show / follow output for a named site or the configured current directory |
+| `servd open [slug]` | open the primary URL for a named site or the configured current directory |
 | `servd proxy up\|down\|status` | manage the background reverse proxy |
 | `servd proxy` | run the proxy in the foreground |
 | `servd doctor` | check settings, ports, primary resolution and configured fallback names |
 | `servd version` / `servd --version` | report version, commit, and build date |
 | `servd` / `servd tui` | interactive dashboard |
 
-With no slug, `up`, `down`, `restart`, and `status` check for `.servd.toml`
-directly in the current working directory; they do not search parents. If
-present, they select the site registered at that path, including registrations
-with a custom slug. An unregistered directory produces an error with a
-`servd add .` hint; no command registers it automatically. Explicit slugs and
-the lifecycle commands' `--all` flag bypass this check. Without the file,
-`up`, `down`, and `restart` still require slugs or `--all`, and `status` lists
-every site. To list every site, run `status` from a directory without
-`.servd.toml`. These selection rules also apply with `--json` and the `ls` alias.
+With no slug, `up`, `down`, `restart`, `status` (alias `ls`), `logs`, `open`,
+`which`, and `rm` check for `.servd.toml` directly in the current working
+directory; they do not search parents. If present, they select the site
+registered at that path, including registrations with a custom slug. An
+unregistered directory produces an error with a `servd add .` hint; no command
+registers it automatically. Explicit slugs and the lifecycle commands' `--all`
+flag bypass this check. Without the file, commands still require their explicit
+slug(s) or existing `--all` option, except `status`, which lists every site.
+To list every site, run `status` from a directory without `.servd.toml`.
+Selection also works with existing flags, such as `logs -f` and `status --json`.
+
+The file's presence selects the site; target selection does not parse its launch
+command. You can still stop a site, read its logs, or unregister it when its
+repository command is invalid. `which` and `restart` retain their command
+resolution errors. `rm` stops and unregisters the site without deleting project
+files, including `.servd.toml`.
 
 ### Dashboard
 The dashboard is a split view: the proxy labeled `servd` followed by registered sites on the

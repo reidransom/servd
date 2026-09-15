@@ -164,21 +164,23 @@ func newRestartCmd() *cobra.Command {
 func newLogsCmd() *cobra.Command {
 	var follow bool
 	c := &cobra.Command{
-		Use:   "logs <slug>",
+		Use:   "logs [slug]",
 		Short: "Show a site's server output",
-		Args:  cobra.ExactArgs(1),
+		Long:  "Show a site's server output. Without a slug, target the registered current directory if it contains .servd.toml.",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_, reg, _, err := app.Load()
 			if err != nil {
 				return err
 			}
-			if reg.Find(args[0]) == nil {
-				return fmt.Errorf("unknown site %q", args[0])
+			s, err := selectSite(cmd, reg, args)
+			if err != nil {
+				return err
 			}
-			path := supervisor.LogPath(args[0])
+			path := supervisor.LogPath(s.Slug)
 			f, err := os.Open(path)
 			if err != nil {
-				return fmt.Errorf("no logs yet for %q", args[0])
+				return fmt.Errorf("no logs yet for %q", s.Slug)
 			}
 			defer func() { _ = f.Close() }()
 			if _, err := io.Copy(os.Stdout, f); err != nil {
@@ -234,17 +236,18 @@ func newLogsCmd() *cobra.Command {
 
 func newOpenCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "open <slug>",
+		Use:   "open [slug]",
 		Short: "Open a site's primary URL in the browser",
-		Args:  cobra.ExactArgs(1),
+		Long:  "Open a site's primary URL in the browser. Without a slug, target the registered current directory if it contains .servd.toml.",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
 			if err != nil {
 				return err
 			}
-			s := reg.Find(args[0])
-			if s == nil {
-				return fmt.Errorf("unknown site %q", args[0])
+			s, err := selectSite(cmd, reg, args)
+			if err != nil {
+				return err
 			}
 			url := proxy.EffectiveSettings(settings, st).SiteURL(*s)
 			fmt.Println(url)

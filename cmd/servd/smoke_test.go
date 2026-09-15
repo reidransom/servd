@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -57,10 +59,23 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		"XDG_STATE_HOME="+stateHome,
 		"PATH="+tmp+string(os.PathListSeparator)+os.Getenv("PATH"),
 	)
+	// Never open the user's browser, including when an invalid-selection test fails.
+	if runtime.GOOS != "windows" {
+		opener := "xdg-open"
+		if runtime.GOOS == "darwin" {
+			opener = "open"
+		}
+		script := "#!/bin/sh\nprintf '%s\\n' \"$1\" > \"${SERVD_SMOKE_OPEN_URL:-/dev/null}\"\n"
+		if err := os.WriteFile(filepath.Join(tmp, opener), []byte(script), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
 	port := availableSmokePort(t)
 	runSmokeCommand(t, environment, binary, "add", project, "--slug", smokeSlug, "--port", fmt.Sprint(port))
 	t.Cleanup(func() {
-		cleanup := exec.Command(binary, "down", "--all")
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		cleanup := exec.CommandContext(ctx, binary, "down", "--all")
 		cleanup.Env = environment
 		_ = cleanup.Run()
 	})
@@ -80,14 +95,6 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	if body := fetchSmokeSite(t, url); !strings.Contains(body, fixture) {
 		t.Fatalf("detached GET %s = %q, want fixture content", url, body)
-	}
-
-	logData, err := os.ReadFile(filepath.Join(stateHome, "servd", "logs", smokeSlug+".log"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(string(logData), `servd starting "`+smokeSlug+`"`) {
-		t.Fatalf("site log missing startup header:\n%s", logData)
 	}
 
 	runSmokeCommand(t, environment, binary, "down", smokeSlug)
@@ -227,11 +234,219 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 	runSmokeCommand(t, environment, binary, "restart", smokeSlug, "other")
 	waitForSmokeBody(t, url, "restarted command")
 	waitForSmokeBody(t, other.DirectURL, "other site")
+
+	t.Run("single site target boundaries", func(t *testing.T) {
+		currentPID := smokeSiteStatus(t, environment, binary, smokeSlug).PID
+		otherPID := smokeSiteStatus(t, environment, binary, "other").PID
+		commands := []string{"logs", "open", "which", "rm"}
+		for _, command := range commands {
+			runSmokeFailure(t, environment, binary, "unknown site", command, "missing")
+			runSmokeFailure(t, environment, binary, "accepts at most 1", command, smokeSlug, "other")
+		}
+		t.Run("outside registered root", func(t *testing.T) {
+			child := filepath.Join(project, "single-child")
+			if err := os.Mkdir(child, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			t.Chdir(child)
+			for _, command := range commands {
+				runSmokeFailure(t, environment, binary, "accepts 1 arg", command)
+			}
+			if err := os.WriteFile(filepath.Join(child, ".servd.toml"), []byte(`cmd = "unused"`), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			for _, command := range commands {
+				runSmokeFailure(t, environment, binary, "servd add .", command)
+				runSmokeFailure(t, environment, binary, "unknown site", command, "missing")
+			}
+		})
+		t.Run("registered root without marker", func(t *testing.T) {
+			configPath := filepath.Join(project, ".servd.toml")
+			data, err := os.ReadFile(configPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Remove(configPath); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := os.WriteFile(configPath, data, 0o644); err != nil {
+					t.Error(err)
+				}
+			})
+			for _, command := range commands {
+				runSmokeFailure(t, environment, binary, "accepts 1 arg", command)
+			}
+		})
+		for slug, pid := range map[string]int{smokeSlug: currentPID, "other": otherPID} {
+			if site := smokeSiteStatus(t, environment, binary, slug); site.PID != pid || site.Status != "running" {
+				t.Fatalf("invalid selection changed %s: %+v", slug, site)
+			}
+		}
+		output := runSmokeCommand(t, environment, binary, "ls", "--json")
+		var payload struct {
+			Sites []smokeSite `json:"sites"`
+		}
+		if err := json.Unmarshal([]byte(output), &payload); err != nil {
+			t.Fatal(err)
+		}
+		if len(payload.Sites) != 1 || payload.Sites[0].Slug != smokeSlug {
+			t.Fatalf("ls did not select the cwd site: %s", output)
+		}
+	})
+
+	t.Run("cwd launch command", func(t *testing.T) {
+		output := runSmokeCommand(t, environment, binary, "which")
+		if !strings.Contains(output, "source: .servd.toml") || !strings.Contains(output, "command: servd static --dir next") {
+			t.Fatalf("cwd which = %s, want next repository command", output)
+		}
+		if err := os.WriteFile(filepath.Join(project, ".servd.toml"), []byte("not toml [[["), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if err := os.WriteFile(filepath.Join(project, ".servd.toml"), []byte("cmd = \"servd static --dir next\"\n"), 0o644); err != nil {
+				t.Error(err)
+			}
+		})
+		runSmokeFailure(t, environment, binary, "invalid repository command", "which")
+		output = runSmokeCommand(t, environment, binary, "which", "other")
+		if !strings.Contains(output, "source: explicit") || strings.Contains(output, "--dir next") {
+			t.Fatalf("explicit which = %s, want other site's explicit command", output)
+		}
+	})
+
+	t.Run("cwd logs and follow", func(t *testing.T) {
+		configPath := filepath.Join(project, ".servd.toml")
+		if err := os.WriteFile(configPath, []byte("cmd = \"echo cwd-log-marker && servd static --dir next\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if err := os.WriteFile(configPath, []byte("cmd = \"servd static --dir next\"\n"), 0o644); err != nil {
+				t.Error(err)
+			}
+		})
+		runSmokeCommand(t, environment, binary, "restart")
+		waitForSmokeBody(t, url, "restarted command")
+		if err := os.WriteFile(configPath, []byte("not toml [[["), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		output := runSmokeCommand(t, environment, binary, "logs")
+		if !strings.Contains(output, "cwd-log-marker") {
+			t.Fatalf("cwd logs did not contain site output: %s", output)
+		}
+		if output := runSmokeCommand(t, environment, binary, "logs", "other"); strings.Contains(output, "cwd-log-marker") {
+			t.Fatalf("explicit logs selected cwd output: %s", output)
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		follow := exec.CommandContext(ctx, binary, "logs", "-f")
+		follow.Env = environment
+		stdout, err := follow.StdoutPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := follow.Start(); err != nil {
+			t.Fatal(err)
+		}
+		readDone := make(chan struct{})
+		defer func() {
+			cancel()
+			<-readDone
+			_ = follow.Wait()
+		}()
+		lines := make(chan string)
+		go func() {
+			defer close(readDone)
+			defer close(lines)
+			scanner := bufio.NewScanner(stdout)
+			for scanner.Scan() {
+				select {
+				case lines <- scanner.Text():
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+		waitForSmokeLine(t, ctx, lines, "cwd-log-marker")
+		if err := os.WriteFile(configPath, []byte("cmd = \"echo cwd-follow-marker && servd static --dir next\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "restart")
+		waitForSmokeLine(t, ctx, lines, "cwd-follow-marker")
+		waitForSmokeBody(t, url, "restarted command")
+	})
+
+	t.Run("cwd browser URL", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Windows uses the system cmd builtin for browser opening")
+		}
+		capture := filepath.Join(t.TempDir(), "opened-url")
+		browserEnv := append(append([]string{}, environment...), "SERVD_SMOKE_OPEN_URL="+capture)
+		for _, tc := range []struct {
+			args []string
+			url  string
+		}{
+			{args: []string{"open"}, url: "http://ci-smoke.localhost/"},
+			{args: []string{"open", "other"}, url: "http://other.localhost/"},
+		} {
+			output := runSmokeCommand(t, browserEnv, binary, tc.args...)
+			if strings.TrimSpace(output) != tc.url {
+				t.Fatalf("%v = %q, want primary URL %q", tc.args, output, tc.url)
+			}
+			deadline := time.Now().Add(5 * time.Second)
+			var captured []byte
+			for time.Now().Before(deadline) {
+				captured, _ = os.ReadFile(capture)
+				if strings.TrimSpace(string(captured)) == tc.url {
+					break
+				}
+				time.Sleep(20 * time.Millisecond)
+			}
+			if strings.TrimSpace(string(captured)) != tc.url {
+				t.Fatalf("browser opened %q, want %q", captured, tc.url)
+			}
+		}
+	})
+
+	t.Run("cwd unregister", func(t *testing.T) {
+		otherBefore := smokeSiteStatus(t, environment, binary, "other")
+		configPath := filepath.Join(project, ".servd.toml")
+		if err := os.WriteFile(configPath, []byte("not toml [[["), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "rm")
+		waitForSmokePortClosed(t, port)
+		runSmokeFailure(t, environment, binary, "unknown site", "status", smokeSlug)
+		if site := smokeSiteStatus(t, environment, binary, "other"); site.PID != otherBefore.PID || site.Status != "running" {
+			t.Fatalf("cwd rm changed other site: %+v", site)
+		}
+		for name, want := range map[string]string{"index.html": fixture, ".servd.toml": "not toml [[["} {
+			data, err := os.ReadFile(filepath.Join(project, name))
+			if err != nil || string(data) != want {
+				t.Fatalf("rm changed project file %s: %q, %v", name, data, err)
+			}
+		}
+		if err := os.WriteFile(configPath, []byte("cmd = \"servd static --dir next\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "add", project, "--slug", smokeSlug, "--port", fmt.Sprint(port))
+		runSmokeCommand(t, environment, binary, "up", "--wait", "--timeout", "10s")
+		currentPID := smokeSiteStatus(t, environment, binary, smokeSlug).PID
+		runSmokeCommand(t, environment, binary, "rm", "other")
+		runSmokeFailure(t, environment, binary, "unknown site", "status", "other")
+		if site := smokeSiteStatus(t, environment, binary, smokeSlug); site.PID != currentPID || site.Status != "running" {
+			t.Fatalf("explicit rm changed cwd site: %+v", site)
+		}
+		waitForSmokeBody(t, url, "restarted command")
+	})
 }
 
 func runSmokeCommand(t *testing.T, environment []string, binary string, arguments ...string) string {
 	t.Helper()
-	command := exec.Command(binary, arguments...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	command := exec.CommandContext(ctx, binary, arguments...)
 	command.Env = environment
 	output, err := command.CombinedOutput()
 	if err != nil {
@@ -294,7 +509,6 @@ type smokeSite struct {
 	Slug      string `json:"slug"`
 	Status    string `json:"status"`
 	PID       int    `json:"pid"`
-	URL       string `json:"url"`
 	DirectURL string `json:"direct_url"`
 }
 
@@ -335,11 +549,30 @@ func waitForSmokeBody(t *testing.T, url, want string) {
 
 func runSmokeFailure(t *testing.T, environment []string, binary, want string, arguments ...string) string {
 	t.Helper()
-	command := exec.Command(binary, arguments...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	command := exec.CommandContext(ctx, binary, arguments...)
 	command.Env = environment
 	output, err := command.CombinedOutput()
-	if _, ok := err.(*exec.ExitError); !ok || !strings.Contains(string(output), want) {
+	if _, ok := err.(*exec.ExitError); ctx.Err() != nil || !ok || !strings.Contains(string(output), want) {
 		t.Fatalf("%s %s: %v\n%s\nwant command failure containing %q", binary, strings.Join(arguments, " "), err, output, want)
 	}
 	return string(output)
+}
+
+func waitForSmokeLine(t *testing.T, ctx context.Context, lines <-chan string, want string) {
+	t.Helper()
+	for {
+		select {
+		case line, ok := <-lines:
+			if !ok {
+				t.Fatalf("log follower exited before %q", want)
+			}
+			if strings.TrimSpace(line) == want {
+				return
+			}
+		case <-ctx.Done():
+			t.Fatalf("log follower did not emit %q: %v", want, ctx.Err())
+		}
+	}
 }
