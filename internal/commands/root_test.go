@@ -1,6 +1,9 @@
 package commands
 
 import (
+	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -106,5 +109,54 @@ func TestBulkUpAndRestartReportEveryFailure(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "2 site(s) failed") {
 			t.Fatalf("%s --all error = %v, want two failed sites", command.Name(), err)
 		}
+	}
+}
+
+func TestCurrentDirectoryTargetingBoundaries(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		args   []string
+		marker bool
+		child  bool
+		err    string
+	}{
+		{name: "up unregistered", args: []string{"up"}, marker: true, err: "not registered"},
+		{name: "status unregistered", args: []string{"status"}, marker: true, err: "not registered"},
+		{name: "all bypasses cwd", args: []string{"up", "--all"}, marker: true},
+		{name: "explicit bypasses cwd", args: []string{"up", "missing"}, marker: true, err: "unknown site"},
+		{name: "up without config", args: []string{"up"}, err: "specify one or more slugs"},
+		{name: "status without config", args: []string{"status"}},
+		{name: "up ignores parent config", args: []string{"up"}, marker: true, child: true, err: "specify one or more slugs"},
+		{name: "status ignores parent config", args: []string{"status"}, marker: true, child: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+			t.Setenv("XDG_STATE_HOME", t.TempDir())
+			dir := t.TempDir()
+			if tc.marker {
+				if err := os.WriteFile(filepath.Join(dir, ".servd.toml"), []byte(`cmd = "serve"`), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if tc.child {
+				dir = filepath.Join(dir, "child")
+				if err := os.Mkdir(dir, 0o755); err != nil {
+					t.Fatal(err)
+				}
+			}
+			t.Chdir(dir)
+			cmd := newRootCmd()
+			cmd.SetOut(&bytes.Buffer{})
+			cmd.SetErr(&bytes.Buffer{})
+			cmd.SetArgs(tc.args)
+			err := cmd.Execute()
+			if tc.err == "" {
+				if err != nil {
+					t.Fatal(err)
+				}
+			} else if err == nil || !strings.Contains(err.Error(), tc.err) {
+				t.Fatalf("%v error = %v, want %q", tc.args, err, tc.err)
+			}
+		})
 	}
 }

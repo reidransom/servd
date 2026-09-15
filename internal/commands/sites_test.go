@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -97,6 +98,67 @@ func TestStatusCommandIsolatesInvalidSite(t *testing.T) {
 		t.Errorf("structured status = %q, want status and error", got)
 	} else if strings.Contains(got, `"launcher"`) || strings.Contains(got, `"source"`) {
 		t.Errorf("structured status exposes removed command metadata: %s", got)
+	}
+}
+
+func TestStatusDefaultsToCurrentDirectory(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	project := t.TempDir()
+	t.Chdir(project)
+	if err := os.WriteFile(filepath.Join(project, ".servd.toml"), []byte("not toml [[["), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	registry := &config.Registry{Sites: []config.Site{
+		{Slug: "custom-slug", Path: project, Port: 4001},
+		{Slug: "other", Path: t.TempDir(), Port: 4002, Cmd: "sleep 30"},
+	}}
+	if err := registry.Save(); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		name    string
+		args    []string
+		slug    string
+		wantErr bool
+	}{
+		{name: "implicit text", slug: "custom-slug", wantErr: true},
+		{name: "implicit JSON", args: []string{"--json"}, slug: "custom-slug", wantErr: true},
+		{name: "explicit override", args: []string{"other", "--json"}, slug: "other"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var out bytes.Buffer
+			cmd := newStatusCmd()
+			cmd.SetOut(&out)
+			cmd.SetErr(&bytes.Buffer{})
+			cmd.SilenceErrors, cmd.SilenceUsage = true, true
+			cmd.SetArgs(tc.args)
+			err := cmd.Execute()
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("status error = %v, wantErr %v", err, tc.wantErr)
+			}
+			if tc.wantErr && !strings.Contains(err.Error(), "custom-slug") {
+				t.Fatalf("status error = %v, want current site's error", err)
+			}
+			if len(tc.args) == 0 {
+				if !strings.Contains(out.String(), tc.slug) || strings.Contains(out.String(), "other") {
+					t.Fatalf("status = %s, want only %s", &out, tc.slug)
+				}
+				return
+			}
+			var payload struct {
+				Sites []struct {
+					Slug string `json:"slug"`
+				} `json:"sites"`
+			}
+			if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
+				t.Fatal(err)
+			}
+			if len(payload.Sites) != 1 || payload.Sites[0].Slug != tc.slug {
+				t.Fatalf("status = %s, want only %s", &out, tc.slug)
+			}
+		})
 	}
 }
 

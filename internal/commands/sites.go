@@ -126,9 +126,14 @@ func newStatusCmd() *cobra.Command {
 		Use:     "status [slug]",
 		Aliases: []string{"ls"},
 		Short:   "List sites with their port, URL, and live status",
+		Long:    "Show site status. Without a slug, target the registered current directory if it contains .servd.toml; otherwise list all sites.",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
+			if err != nil {
+				return err
+			}
+			args, err = defaultSiteArgs(reg, args)
 			if err != nil {
 				return err
 			}

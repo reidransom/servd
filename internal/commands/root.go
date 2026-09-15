@@ -3,6 +3,8 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 
 	"github.com/reidransom/servd/internal/buildinfo"
@@ -72,4 +74,26 @@ func selectSites(reg *config.Registry, args []string, all bool) ([]config.Site, 
 		out = append(out, *s)
 	}
 	return out, nil
+}
+
+// defaultSiteArgs targets the registered cwd only when it contains .servd.toml.
+// Explicit slugs bypass directory detection.
+func defaultSiteArgs(reg *config.Registry, args []string) ([]string, error) {
+	if len(args) > 0 {
+		return args, nil
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("get current directory: %w", err)
+	}
+	if _, err := os.Stat(filepath.Join(cwd, ".servd.toml")); os.IsNotExist(err) {
+		return args, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("check current directory configuration: %w", err)
+	}
+	site := reg.FindByPath(cwd)
+	if site == nil {
+		return nil, fmt.Errorf("current directory %q is not registered (run `servd add .`)", cwd)
+	}
+	return []string{site.Slug}, nil
 }

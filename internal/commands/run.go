@@ -21,10 +21,17 @@ func newUpCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "up [slug...]",
 		Short: "Start one or more sites (use --all for every site)",
+		Long:  "Start one or more sites. Without slugs, target the registered current directory if it contains .servd.toml. Use --all for every site.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, _, err := app.Load()
 			if err != nil {
 				return err
+			}
+			if !all {
+				args, err = defaultSiteArgs(reg, args)
+				if err != nil {
+					return err
+				}
 			}
 			sites, err := selectSites(reg, args, all)
 			if err != nil {

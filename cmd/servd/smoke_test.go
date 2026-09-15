@@ -92,6 +92,39 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 
 	runSmokeCommand(t, environment, binary, "down", smokeSlug)
 	waitForSmokePortClosed(t, port)
+
+	otherProject := filepath.Join(tmp, "other")
+	if err := os.Mkdir(otherProject, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	runSmokeCommand(t, environment, binary, "add", otherProject, "--slug", "other", "--", "servd", "static")
+	t.Chdir(project)
+	runSmokeCommand(t, environment, binary, "up", "--wait", "--timeout", "10s")
+	if body := fetchSmokeSite(t, url); !strings.Contains(body, fixture) {
+		t.Fatalf("cwd-targeted GET %s = %q, want fixture content", url, body)
+	}
+	currentStatus := runSmokeCommand(t, environment, binary, "status", "--json")
+	var current struct {
+		Sites []struct {
+			Slug   string `json:"slug"`
+			Status string `json:"status"`
+		} `json:"sites"`
+	}
+	if err := json.Unmarshal([]byte(currentStatus), &current); err != nil {
+		t.Fatal(err)
+	}
+	if len(current.Sites) != 1 || current.Sites[0].Slug != smokeSlug || current.Sites[0].Status != "running" {
+		t.Fatalf("cwd-targeted status = %s, want only running %s", currentStatus, smokeSlug)
+	}
+	otherStatus := runSmokeCommand(t, environment, binary, "status", "other", "--json")
+	if err := json.Unmarshal([]byte(otherStatus), &current); err != nil {
+		t.Fatal(err)
+	}
+	if len(current.Sites) != 1 || current.Sites[0].Slug != "other" || current.Sites[0].Status != "stopped" {
+		t.Fatalf("explicit status = %s, want other still stopped", otherStatus)
+	}
+	runSmokeCommand(t, environment, binary, "down", smokeSlug)
+	waitForSmokePortClosed(t, port)
 	status := runSmokeCommand(t, environment, binary, "status", smokeSlug, "--json")
 	var payload struct {
 		Sites []struct {
