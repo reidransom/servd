@@ -27,12 +27,6 @@ func newUpCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if !all {
-				args, err = defaultSiteArgs(reg, args)
-				if err != nil {
-					return err
-				}
-			}
 			sites, err := selectSites(reg, args, all)
 			if err != nil {
 				return err
@@ -100,6 +94,7 @@ func newDownCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "down [slug...]",
 		Short: "Stop one or more sites (use --all for every site)",
+		Long:  "Stop one or more sites. Without slugs, target the registered current directory if it contains .servd.toml. Use --all for every site.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_, reg, _, err := app.Load()
 			if err != nil {
@@ -133,6 +128,7 @@ func newRestartCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "restart [slug...]",
 		Short: "Restart one or more sites",
+		Long:  "Restart one or more sites. Without slugs, target the registered current directory if it contains .servd.toml. Use --all for every site.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, err := config.LoadSettings()
 			if err != nil {

@@ -400,8 +400,8 @@ with `servd static`.
 | `servd static [--host <host>] [--port <port>] [--dir <directory>]` | run the foreground static server |
 | `servd status [slug]` (alias `ls`) | show a named site, the configured current directory, or all sites otherwise (`--json` for machines) |
 | `servd up [slug…] [--all]` | start named sites or the configured current directory (`--all` starts every registered site; `--wait`/`--json` for scripts) |
-| `servd down [slug…] [--all]` | stop sites (`--all` stops every registered site) |
-| `servd restart [slug…] [--all]` | restart sites (`--all` restarts every registered site) |
+| `servd down [slug…] [--all]` | stop named sites or the configured current directory (`--all` stops every registered site) |
+| `servd restart [slug…] [--all]` | restart named sites or the configured current directory (`--all` restarts every registered site) |
 | `servd logs <slug> [-f]` | show / follow a site's server output |
 | `servd open <slug>` | open the primary URL in a browser |
 | `servd proxy up\|down\|status` | manage the background reverse proxy |
@@ -410,12 +410,13 @@ with `servd static`.
 | `servd version` / `servd --version` | report version, commit, and build date |
 | `servd` / `servd tui` | interactive dashboard |
 
-With no slug, `up` and `status` check for `.servd.toml` directly in the current
-working directory; they do not search parents. If present, they select the site
-registered at that path, including registrations with a custom slug. An
-unregistered directory produces an error with a `servd add .` hint; neither
-command registers it automatically. Explicit slugs and `up --all` bypass this
-check. Without the file, `up` still requires slugs or `--all`, and `status` lists
+With no slug, `up`, `down`, `restart`, and `status` check for `.servd.toml`
+directly in the current working directory; they do not search parents. If
+present, they select the site registered at that path, including registrations
+with a custom slug. An unregistered directory produces an error with a
+`servd add .` hint; no command registers it automatically. Explicit slugs and
+the lifecycle commands' `--all` flag bypass this check. Without the file,
+`up`, `down`, and `restart` still require slugs or `--all`, and `status` lists
 every site. To list every site, run `status` from a directory without
 `.servd.toml`. These selection rules also apply with `--json` and the `ls` alias.
 

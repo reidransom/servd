@@ -54,13 +54,17 @@ func newRootCmd() *cobra.Command {
 	return root
 }
 
-// selectSites resolves command args (slugs) plus an --all flag into sites.
+// selectSites resolves slugs, --all, or the configured current directory into sites.
 func selectSites(reg *config.Registry, args []string, all bool) ([]config.Site, error) {
 	if all && len(args) > 0 {
 		return nil, fmt.Errorf("pass slugs or --all, not both")
 	}
 	if all {
 		return slices.Clone(reg.Sites), nil
+	}
+	args, err := defaultSiteArgs(reg, args)
+	if err != nil {
+		return nil, err
 	}
 	if len(args) == 0 {
 		return nil, fmt.Errorf("specify one or more slugs, or --all")
