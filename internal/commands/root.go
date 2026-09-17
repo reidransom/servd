@@ -113,6 +113,25 @@ func defaultSiteArgs(reg *config.Registry, args []string) ([]string, error) {
 	}
 	site := reg.FindByPath(cwd)
 	if site == nil {
+		// The OS may spell cwd differently (symlinks or Windows short names).
+		// Keep exact matches preferred; compare directory identity as a fallback.
+		cwdInfo, err := os.Stat(cwd)
+		if err != nil {
+			return nil, fmt.Errorf("stat current directory: %w", err)
+		}
+		for i := range reg.Sites {
+			candidate := &reg.Sites[i]
+			info, err := os.Stat(candidate.Path)
+			if err != nil || !os.SameFile(cwdInfo, info) {
+				continue
+			}
+			if site != nil {
+				return nil, fmt.Errorf("current directory %q matches multiple registered sites; specify a slug", cwd)
+			}
+			site = candidate
+		}
+	}
+	if site == nil {
 		return nil, fmt.Errorf("current directory %q is not registered (run `servd add .`)", cwd)
 	}
 	return []string{site.Slug}, nil

@@ -440,6 +440,45 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		}
 		waitForSmokeBody(t, url, "restarted command")
 	})
+
+	t.Run("cwd directory identity", func(t *testing.T) {
+		directory := t.TempDir()
+		if err := os.WriteFile(filepath.Join(directory, ".servd.toml"), []byte("cmd = \"echo alias-command\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		alias := filepath.Join(t.TempDir(), "alias")
+		if err := os.Symlink(directory, alias); err != nil {
+			if runtime.GOOS == "windows" {
+				t.Skipf("directory symlinks unavailable: %v", err)
+			}
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "add", alias, "--slug", "aliased")
+		t.Chdir(directory)
+		output := runSmokeCommand(t, environment, binary, "which")
+		if !strings.Contains(output, "command: echo alias-command") {
+			t.Fatalf("which did not select the aliased registration: %s", output)
+		}
+		aliasTwo := filepath.Join(t.TempDir(), "alias-two")
+		if err := os.Symlink(directory, aliasTwo); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "add", aliasTwo, "--slug", "alias-two", "--", "echo", "second-command")
+		runSmokeFailure(t, environment, binary, "matches multiple registered sites", "which")
+		output = runSmokeCommand(t, environment, binary, "which", "aliased")
+		if !strings.Contains(output, "command: echo alias-command") {
+			t.Fatalf("explicit slug did not override ambiguous cwd: %s", output)
+		}
+		runSmokeCommand(t, environment, binary, "add", ".", "--slug", "exact", "--", "echo", "exact-command")
+		output = runSmokeCommand(t, environment, binary, "which")
+		if !strings.Contains(output, "exact-command") {
+			t.Fatalf("exact registration did not take precedence: %s", output)
+		}
+		runSmokeCommand(t, environment, binary, "rm", "exact")
+		runSmokeCommand(t, environment, binary, "rm", "alias-two")
+		runSmokeCommand(t, environment, binary, "rm")
+		runSmokeFailure(t, environment, binary, "unknown site", "status", "aliased")
+	})
 }
 
 func runSmokeCommand(t *testing.T, environment []string, binary string, arguments ...string) string {

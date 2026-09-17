@@ -427,6 +427,12 @@ repository command is invalid. `which` and `restart` retain their command
 resolution errors. `rm` stops and unregisters the site without deleting project
 files, including `.servd.toml`.
 
+An exact registered path takes precedence. If the OS reports a different spelling
+for the same directory (such as macOS symlinks or Windows short paths), Servd
+matches the directory's filesystem identity without rewriting registrations.
+If several registrations match that identity and none matches the path exactly,
+provide an explicit slug.
+
 ### Dashboard
 The dashboard is a split view: the proxy labeled `servd` followed by registered sites on the
 left, and a live tail of the selected server's log on the right. The proxy is
