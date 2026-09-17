@@ -263,7 +263,7 @@ func (s *Server) landing(w http.ResponseWriter, r *http.Request) {
 		for _, site := range sites {
 			u := s.settings.SiteURL(site)
 			b.WriteString("<li><a href=\"" + html.EscapeString(u) + "\">" + html.EscapeString(site.Slug) + "</a> ")
-			b.WriteString(fmt.Sprintf(`<span class="port">:%d</span> `, site.Port))
+			fmt.Fprintf(&b, `<span class="port">:%d</span> `, site.Port)
 			b.WriteString(`<details><summary>QR code</summary>`)
 			qr, err := qrcode.New(u, qrcode.Medium)
 			var png []byte

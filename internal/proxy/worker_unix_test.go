@@ -57,7 +57,7 @@ func TestBackgroundProxyStopsWhileParentRemainsAlive(t *testing.T) {
 		// Reap the child even when the regression leaves it a zombie.
 		process, err := os.FindProcess(entry.PID)
 		if err == nil {
-			defer process.Release()
+			defer func() { _ = process.Release() }()
 		}
 		if err == nil && state.EntryAlive(entry) {
 			_ = process.Kill()

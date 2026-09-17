@@ -22,7 +22,11 @@ func selectionModel(t *testing.T) (*model, *os.File) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { out.Close() })
+	t.Cleanup(func() {
+		if err := out.Close(); err != nil {
+			t.Error(err)
+		}
+	})
 	m.output = &terminalOutput{File: out}
 	m.Update(tea.WindowSizeMsg{Width: 100, Height: 24})
 	return m, out

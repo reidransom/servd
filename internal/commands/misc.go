@@ -127,17 +127,22 @@ func checkFallbackResolution(w io.Writer, settings config.Settings, registry *co
 		}
 		for _, hostname := range hostnames[1:] {
 			if !printedHeader {
-				fmt.Fprintln(w, "Fallback hostname resolution:")
+				if _, err := fmt.Fprintln(w, "Fallback hostname resolution:"); err != nil {
+					return err
+				}
 				printedHeader = true
 			}
-			addresses, err := lookupHost(hostname)
+			addresses, lookupErr := lookupHost(hostname)
 			switch {
-			case err != nil:
-				fmt.Fprintf(w, "  could not resolve optional fallback %s: %v\n", hostname, err)
+			case lookupErr != nil:
+				_, err = fmt.Fprintf(w, "  could not resolve optional fallback %s: %v\n", hostname, lookupErr)
 			case len(addresses) == 0:
-				fmt.Fprintf(w, "  could not resolve optional fallback %s: no addresses returned\n", hostname)
+				_, err = fmt.Fprintf(w, "  could not resolve optional fallback %s: no addresses returned\n", hostname)
 			default:
-				fmt.Fprintf(w, "  %s -> %v\n", hostname, addresses)
+				_, err = fmt.Fprintf(w, "  %s -> %v\n", hostname, addresses)
+			}
+			if err != nil {
+				return err
 			}
 		}
 	}

@@ -560,7 +560,11 @@ func TestProxyStartReportsBindFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer listener.Close()
+	defer func() {
+		if err := listener.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
 	settings := config.DefaultSettings()
 	settings.Hostnames.HTTPPort = listener.Addr().(*net.TCPAddr).Port
 	if err := config.SaveSettings(settings); err != nil {
