@@ -15,6 +15,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/reidransom/servd/internal/launcher"
 )
 
 const smokeSlug = "ci-smoke"
@@ -323,7 +325,7 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 			target string
 			want   string
 		}{
-			{target: "other", want: "command: servd static"},
+			{target: "other", want: "command: " + launcher.ShellJoin([]string{"servd", "static"})},
 			{target: "./other/", want: "command: echo directory-command"},
 			{target: collision, want: "command: echo directory-command"},
 		} {
@@ -598,7 +600,7 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		currentPID := smokeSiteStatus(t, environment, binary, smokeSlug).PID
 		runSmokeCommand(t, environment, binary, "rm", otherProject)
 		waitForSmokePortClosed(t, otherBefore.Port)
-		runSmokeFailure(t, environment, binary, "unknown site", "status", "other")
+		runSmokeFailure(t, environment, binary, "unknown site", "status", otherProject)
 		if data, err := os.ReadFile(filepath.Join(otherProject, "index.html")); err != nil || string(data) != "other site" {
 			t.Fatalf("path rm changed project files: %q, %v", data, err)
 		}
