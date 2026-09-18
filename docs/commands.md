@@ -46,9 +46,23 @@ A valid `.servd.toml` edit affects the next start but does not restart a healthy
 
 ## Select a target
 
-`up`, `down`, `restart`, `status` (`ls`), `logs`, `open`, `which`, and `rm` use an explicit slug when given. Without one, they select only a project registered at the current directory when `.servd.toml` is directly present—never a parent. An unregistered directory errors with an `add .` hint. `--all` selects all registered sites for lifecycle commands; `status` otherwise lists all sites. Exact registered paths take precedence over filesystem-identity matches; ambiguous identity matches require a slug.
+`up`, `down`, `restart`, `status` (`ls`), `logs`, `open`, `which`, and `rm` accept a site slug or a registered root directory path. Lookup checks the exact slug first, then the absolute, cleaned path relative to your working directory. An exact registered path wins over filesystem-identity matches (such as symlinks); ambiguous identity matches require a slug.
 
-Resolution errors are isolated per site. Bulk operations attempt all selected sites, report every failure, and exit nonzero if any fail. `status` can show all rows despite an error, while a targeted invalid site exits nonzero. `down` still stops a running site whose next command is invalid.
+```sh
+servd status ./docs/
+servd restart api ./docs/
+servd open /absolute/project/path
+```
+
+A matching slug takes precedence over a relative directory name: `servd which docs` selects the slug `docs`, while `servd which ./docs/` selects the registered directory. Explicit paths do not require `.servd.toml`, never search parents or descendants, and never register a site automatically. An exact registered path remains selectable even if the directory no longer exists, allowing stale registrations to be removed.
+
+Without a target, commands select only a project registered at the current directory when `.servd.toml` is directly present—never a parent. An unregistered current directory containing that file errors with an `add .` hint. Without an inferred target, `status` lists all sites; other site commands require explicit targets or their existing `--all` option.
+
+`up`, `down`, and `restart` accept mixed slug/path lists. All targets must resolve before any site is started, stopped, or restarted. `--all` selects all registered sites, bypasses cwd inference, and cannot be combined with positional targets. Other site commands accept at most one target.
+
+After target selection, command-resolution and operation errors are isolated per site. Bulk operations attempt all selected sites, report every failure, and exit nonzero if any fail. `status` can show all rows despite an error, while a targeted invalid site exits nonzero. `down` still stops a running site whose next command is invalid.
+
+`servd rm ./docs/` stops and unregisters the selected site; it does not delete the directory or its files. Selection for stopping, log access, and removal does not depend on a valid repository command.
 
 ## Serve static files
 

@@ -70,9 +70,9 @@ func newAddCmd() *cobra.Command {
 
 func newRmCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "rm [slug]",
+		Use:   "rm [slug|path]",
 		Short: "Remove a site from the registry (stops it first)",
-		Long:  "Remove a site from the registry (stops it first). Without a slug, target the registered current directory if it contains .servd.toml. Project files are not deleted.",
+		Long:  "Remove a site from the registry by slug or registered root directory path (stops it first). Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml. Project files are not deleted.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			reg, err := config.LoadRegistry()
@@ -100,9 +100,9 @@ func newRmCmd() *cobra.Command {
 
 func newWhichCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "which [slug]",
+		Use:   "which [slug|path]",
 		Short: "Show the resolved launch command for a site",
-		Long:  "Show the resolved launch command for a site. Without a slug, target the registered current directory if it contains .servd.toml.",
+		Long:  "Show the resolved launch command for a site by slug or registered root directory path. Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, _, err := app.Load()
@@ -126,10 +126,10 @@ func newWhichCmd() *cobra.Command {
 func newStatusCmd() *cobra.Command {
 	var jsonOut bool
 	c := &cobra.Command{
-		Use:     "status [slug]",
+		Use:     "status [slug|path]",
 		Aliases: []string{"ls"},
 		Short:   "List sites with their port, URL, and live status",
-		Long:    "Show site status. Without a slug, target the registered current directory if it contains .servd.toml; otherwise list all sites.",
+		Long:    "Show site status by slug or registered root directory path. Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml; otherwise list all sites.",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()
@@ -193,9 +193,9 @@ func statusSites(reg *config.Registry, args []string) ([]config.Site, error) {
 	if len(args) == 0 {
 		return reg.Sites, nil
 	}
-	s := reg.Find(args[0])
-	if s == nil {
-		return nil, fmt.Errorf("unknown site %q (try `servd status`)", args[0])
+	s, err := resolveSiteTarget(reg, args[0])
+	if err != nil {
+		return nil, err
 	}
 	return []config.Site{*s}, nil
 }

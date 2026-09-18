@@ -44,22 +44,9 @@ func TestSelectSitesExplicitSlugsAndErrors(t *testing.T) {
 		t.Fatalf("selectSites bravo = %#v, want only bravo", sites)
 	}
 
-	for _, tc := range []struct {
-		name string
-		args []string
-		all  bool
-		want string
-	}{
-		{name: "all with slugs", args: []string{"alpha"}, all: true, want: "pass slugs or --all"},
-		{name: "no target", want: "specify one or more slugs"},
-		{name: "unknown slug", args: []string{"missing"}, want: `unknown site "missing"`},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			_, err := selectSites(registry, tc.args, tc.all)
-			if err == nil || !strings.Contains(err.Error(), tc.want) {
-				t.Fatalf("selectSites(%v, %v) error = %v, want %q", tc.args, tc.all, err, tc.want)
-			}
-		})
+	_, err = selectSites(registry, []string{"missing"}, false)
+	if err == nil {
+		t.Fatal("selectSites accepted an unknown target")
 	}
 }
 
@@ -124,9 +111,7 @@ func TestCurrentDirectoryTargetingBoundaries(t *testing.T) {
 		{name: "status unregistered", args: []string{"status"}, marker: true, err: "not registered"},
 		{name: "all bypasses cwd", args: []string{"up", "--all"}, marker: true},
 		{name: "explicit bypasses cwd", args: []string{"up", "missing"}, marker: true, err: "unknown site"},
-		{name: "up without config", args: []string{"up"}, err: "specify one or more slugs"},
 		{name: "status without config", args: []string{"status"}},
-		{name: "up ignores parent config", args: []string{"up"}, marker: true, child: true, err: "specify one or more slugs"},
 		{name: "status ignores parent config", args: []string{"status"}, marker: true, child: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

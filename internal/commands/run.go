@@ -19,9 +19,9 @@ func newUpCmd() *cobra.Command {
 	var all, wait, jsonOut bool
 	var timeout time.Duration
 	c := &cobra.Command{
-		Use:   "up [slug...]",
+		Use:   "up [slug|path...]",
 		Short: "Start one or more sites (use --all for every site)",
-		Long:  "Start one or more sites. Without slugs, target the registered current directory if it contains .servd.toml. Use --all for every site.",
+		Long:  "Start one or more sites by slug or registered root directory path. Slugs take precedence over directory names. Without targets, use the registered current directory if it contains .servd.toml. Use --all for every site.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, _, err := app.Load()
 			if err != nil {
@@ -92,9 +92,9 @@ func newUpCmd() *cobra.Command {
 func newDownCmd() *cobra.Command {
 	var all bool
 	c := &cobra.Command{
-		Use:   "down [slug...]",
+		Use:   "down [slug|path...]",
 		Short: "Stop one or more sites (use --all for every site)",
-		Long:  "Stop one or more sites. Without slugs, target the registered current directory if it contains .servd.toml. Use --all for every site.",
+		Long:  "Stop one or more sites by slug or registered root directory path. Slugs take precedence over directory names. Without targets, use the registered current directory if it contains .servd.toml. Use --all for every site.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_, reg, _, err := app.Load()
 			if err != nil {
@@ -126,9 +126,9 @@ func newDownCmd() *cobra.Command {
 func newRestartCmd() *cobra.Command {
 	var all bool
 	c := &cobra.Command{
-		Use:   "restart [slug...]",
+		Use:   "restart [slug|path...]",
 		Short: "Restart one or more sites",
-		Long:  "Restart one or more sites. Without slugs, target the registered current directory if it contains .servd.toml. Use --all for every site.",
+		Long:  "Restart one or more sites by slug or registered root directory path. Slugs take precedence over directory names. Without targets, use the registered current directory if it contains .servd.toml. Use --all for every site.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, err := config.LoadSettings()
 			if err != nil {
@@ -164,9 +164,9 @@ func newRestartCmd() *cobra.Command {
 func newLogsCmd() *cobra.Command {
 	var follow bool
 	c := &cobra.Command{
-		Use:   "logs [slug]",
+		Use:   "logs [slug|path]",
 		Short: "Show a site's server output",
-		Long:  "Show a site's server output. Without a slug, target the registered current directory if it contains .servd.toml.",
+		Long:  "Show a site's server output by slug or registered root directory path. Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_, reg, _, err := app.Load()
@@ -236,9 +236,9 @@ func newLogsCmd() *cobra.Command {
 
 func newOpenCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "open [slug]",
+		Use:   "open [slug|path]",
 		Short: "Open a site's primary URL in the browser",
-		Long:  "Open a site's primary URL in the browser. Without a slug, target the registered current directory if it contains .servd.toml.",
+		Long:  "Open a site's primary URL in the browser by slug or registered root directory path. Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, reg, st, err := app.Load()

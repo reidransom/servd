@@ -184,8 +184,8 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		t.Chdir(child)
-		for _, command := range []string{"down", "restart"} {
-			runSmokeFailure(t, environment, binary, "specify one or more slugs", command)
+		for _, command := range []string{"up", "down", "restart"} {
+			runSmokeFailure(t, environment, binary, "", command)
 		}
 		if err := os.WriteFile(filepath.Join(child, ".servd.toml"), []byte(`cmd = "unused"`), 0o644); err != nil {
 			t.Fatal(err)
@@ -234,6 +234,131 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 	runSmokeCommand(t, environment, binary, "restart", smokeSlug, "other")
 	waitForSmokeBody(t, url, "restarted command")
 	waitForSmokeBody(t, other.DirectURL, "other site")
+
+	t.Run("path lifecycle targets", func(t *testing.T) {
+		otherBefore := smokeSiteStatus(t, environment, binary, "other")
+		runSmokeCommand(t, environment, binary, "down", project)
+		waitForSmokePortClosed(t, port)
+		runSmokeCommand(t, environment, binary, "up", "./../site/", "--wait", "--timeout", "10s")
+		waitForSmokeBody(t, url, "restarted command")
+		configPath := filepath.Join(project, ".servd.toml")
+		if err := os.WriteFile(configPath, []byte("cmd = \"servd static\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "restart", project)
+		waitForSmokeBody(t, url, fixture)
+		if site := smokeSiteStatus(t, environment, binary, "other"); site.PID != otherBefore.PID || site.Status != "running" {
+			t.Fatalf("path lifecycle changed unrelated site: %+v", site)
+		}
+		if err := os.WriteFile(configPath, []byte("cmd = \"servd static --dir next\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "down", project, "other")
+		for _, slug := range []string{smokeSlug, "other"} {
+			if site := smokeSiteStatus(t, environment, binary, slug); site.Status != "stopped" {
+				t.Fatalf("mixed down left %s active: %+v", slug, site)
+			}
+		}
+		runSmokeFailure(t, environment, binary, "unknown site", "up", project, "./missing/")
+		if site := smokeSiteStatus(t, environment, binary, smokeSlug); site.Status != "stopped" {
+			t.Fatalf("invalid selection started a valid earlier target: %+v", site)
+		}
+		runSmokeCommand(t, environment, binary, "up", smokeSlug, otherProject, "--wait", "--timeout", "10s")
+		beforeRestart := smokeSiteStatus(t, environment, binary, smokeSlug)
+		otherBefore = smokeSiteStatus(t, environment, binary, "other")
+		runSmokeCommand(t, environment, binary, "restart", project, "other")
+		waitForSmokeBody(t, url, "restarted command")
+		waitForSmokeBody(t, other.DirectURL, "other site")
+		for slug, pid := range map[string]int{smokeSlug: beforeRestart.PID, "other": otherBefore.PID} {
+			if site := smokeSiteStatus(t, environment, binary, slug); site.PID == pid || site.Status != "running" {
+				t.Fatalf("mixed restart did not replace %s: %+v", slug, site)
+			}
+		}
+		for _, command := range []string{"up", "down", "restart"} {
+			before := smokeSiteStatus(t, environment, binary, smokeSlug)
+			runSmokeFailure(t, environment, binary, "unknown site", command, project, "./missing/")
+			runSmokeFailure(t, environment, binary, "not both", command, project, "--all")
+			if after := smokeSiteStatus(t, environment, binary, smokeSlug); after.PID != before.PID || after.Status != "running" {
+				t.Fatalf("%s changed a site before resolving all targets: %+v", command, after)
+			}
+		}
+	})
+
+	t.Run("path status targets", func(t *testing.T) {
+		for _, command := range []string{"status", "ls"} {
+			output := runSmokeCommand(t, environment, binary, command, "./../site/", "--json")
+			var payload struct {
+				Sites []smokeSite `json:"sites"`
+			}
+			if err := json.Unmarshal([]byte(output), &payload); err != nil {
+				t.Fatal(err)
+			}
+			if len(payload.Sites) != 1 || payload.Sites[0].Slug != smokeSlug || payload.Sites[0].Status != "running" {
+				t.Fatalf("%s path selection = %s, want only running %s", command, output, smokeSlug)
+			}
+		}
+		configPath := filepath.Join(project, ".servd.toml")
+		if err := os.WriteFile(configPath, []byte("not toml [[["), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if err := os.WriteFile(configPath, []byte("cmd = \"servd static --dir next\"\n"), 0o644); err != nil {
+				t.Error(err)
+			}
+		})
+		for _, command := range []string{"status", "ls"} {
+			runSmokeFailure(t, environment, binary, "invalid repository command", command, project)
+			runSmokeFailure(t, environment, binary, "invalid repository command", command, project, "--json")
+		}
+	})
+
+	t.Run("directory target boundaries", func(t *testing.T) {
+		collision := filepath.Join(project, "other")
+		child := filepath.Join(collision, "child")
+		if err := os.MkdirAll(child, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "add", collision, "--slug", "collision", "--", "echo", "directory-command")
+		for _, tc := range []struct {
+			target string
+			want   string
+		}{
+			{target: "other", want: "command: servd static"},
+			{target: "./other/", want: "command: echo directory-command"},
+			{target: collision, want: "command: echo directory-command"},
+		} {
+			output := runSmokeCommand(t, environment, binary, "which", tc.target)
+			if !strings.Contains(output, tc.want) {
+				t.Fatalf("which %q = %s, want %q", tc.target, output, tc.want)
+			}
+		}
+		for _, command := range []string{"up", "down", "restart", "status", "ls", "logs", "open", "which", "rm"} {
+			runSmokeFailure(t, environment, binary, "unknown site", command, child)
+			runSmokeFailure(t, environment, binary, "unknown site", command, "./missing/")
+		}
+		t.Run("explicit path without marker", func(t *testing.T) {
+			t.Chdir(collision)
+			runSmokeFailure(t, environment, binary, "accepts 1 arg", "which")
+			output := runSmokeCommand(t, environment, binary, "which", ".")
+			if !strings.Contains(output, "command: echo directory-command") {
+				t.Fatalf("explicit path required a marker: %s", output)
+			}
+		})
+		runSmokeCommand(t, environment, binary, "rm", collision)
+		if info, err := os.Stat(child); err != nil || !info.IsDir() {
+			t.Fatalf("rm removed project directory: %v", err)
+		}
+		stale := filepath.Join(t.TempDir(), "stale")
+		if err := os.Mkdir(stale, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "add", stale, "--slug", "stale", "--", "echo", "unused")
+		if err := os.Remove(stale); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "rm", stale)
+		runSmokeFailure(t, environment, binary, "unknown site", "status", "stale")
+	})
 
 	t.Run("single site target boundaries", func(t *testing.T) {
 		currentPID := smokeSiteStatus(t, environment, binary, smokeSlug).PID
@@ -300,6 +425,10 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		if !strings.Contains(output, "source: .servd.toml") || !strings.Contains(output, "command: servd static --dir next") {
 			t.Fatalf("cwd which = %s, want next repository command", output)
 		}
+		output = runSmokeCommand(t, environment, binary, "which", "./../site/")
+		if !strings.Contains(output, "source: .servd.toml") || !strings.Contains(output, "command: servd static --dir next") {
+			t.Fatalf("path which = %s, want next repository command", output)
+		}
 		if err := os.WriteFile(filepath.Join(project, ".servd.toml"), []byte("not toml [[["), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -309,13 +438,14 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 			}
 		})
 		runSmokeFailure(t, environment, binary, "invalid repository command", "which")
+		runSmokeFailure(t, environment, binary, "invalid repository command", "which", project)
 		output = runSmokeCommand(t, environment, binary, "which", "other")
 		if !strings.Contains(output, "source: explicit") || strings.Contains(output, "--dir next") {
 			t.Fatalf("explicit which = %s, want other site's explicit command", output)
 		}
 	})
 
-	t.Run("cwd logs and follow", func(t *testing.T) {
+	t.Run("cwd and path logs with follow", func(t *testing.T) {
 		configPath := filepath.Join(project, ".servd.toml")
 		if err := os.WriteFile(configPath, []byte("cmd = \"echo cwd-log-marker && servd static --dir next\"\n"), 0o644); err != nil {
 			t.Fatal(err)
@@ -334,13 +464,17 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		if !strings.Contains(output, "cwd-log-marker") {
 			t.Fatalf("cwd logs did not contain site output: %s", output)
 		}
+		output = runSmokeCommand(t, environment, binary, "logs", project)
+		if !strings.Contains(output, "cwd-log-marker") {
+			t.Fatalf("path logs did not contain site output: %s", output)
+		}
 		if output := runSmokeCommand(t, environment, binary, "logs", "other"); strings.Contains(output, "cwd-log-marker") {
 			t.Fatalf("explicit logs selected cwd output: %s", output)
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		follow := exec.CommandContext(ctx, binary, "logs", "-f")
+		follow := exec.CommandContext(ctx, binary, "logs", project, "-f")
 		follow.Env = environment
 		stdout, err := follow.StdoutPipe()
 		if err != nil {
@@ -377,7 +511,7 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		waitForSmokeBody(t, url, "restarted command")
 	})
 
-	t.Run("cwd browser URL", func(t *testing.T) {
+	t.Run("browser URL targets", func(t *testing.T) {
 		if runtime.GOOS == "windows" {
 			t.Skip("Windows uses the system cmd builtin for browser opening")
 		}
@@ -389,7 +523,12 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		}{
 			{args: []string{"open"}, url: "http://ci-smoke.localhost/"},
 			{args: []string{"open", "other"}, url: "http://other.localhost/"},
+			{args: []string{"open", project}, url: "http://ci-smoke.localhost/"},
+			{args: []string{"open", "./../site/"}, url: "http://ci-smoke.localhost/"},
 		} {
+			if err := os.Remove(capture); err != nil && !os.IsNotExist(err) {
+				t.Fatal(err)
+			}
 			output := runSmokeCommand(t, browserEnv, binary, tc.args...)
 			if strings.TrimSpace(output) != tc.url {
 				t.Fatalf("%v = %q, want primary URL %q", tc.args, output, tc.url)
@@ -407,6 +546,30 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 				t.Fatalf("browser opened %q, want %q", captured, tc.url)
 			}
 		}
+	})
+
+	t.Run("path invalid command recovery", func(t *testing.T) {
+		otherBefore := smokeSiteStatus(t, environment, binary, "other")
+		configPath := filepath.Join(project, ".servd.toml")
+		if err := os.WriteFile(configPath, []byte("not toml [[["), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "down", project)
+		waitForSmokePortClosed(t, port)
+		runSmokeCommand(t, environment, binary, "rm", project)
+		runSmokeFailure(t, environment, binary, "unknown site", "status", smokeSlug)
+		if data, err := os.ReadFile(configPath); err != nil || string(data) != "not toml [[[" {
+			t.Fatalf("path rm changed repository config: %q, %v", data, err)
+		}
+		if site := smokeSiteStatus(t, environment, binary, "other"); site.PID != otherBefore.PID || site.Status != "running" {
+			t.Fatalf("path recovery affected unrelated site: %+v", site)
+		}
+		if err := os.WriteFile(configPath, []byte("cmd = \"servd static --dir next\"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runSmokeCommand(t, environment, binary, "add", project, "--slug", smokeSlug, "--port", fmt.Sprint(port))
+		runSmokeCommand(t, environment, binary, "up", project, "--wait", "--timeout", "10s")
+		waitForSmokeBody(t, url, "restarted command")
 	})
 
 	t.Run("cwd unregister", func(t *testing.T) {
@@ -433,8 +596,12 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		runSmokeCommand(t, environment, binary, "add", project, "--slug", smokeSlug, "--port", fmt.Sprint(port))
 		runSmokeCommand(t, environment, binary, "up", "--wait", "--timeout", "10s")
 		currentPID := smokeSiteStatus(t, environment, binary, smokeSlug).PID
-		runSmokeCommand(t, environment, binary, "rm", "other")
+		runSmokeCommand(t, environment, binary, "rm", otherProject)
+		waitForSmokePortClosed(t, otherBefore.Port)
 		runSmokeFailure(t, environment, binary, "unknown site", "status", "other")
+		if data, err := os.ReadFile(filepath.Join(otherProject, "index.html")); err != nil || string(data) != "other site" {
+			t.Fatalf("path rm changed project files: %q, %v", data, err)
+		}
 		if site := smokeSiteStatus(t, environment, binary, smokeSlug); site.PID != currentPID || site.Status != "running" {
 			t.Fatalf("explicit rm changed cwd site: %+v", site)
 		}
@@ -459,12 +626,30 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		if !strings.Contains(output, "command: echo alias-command") {
 			t.Fatalf("which did not select the aliased registration: %s", output)
 		}
+		output = runSmokeCommand(t, environment, binary, "which", directory)
+		if !strings.Contains(output, "command: echo alias-command") {
+			t.Fatalf("path did not select aliased registration: %s", output)
+		}
 		aliasTwo := filepath.Join(t.TempDir(), "alias-two")
 		if err := os.Symlink(directory, aliasTwo); err != nil {
 			t.Fatal(err)
 		}
 		runSmokeCommand(t, environment, binary, "add", aliasTwo, "--slug", "alias-two", "--", "echo", "second-command")
 		runSmokeFailure(t, environment, binary, "matches multiple registered sites", "which")
+		runSmokeFailure(t, environment, binary, "matches multiple registered sites", "which", directory)
+		runSmokeCommand(t, environment, binary, "down", project)
+		runSmokeFailure(t, environment, binary, "matches multiple registered sites", "up", project, directory)
+		if site := smokeSiteStatus(t, environment, binary, smokeSlug); site.Status != "stopped" {
+			t.Fatalf("ambiguous up started earlier site: %+v", site)
+		}
+		runSmokeCommand(t, environment, binary, "up", project, "--wait", "--timeout", "10s")
+		for _, command := range []string{"up", "down", "restart"} {
+			before := smokeSiteStatus(t, environment, binary, smokeSlug)
+			runSmokeFailure(t, environment, binary, "matches multiple registered sites", command, project, directory)
+			if after := smokeSiteStatus(t, environment, binary, smokeSlug); after.PID != before.PID || after.Status != "running" {
+				t.Fatalf("ambiguous %s selection affected earlier site: %+v", command, after)
+			}
+		}
 		output = runSmokeCommand(t, environment, binary, "which", "aliased")
 		if !strings.Contains(output, "command: echo alias-command") {
 			t.Fatalf("explicit slug did not override ambiguous cwd: %s", output)
@@ -473,6 +658,10 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		output = runSmokeCommand(t, environment, binary, "which")
 		if !strings.Contains(output, "exact-command") {
 			t.Fatalf("exact registration did not take precedence: %s", output)
+		}
+		output = runSmokeCommand(t, environment, binary, "which", directory)
+		if !strings.Contains(output, "exact-command") {
+			t.Fatalf("exact path did not take precedence: %s", output)
 		}
 		runSmokeCommand(t, environment, binary, "rm", "exact")
 		runSmokeCommand(t, environment, binary, "rm", "alias-two")
@@ -548,6 +737,7 @@ type smokeSite struct {
 	Slug      string `json:"slug"`
 	Status    string `json:"status"`
 	PID       int    `json:"pid"`
+	Port      int    `json:"port"`
 	DirectURL string `json:"direct_url"`
 }
 

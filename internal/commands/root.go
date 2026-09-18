@@ -54,10 +54,10 @@ func newRootCmd() *cobra.Command {
 	return root
 }
 
-// selectSites resolves slugs, --all, or the configured current directory into sites.
+// selectSites resolves targets, --all, or the configured current directory into sites.
 func selectSites(reg *config.Registry, args []string, all bool) ([]config.Site, error) {
 	if all && len(args) > 0 {
-		return nil, fmt.Errorf("pass slugs or --all, not both")
+		return nil, fmt.Errorf("pass targets or --all, not both")
 	}
 	if all {
 		return slices.Clone(reg.Sites), nil
@@ -67,20 +67,20 @@ func selectSites(reg *config.Registry, args []string, all bool) ([]config.Site, 
 		return nil, err
 	}
 	if len(args) == 0 {
-		return nil, fmt.Errorf("specify one or more slugs, or --all")
+		return nil, fmt.Errorf("specify one or more targets (slugs or paths), or --all")
 	}
-	var out []config.Site
-	for _, slug := range args {
-		s := reg.Find(slug)
-		if s == nil {
-			return nil, fmt.Errorf("unknown site %q (try `servd status`)", slug)
+	out := make([]config.Site, len(args))
+	for i, target := range args {
+		s, err := resolveSiteTarget(reg, target)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, *s)
+		out[i] = *s
 	}
 	return out, nil
 }
 
-// selectSite resolves one explicit slug or the configured current directory.
+// selectSite resolves one explicit target or the configured current directory.
 func selectSite(cmd *cobra.Command, reg *config.Registry, args []string) (*config.Site, error) {
 	args, err := defaultSiteArgs(reg, args)
 	if err != nil {
@@ -89,15 +89,30 @@ func selectSite(cmd *cobra.Command, reg *config.Registry, args []string) (*confi
 	if err := cobra.ExactArgs(1)(cmd, args); err != nil {
 		return nil, err
 	}
-	site := reg.Find(args[0])
+	return resolveSiteTarget(reg, args[0])
+}
+
+// resolveSiteTarget prefers a registered slug over a registered root directory.
+func resolveSiteTarget(reg *config.Registry, target string) (*config.Site, error) {
+	if site := reg.Find(target); site != nil {
+		return site, nil
+	}
+	path, err := filepath.Abs(target)
+	if err != nil {
+		return nil, fmt.Errorf("resolve site directory %q: %w", target, err)
+	}
+	site, err := findSiteByDirectory(reg, path)
+	if err != nil {
+		return nil, err
+	}
 	if site == nil {
-		return nil, fmt.Errorf("unknown site %q", args[0])
+		return nil, fmt.Errorf("unknown site %q (try `servd status`)", target)
 	}
 	return site, nil
 }
 
 // defaultSiteArgs targets the registered cwd only when it contains .servd.toml.
-// Explicit slugs bypass directory detection.
+// Explicit targets bypass current-directory inference.
 func defaultSiteArgs(reg *config.Registry, args []string) ([]string, error) {
 	if len(args) > 0 {
 		return args, nil
@@ -111,28 +126,43 @@ func defaultSiteArgs(reg *config.Registry, args []string) ([]string, error) {
 	} else if err != nil {
 		return nil, fmt.Errorf("check current directory configuration: %w", err)
 	}
-	site := reg.FindByPath(cwd)
-	if site == nil {
-		// The OS may spell cwd differently (symlinks or Windows short names).
-		// Keep exact matches preferred; compare directory identity as a fallback.
-		cwdInfo, err := os.Stat(cwd)
-		if err != nil {
-			return nil, fmt.Errorf("stat current directory: %w", err)
-		}
-		for i := range reg.Sites {
-			candidate := &reg.Sites[i]
-			info, err := os.Stat(candidate.Path)
-			if err != nil || !os.SameFile(cwdInfo, info) {
-				continue
-			}
-			if site != nil {
-				return nil, fmt.Errorf("current directory %q matches multiple registered sites; specify a slug", cwd)
-			}
-			site = candidate
-		}
+	site, err := findSiteByDirectory(reg, cwd)
+	if err != nil {
+		return nil, err
 	}
 	if site == nil {
 		return nil, fmt.Errorf("current directory %q is not registered (run `servd add .`)", cwd)
 	}
 	return []string{site.Slug}, nil
+}
+
+// findSiteByDirectory prefers an exact registered path, then directory identity
+// (e.g. symlinks or Windows short names). It never searches parent directories.
+func findSiteByDirectory(reg *config.Registry, path string) (*config.Site, error) {
+	if site := reg.FindByPath(path); site != nil {
+		return site, nil
+	}
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("stat site directory %q: %w", path, err)
+	}
+	if !info.IsDir() {
+		return nil, nil
+	}
+	var site *config.Site
+	for i := range reg.Sites {
+		candidate := &reg.Sites[i]
+		candidateInfo, err := os.Stat(candidate.Path)
+		if err != nil || !os.SameFile(info, candidateInfo) {
+			continue
+		}
+		if site != nil {
+			return nil, fmt.Errorf("directory %q matches multiple registered sites; specify a slug", path)
+		}
+		site = candidate
+	}
+	return site, nil
 }
