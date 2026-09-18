@@ -1,0 +1,96 @@
+{
+  "ticket": "11-icons",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "component_url": "http://127.0.0.1:4312/components/icons/",
+    "captures": [
+      "reference-light-390.png",
+      "reference-light-800.png",
+      "reference-light-1440.png",
+      "reference-dark-390.png",
+      "reference-dark-800.png",
+      "reference-dark-1440.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4323/icons/",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-light-390.png",
+      "implementation-light-800.png",
+      "implementation-light-1440.png",
+      "implementation-dark-390.png",
+      "implementation-dark-800.png",
+      "implementation-dark-1440.png",
+      "implementation-geometry-light-390.png",
+      "implementation-geometry-light-800.png",
+      "implementation-geometry-light-1440.png",
+      "implementation-geometry-dark-390.png",
+      "implementation-geometry-dark-800.png",
+      "implementation-geometry-dark-1440.png",
+      "implementation-grid-light-1440.png",
+      "implementation-grid-dark-1440.png",
+      "implementation-focus-light-390.png",
+      "implementation-focus-dark-390.png"
+    ]
+  },
+  "registry": {
+    "source": "tools/icons/icons.json",
+    "generator": "tools/icons/generate.py",
+    "frozen_names": 130,
+    "vendored_names": 130,
+    "documented_names": 130,
+    "fixture_names": 130,
+    "frozen_registry_exact_match": true,
+    "alphabetical_inventory": true,
+    "canonical_sha256": "30012e5593475f9b8a6d8ab0f38bff5bde49aa7c51eec5e55e9b74db1f2976c3",
+    "generated_check": "Icon registry synchronized: 130 names",
+    "runtime_sprite_requests": 0,
+    "license": "assets/starlight-LICENSE",
+    "file_tree_registry_separate": true
+  },
+  "geometry": {
+    "view_box": "0 0 24 24",
+    "small_css_pixels": [14, 14],
+    "medium_css_pixels": [16, 16],
+    "large_css_pixels": [24, 24],
+    "representatives": ["forward-slash", "bars", "star", "github", "right-arrow"],
+    "representative_size_cases": 15,
+    "representative_glyphs_within_view_box": true,
+    "square_aspect_ratio": true,
+    "page_wide_overflow": false
+  },
+  "accessibility": {
+    "decorative_icon_snapshot": "",
+    "meaningful_icon_snapshot": "img Starlyt <mark>safe</mark> & literal",
+    "meaningful_label_escaped_plain_text": true,
+    "focusable_icons": 0,
+    "link_accessible_name": "All icons",
+    "button_accessible_name": "Confirm",
+    "link_focus_visible": true,
+    "button_focus_visible": true,
+    "unknown_name_svg_count": 0,
+    "invalid_inputs_class": "sl-icon medium color-current"
+  },
+  "semantic_color_contrast": {
+    "light_minimum_ratio": 7.1,
+    "dark_minimum_ratio": 10.06,
+    "backgrounds": ["rgb(255, 255, 255)", "rgb(23, 24, 28)"]
+  },
+  "integrations": {
+    "card_valid_icon": "rocket",
+    "card_unknown_icon_svg_count": 0,
+    "tab_valid_icon": "open-book",
+    "tab_unknown_icon_svg_count": 0,
+    "enhanced_tab_accessible_name": "Overview",
+    "javascript_disabled_tab_icon_visible": true
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

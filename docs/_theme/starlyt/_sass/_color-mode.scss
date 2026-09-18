@@ -1,0 +1,61 @@
+/*! Selector geometry adapted from stock Starlight; MIT, Astro contributors. */
+@layer starlyt {
+  #mode-picker {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  #mode-picker label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--sl-color-gray-2);
+  }
+  #mode-picker label:hover {
+    color: var(--sl-color-white);
+  }
+  #color-mode {
+    border: 0;
+    padding-block: 0.625rem;
+    padding-inline: 1.625rem 2rem;
+    margin-inline: -0.5rem;
+    width: calc(6.25em + 1rem);
+    background: transparent;
+    text-overflow: ellipsis;
+    color: inherit;
+    cursor: pointer;
+    appearance: none;
+  }
+  #color-mode option {
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-gray-1);
+  }
+  #mode-picker svg {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .mode-icon {
+    inset-inline-start: 0;
+  }
+  .mode-caret {
+    inset-inline-end: 0;
+  }
+  #site-nav #mode-picker {
+    margin-top: 1rem;
+    border-top: 1px solid var(--sl-color-gray-6);
+    padding: 0.5rem 0;
+  }
+  @media (min-width: 50rem) {
+    #color-mode {
+      font-size: var(--sl-text-sm);
+    }
+    #mode-picker::before {
+      content: '';
+      height: 2rem;
+      border-inline-end: 1px solid var(--sl-color-gray-5);
+    }
+  }
+}

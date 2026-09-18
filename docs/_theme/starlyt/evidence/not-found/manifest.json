@@ -1,0 +1,51 @@
+{
+  "ticket": "04-custom-404",
+  "reference": {
+    "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "page": "/404/",
+    "screenshots": "../splash-hero/reference-404-{390,799,800,1024,1151,1152,1440}-{light,dark}.png"
+  },
+  "consumer": {
+    "customScreenshots": "custom-404-{390,799,800,1024,1151,1152,1440}-{light,dark}.png",
+    "defaultScreenshots": "default-404-{390,1024,1440}-{light,dark}.png",
+    "rootRoute": "/404.html",
+    "prefixRoute": "/docs/404.html"
+  },
+  "environment": {
+    "playwrightMcp": "0.0.80",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "platform": "Linux",
+    "deviceScaleFactor": 1,
+    "browserZoom": 1,
+    "defaultFontPixels": 16
+  },
+  "checks": {
+    "consumerCaptures": 20,
+    "singleHeadingPerPage": true,
+    "pageWideOverflow": false,
+    "sidebarsOmitted": true,
+    "defaultTitleMessageAndLink": true,
+    "customTitleMessageAndLinks": true,
+    "malformedLinksOmitted": true,
+    "escapedPlainText": true,
+    "rootAndPrefixAssets": true,
+    "rootAndPrefixRecoveryLinks": true,
+    "keyboardFocusOutline": true,
+    "noJavaScriptContentAndLinks": true,
+    "searchCorpusExclusion": true,
+    "referenceHeroGeometry": {
+      "widths": [390, 799, 800, 1024, 1151, 1152, 1440],
+      "modes": ["light", "dark"],
+      "matchingProperties": ["title-y", "font-size", "text-align"],
+      "mismatches": 0
+    },
+    "githubPagesHttp404": false
+  },
+  "blocker": "GitHub CLI has no authenticated account, so no disposable Pages repository could be created or deployed. Local static hosting returns 200 for direct files and was not substituted for the required GitHub Pages HTTP 404 check.",
+  "acceptedDifferences": [
+    "Consumer copy and recovery-link count differ from the frozen reference fixture.",
+    "Starlyt uses its existing search and color controls in the splash header.",
+    "No browser or host claim is made beyond the checks recorded here."
+  ]
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title">
+  <title id="title">RTL responsive layout fixture</title>
+  <rect width="960" height="360" rx="32" fill="#171923"/>
+  <path d="M760 72H200a32 32 0 0 0-32 32v152a32 32 0 0 0 32 32h560a32 32 0 0 0 32-32V104a32 32 0 0 0-32-32Z" fill="#343a46"/>
+  <path d="M700 132H420M700 180H300M700 228H500" fill="none" stroke="#91a7ff" stroke-linecap="round" stroke-width="20"/>
+</svg>

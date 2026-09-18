@@ -1,0 +1,72 @@
+{
+  "ticket": "10-callouts",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/components/asides/",
+    "captures": [
+      "reference-390-light.png",
+      "reference-800-light.png",
+      "reference-1440-light.png",
+      "reference-390-dark.png",
+      "reference-800-dark.png",
+      "reference-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4324/callouts/",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-390-light.png",
+      "implementation-800-light.png",
+      "implementation-1440-light.png",
+      "implementation-390-dark.png",
+      "implementation-800-dark.png",
+      "implementation-1440-dark.png",
+      "implementation-focus-390-light.png",
+      "implementation-focus-390-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation": {
+      "padding": "16px",
+      "border_inline_start_width": "4px",
+      "title_gap": "8px",
+      "title_font_size": "18px",
+      "title_font_weight": "600",
+      "title_line_height": "21.6px",
+      "content_margin_top": "8px",
+      "light_note_border": "rgb(61, 80, 245)",
+      "light_note_background": "rgb(207, 212, 252)",
+      "dark_note_border": "rgb(51, 71, 255)",
+      "dark_note_background": "rgb(23, 29, 79)"
+    }
+  },
+  "behavior": {
+    "rendered_callouts": 9,
+    "type_sequence": ["note", "tip", "caution", "danger", "tip", "tip", "caution", "note", "danger"],
+    "icon_sequence": ["information", "rocket", "warning", "error", "rocket", "star", "warning", "information", "error"],
+    "default_titles": true,
+    "custom_title_escaped": true,
+    "custom_icon": true,
+    "unknown_icon_falls_back": true,
+    "invalid_type_falls_back_to_note": true,
+    "empty_content_omitted": true,
+    "unique_title_labels": true,
+    "aria_alerts_or_live_regions": 0,
+    "container_tab_stops": 0,
+    "contained_keyboard_order": ["link", "code", "copy", "code", "copy"],
+    "focused_controls_visible": true,
+    "rich_markdown": ["paragraph", "link", "list", "inline_code", "fenced_code", "blockquote"],
+    "ordinary_blockquote_unchanged": true,
+    "page_wide_overflow": false,
+    "root_and_prefix_builds": true
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

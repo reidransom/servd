@@ -1,0 +1,45 @@
+{% assign not_found_title = page.title | strip %}
+{% if not_found_title == '' %}{% capture not_found_title %}{% include private/ui-message.html key='starlyt.not_found.title' default='Page not found' %}{% endcapture %}{% endif %}
+{% assign not_found_home_href = '/' %}{% if page.language %}{% assign not_found_home_href = '/' | localized_url %}{% endif %}
+{% capture not_found_home_label %}{% include private/ui-message.html key='starlyt.not_found.back_home' default='Back to home' %}{% endcapture %}
+{% capture html_localization %}{% include private/html-localization.html %}{% endcapture %}
+{% capture enhancement_messages %}{% include private/enhancement-messages.html %}{% endcapture %}
+<!doctype html>
+<html {{ html_localization | strip }} data-theme="dark" data-layout="splash" {{ enhancement_messages | strip }}>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ not_found_title | escape }} | {{ site.title | escape }}</title>
+    {% include private/localization-head.html %}
+    <script src="{{ '/assets/color-mode.js' | relative_url | escape }}"></script>
+    <link rel="stylesheet" href="{{ '/assets/starlyt.css' | relative_url | escape }}">
+    <script src="{{ '/assets/flexsearch-0.8.212.min.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/search.js' | relative_url | escape }}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{% include private/ui-message.html key='starlyt.skip_to_content' default='Skip to content' %}</a>
+    <header class="site-header">{% include header.html %}</header>
+    <div class="splash-frame">
+      <main id="main-content" class="main-pane splash-pane" tabindex="-1">
+        <div class="content-panel"><div class="content-container">
+          <div class="hero not-found-hero not-content">
+            <div class="hero-stack">
+              <div class="hero-copy">
+                <h1 id="page-title">{{ not_found_title | escape }}</h1>
+                {% if page.not_found.message %}{% assign message = page.not_found.message | strip %}{% if message != '' %}<p class="hero-tagline">{{ page.not_found.message | escape }}</p>{% endif %}{% endif %}
+              </div>
+              {% if page.not_found.links == nil %}
+                <div class="hero-actions">{% include components/link-button.html text=not_found_home_label href=not_found_home_href %}</div>
+              {% else %}
+                {% capture recovery_links %}{% for action in page.not_found.links %}{% include components/link-button.html text=action.text href=action.link variant=action.variant %}{% endfor %}{% endcapture %}
+                {% assign recovery_links = recovery_links | strip %}
+                {% if recovery_links != '' %}<div class="hero-actions">{{ recovery_links }}</div>{% endif %}
+              {% endif %}
+            </div>
+          </div>
+          {% include private/print-canonical.html %}
+        </div></div>
+      </main>
+    </div>
+  </body>
+</html>

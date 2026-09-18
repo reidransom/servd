@@ -1,0 +1,4 @@
+{% assign grid_stagger = false %}
+{% if include.stagger == true %}{% assign grid_stagger = true %}{% endif %}
+{% assign grid_content = include.content | strip %}
+{% if grid_content != '' %}<div class="card-grid not-content{% if grid_stagger %} stagger{% endif %}">{{ include.content }}</div>{% endif %}

@@ -1,0 +1,95 @@
+{
+  "ticket": "15-code-line-numbers",
+  "jigyll": {
+    "feature_commit": "25bbd825096fa5f3794024e3138295b2c87d83e6",
+    "gutter_width_fix_commit": "cd32dba4d090f40eb4e13ce64d6eba2c0a2a5aaf",
+    "release": "v1.13.0",
+    "release_commit": "f8160c99cc564e9961bcfba788b2604d252e0117",
+    "validation_fixtures": 9,
+    "all_validation_fixtures_failed_with_path_line_and_expected_diagnostic": true
+  },
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "reference-390-light.png",
+      "reference-800-light.png",
+      "reference-1440-light.png",
+      "reference-390-dark.png",
+      "reference-800-dark.png",
+      "reference-1440-dark.png"
+    ],
+    "line_numbers_rendered": false,
+    "limitation": "The frozen Starlight fixture rendered no gutters when showLineNumbers/startLineNumber fence metadata was supplied, including with expressiveCode.defaultProps enabling numbering. The captures therefore establish the frozen code line height and spacing but cannot supply line-number gutter geometry."
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4328/code/",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-390-light.png",
+      "implementation-800-light.png",
+      "implementation-1440-light.png",
+      "implementation-390-dark.png",
+      "implementation-800-dark.png",
+      "implementation-1440-dark.png",
+      "implementation-combined-390-light.png",
+      "implementation-combined-800-light.png",
+      "implementation-combined-1440-light.png",
+      "implementation-combined-390-dark.png",
+      "implementation-combined-800-dark.png",
+      "implementation-combined-1440-dark.png",
+      "implementation-scrolled-390-light.png",
+      "implementation-scrolled-390-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation_line_height": "24.5px",
+    "gutter_width_source": "code[data-line-number-width]",
+    "one_to_six_digit_gutters_supported": true,
+    "two_digit_content_width": "16.7969px",
+    "separator": "1px logical inline-end border",
+    "alignment": "tabular numerals aligned to logical inline end",
+    "number_position_during_local_scroll": "sticky logical inline start",
+    "page_wide_overflow": false,
+    "local_horizontal_scroll_at_all_tested_widths_and_modes": true,
+    "reference_gutter_match": "not measurable because the frozen reference emitted no line numbers"
+  },
+  "behavior": {
+    "numbering_off_preserves_existing_output": true,
+    "numbering_from_one": [1, 2, 3],
+    "blank_logical_line_numbered": true,
+    "trailing_newline_creates_extra_number": false,
+    "numbering_from_eight": [8, 9, 10],
+    "nine_to_ten_transition": true,
+    "maximum_start_verified_upstream": 999999,
+    "frame_and_all_whole_line_markers_combined": true,
+    "data_line_numbers_are_sequential": true,
+    "numbers_present_in_code_text": false,
+    "private_renderer_metadata_absent_from_output": true,
+    "chroma_text_and_token_order_preserved": true,
+    "clipboard_matches_authored_source_including_terminal_newline": true,
+    "ordinary_selection_matches_authored_visible_lines": true,
+    "ordinary_selection_browser_omits_only_terminal_newline": true,
+    "assistive_snapshot_contains_only_source_text": true,
+    "pseudo_content_has_empty_accessibility_alternative": true,
+    "keyboard_focus_and_enter_copy": true,
+    "visible_native_focus": true,
+    "copy_success_feedback": "Copied!",
+    "copy_failure_feedback": "Copy failed",
+    "root_and_prefix_builds": true,
+    "compiled_css_matches_sass": true
+  },
+  "reviews": {
+    "standards": "Passed after checking existing Sass layers, logical properties, shipped CSS generation, semantic renderer seams, and installed-consumer conventions.",
+    "spec": "Passed with the frozen-reference limitation recorded explicitly; removed a stale documentation sentence that incorrectly said line markers and numbers were unsupported."
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

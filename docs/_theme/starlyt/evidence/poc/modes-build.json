@@ -1,0 +1,12 @@
+{
+  "themeRevision": "1db07ea8eeb9b326a6d53ecf994c2d565a35ed58",
+  "themeTree": "f73c1c033b105aca4c81d494dcc8ed5a805c691f",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "",
+  "source": "/home/reid/src/starlyt/.poc/modes",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/modes --theme /home/reid/src/starlyt/.poc/theme-modes",
+    "jigyll build --source /home/reid/src/starlyt/.poc/modes",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/modes"
+  ]
+}

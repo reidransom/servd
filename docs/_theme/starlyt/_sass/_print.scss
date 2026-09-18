@@ -1,0 +1,261 @@
+/*! Print presentation guided by stock Starlight 39d4e71; MIT, Astro contributors. */
+.print-canonical {
+  display: none;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+    --sl-color-white: hsl(224, 10%, 10%);
+    --sl-color-gray-1: hsl(224, 14%, 16%);
+    --sl-color-gray-2: hsl(224, 10%, 23%);
+    --sl-color-gray-3: hsl(224, 7%, 36%);
+    --sl-color-gray-4: hsl(224, 6%, 56%);
+    --sl-color-gray-5: hsl(224, 6%, 77%);
+    --sl-color-gray-6: hsl(224, 20%, 94%);
+    --sl-color-gray-7: hsl(224, 19%, 97%);
+    --sl-color-black: #fff;
+    --sl-color-text: var(--sl-color-gray-2);
+    --sl-color-text-accent: hsl(234, 80%, 30%);
+    --sl-color-text-invert: #fff;
+    --sl-color-bg: #fff;
+    --sl-color-bg-nav: #fff;
+    --sl-color-bg-sidebar: #fff;
+    --sl-color-bg-inline-code: var(--sl-color-gray-6);
+    --sl-color-hairline-light: var(--sl-color-gray-6);
+    --sl-color-hairline-shade: var(--sl-color-gray-5);
+    --sl-shadow-sm: none;
+    --sl-shadow-md: none;
+    --sl-shadow-lg: none;
+  }
+
+  html {
+    scroll-padding: 0;
+  }
+
+  body {
+    color: var(--sl-color-text);
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .skip-link,
+  #site-search,
+  #mode-picker,
+  #language-picker,
+  #menu-toggle,
+  #site-nav,
+  #toc-slot,
+  .copy-button,
+  .copy-feedback,
+  .tablist-wrapper,
+  .sl-anchor-link {
+    display: none !important;
+  }
+
+  .site-header {
+    position: static;
+    display: block;
+    height: auto;
+    padding: 0 0 4mm;
+    margin-bottom: 6mm;
+    border: 0;
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    background: transparent;
+  }
+
+  .site-title {
+    color: var(--sl-color-white);
+    font-size: 14pt;
+  }
+
+  .page-frame,
+  .splash-frame {
+    display: block;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .main-pane,
+  [data-has-toc] .main-pane,
+  .splash-pane {
+    width: auto;
+    max-width: none;
+    padding: 0;
+  }
+
+  .content-panel,
+  .content-panel:last-child {
+    padding: 0;
+    border: 0;
+  }
+
+  .content-panel + .content-panel {
+    margin-top: 5mm;
+  }
+
+  .content-container,
+  [data-has-toc] .content-container {
+    max-width: none;
+    margin: 0;
+  }
+
+  h1,
+  .sl-markdown-content :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--sl-color-white);
+    break-after: avoid;
+  }
+
+  .sl-heading-wrapper {
+    break-after: avoid;
+  }
+
+  .sl-markdown-content :is(p, li) {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .print-canonical {
+    display: block;
+    margin: 8mm 0 0;
+    padding-top: 3mm;
+    border-top: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-2);
+    direction: ltr;
+    font-family: var(--sl-font-system-mono);
+    font-size: 9pt;
+    overflow-wrap: anywhere;
+    unicode-bidi: isolate;
+  }
+
+  #article a[href^='http://']::after,
+  #article a[href^='https://']::after {
+    content: ' (' attr(href) ')';
+    color: var(--sl-color-gray-2);
+    direction: ltr;
+    font-size: 0.85em;
+    overflow-wrap: anywhere;
+    unicode-bidi: isolate;
+  }
+
+  .sl-markdown-content code:not(:where(.not-content *)),
+  .tab-panel code {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+  }
+
+  #article pre,
+  #article pre * {
+    color: #111 !important;
+  }
+
+  #article pre {
+    max-width: 100%;
+    overflow: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    break-inside: auto;
+  }
+
+  #article pre code {
+    white-space: inherit;
+    overflow-wrap: inherit;
+    word-break: inherit;
+  }
+
+  #article :is(.code-frame, figure.highlight) {
+    overflow: visible;
+    break-inside: auto;
+    background: transparent;
+  }
+
+  #article .code-line {
+    width: auto;
+    min-width: 0;
+    padding-inline-end: 0;
+  }
+
+  .sl-markdown-content table:not(:where(.not-content *)) {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    overflow: visible;
+    break-inside: auto;
+  }
+
+  .sl-markdown-content thead:not(:where(.not-content *)) {
+    display: table-header-group;
+  }
+
+  .sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .sl-markdown-content tr:not(:where(.not-content *)) {
+    break-inside: avoid;
+  }
+
+  .sl-markdown-content :is(img, picture, video, canvas, svg):not(:where(.not-content *)) {
+    max-width: 100%;
+    height: auto;
+    break-inside: avoid;
+  }
+
+  #article details:not([open]) > :not(summary) {
+    display: block !important;
+  }
+
+  #article details::details-content {
+    content-visibility: visible !important;
+  }
+
+  @layer starlyt {
+    .tabs .tab-item-label[hidden],
+    .tabs .tab-panel[hidden] {
+      display: block !important;
+    }
+  }
+
+  #article summary {
+    display: block;
+    list-style: none;
+    pointer-events: none;
+  }
+
+  #article summary::marker,
+  #article summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .tabs .tab-item + .tab-item {
+    margin-top: 5mm;
+  }
+
+  .file-tree,
+  .starlight-aside,
+  .card,
+  .sl-badge,
+  .sl-link-button.primary {
+    color: var(--sl-color-white);
+    background: transparent;
+  }
+
+  .file-tree {
+    overflow: visible;
+    break-inside: auto;
+  }
+
+  .sl-badge {
+    border-color: var(--sl-color-gray-3);
+  }
+}

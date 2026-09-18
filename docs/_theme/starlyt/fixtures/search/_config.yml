@@ -1,0 +1,15 @@
+title: Search fixture
+theme: starlyt
+baseurl: /docs
+permalink: pretty
+collections:
+  guides:
+    output: true
+    permalink: /guides/:path/
+  private:
+    output: false
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

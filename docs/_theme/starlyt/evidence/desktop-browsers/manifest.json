@@ -1,0 +1,88 @@
+{
+  "generatedAt": "2026-09-12T04:31:54Z",
+  "verdict": "pass",
+  "scope": "Pinned Playwright browser binaries on Linux only; excludes Edge, real Safari, mobile devices, physical devices, and accessibility certification.",
+  "command": "JIGYLL=/tmp/jigyll-code-annotations PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npm test",
+  "workingDirectory": "tools/browser",
+  "environment": {
+    "platform": "linux",
+    "kernel": "7.2.3-arch1-3",
+    "architecture": "x64",
+    "jigyll": "jigyll version develop",
+    "themeCommit": "8106e6816bbd8e6a93d3dcc630b0211c54f9137b",
+    "themeWorkingTreeSha256": "36f8305a8c93ed11dae730dfc720f5210cdd23c72a513513ccab78e2ac305fe0",
+    "packageLockSha256": "fcd85827afd252049246d4481f1dfb73517e1430a38013a447fab39963fa28c8",
+    "playwright": "1.63.0",
+    "hostCompatibility": "Playwright classifies Arch Linux as unsupported and selected its Ubuntu 24.04 fallback builds. WebKit used locally extracted Ubuntu 24.04 libicu74, libxml2, and libflite1 runtime libraries; host-package validation was skipped. No test or browser project was skipped."
+  },
+  "browsers": [
+    {
+      "name": "chromium",
+      "revision": "1243",
+      "version": "153.0.8010.12",
+      "tests": 99,
+      "passed": 99
+    },
+    {
+      "name": "firefox",
+      "revision": "1543",
+      "version": "155.0",
+      "tests": 99,
+      "passed": 99
+    },
+    {
+      "name": "webkit",
+      "revision": "2359",
+      "version": "26.6",
+      "tests": 99,
+      "passed": 99,
+      "note": "Playwright WebKit; not reported as Safari evidence."
+    }
+  ],
+  "matrix": {
+    "installations": ["/", "/docs/"],
+    "pages": ["overview", "long-guide", "code"],
+    "colorModes": ["light", "dark"],
+    "viewports": ["390x844", "1024x768", "1440x900", "799x768", "800x768", "1151x900", "1152x900"],
+    "layoutCasesPerBrowser": 84,
+    "focusedCasesPerBrowser": 14,
+    "metadataCasesPerBrowser": 1
+  },
+  "behaviors": [
+    "page-wide containment and local wide-content scrolling",
+    "fixed-header content clearance and reachable controls",
+    "mobile navigation focus visibility, containment, Escape dismissal, and restoration",
+    "navigation and table-of-contents breakpoint cleanup",
+    "native disclosure persistence",
+    "table-of-contents scrolling and target focus",
+    "light and dark preference persistence",
+    "exact clipboard success content and honest denial feedback",
+    "JavaScript-disabled content, tabs, image, navigation, and server-rendered code"
+  ],
+  "results": {
+    "total": 297,
+    "passed": 297,
+    "failed": 0,
+    "skipped": 0,
+    "duration": "2.3m",
+    "environmentRecordSha256": "ad306d9b366fc6ec06037215cb37d6db0c4f800ffca89636de7fa5e3557331ff",
+    "jsonReporterSha256": "e1972fa01ccf0bb2d035a5dce2ec540e13cd5afd33ae7d9fd07ea77a687c3347"
+  },
+  "diagnostics": {
+    "failureScreenshots": 0,
+    "failureTraces": 0,
+    "pixelBaseline": false,
+    "browserSpecificSkips": []
+  },
+  "headlessPlaywrightMcpReview": {
+    "purpose": "Independent rendered-surface check; not part of the maintained acceptance verdict.",
+    "viewport": "390x844",
+    "page": "/docs/reference/code-examples/",
+    "engines": [
+      "Chromium 153.0.8010.12 revision 1243",
+      "Firefox 155.0 revision 1542",
+      "Playwright WebKit 26.5 revision 2358"
+    ],
+    "observations": "All three rendered readable, contained code pages with 16px article insets, zero page-wide overflow, and local auto-scrolling for every wide code block. No overlaps or malformed controls were visible. Success screenshots were inspected and then removed; the harness retains screenshots only for failures."
+  }
+}

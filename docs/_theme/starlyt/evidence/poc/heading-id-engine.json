@@ -1,0 +1,8 @@
+{
+  "engine": "Jigyll 1.10.1",
+  "input": "<h2 id=\"manual&amp;quoted\">Literal &lt;tag&gt; with <code>code</code></h2>",
+  "output": "<h2 id=\"manual&quotedoted\">Literal &lt;tag&gt; with <code>code</code></h2>",
+  "emittedId": "manual&quotedoted",
+  "tocHref": "#manual%26quotedoted",
+  "themePreservesEmittedId": true
+}

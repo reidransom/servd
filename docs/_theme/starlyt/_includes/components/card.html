@@ -1,0 +1,7 @@
+{% assign card_title = include.title | strip %}
+{% if card_title != '' %}
+<article class="card not-content">
+  <p class="card-title">{% if include.icon %}{% include components/icon.html name=include.icon size='large' %}{% endif %}<span>{{ include.title | escape }}</span></p>
+  {% if include.content %}<div class="card-body sl-markdown-content">{{ include.content | markdownify }}</div>{% endif %}
+</article>
+{% endif %}

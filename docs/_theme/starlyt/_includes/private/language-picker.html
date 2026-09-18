@@ -1,0 +1,22 @@
+{% if page.all_translations.size > 1 %}
+<details id="language-picker" data-global-control>
+  <summary aria-label="{% include private/ui-message.html key='starlyt.language' default='Language' %}: {{ page.language.label | escape }}">
+    <span class="language-picker-control">
+      {% include components/icon.html name='translate' size='small' %}
+      <span class="language-current" lang="{{ page.language.tag | escape }}" dir="{{ page.language.direction | escape }}">{{ page.language.label | escape }}</span>
+      <svg class="language-caret" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m6.3 9 5.7 5.7L17.7 9l1.4 1.4-7.1 7.1-7.1-7.1Z"/></svg>
+    </span>
+  </summary>
+  <ul aria-label="{% include private/ui-message.html key='starlyt.language' default='Language' %}">
+    {% for edition in page.all_translations %}
+      <li>
+        {% if edition.language.key == page.language.key %}
+          <span class="language-option current" aria-current="page" lang="{{ edition.language.tag | escape }}" dir="{{ edition.language.direction | escape }}">{{ edition.language.label | escape }}</span>
+        {% else %}
+          <a class="language-option" href="{{ edition.url | relative_url | escape }}" lang="{{ edition.language.tag | escape }}" dir="{{ edition.language.direction | escape }}">{{ edition.language.label | escape }}</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</details>
+{% endif %}

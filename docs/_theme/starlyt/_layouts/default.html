@@ -1,0 +1,45 @@
+{% capture toc %}{% include toc.html headings=page.headings %}{% endcapture %}
+{% assign toc = toc | strip %}
+{% assign navigation_base = '/' | relative_url %}{% if page.language %}{% assign navigation_base = '/' | localized_url | relative_url %}{% endif %}
+{% capture html_localization %}{% include private/html-localization.html %}{% endcapture %}
+{% capture enhancement_messages %}{% include private/enhancement-messages.html %}{% endcapture %}
+<!doctype html>
+<html {{ html_localization | strip }} data-theme="dark"{% if toc != "" %} data-has-toc{% endif %} {{ enhancement_messages | strip }}>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page.title | escape }} | {{ site.title | escape }}</title>
+    {% include private/localization-head.html %}
+    <script src="{{ '/assets/color-mode.js' | relative_url | escape }}"></script>
+    <link rel="stylesheet" href="{{ '/assets/starlyt.css' | relative_url | escape }}">
+    <script src="{{ '/assets/navigation.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/global-controls.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/prose.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/toc.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/flexsearch-0.8.212.min.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/search.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/tabs.js' | relative_url | escape }}" defer></script>
+    <script src="{{ '/assets/code.js' | relative_url | escape }}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{% include private/ui-message.html key='starlyt.skip_to_content' default='Skip to content' %}</a>
+    <header class="site-header">{% include header.html %}</header>
+    <button id="menu-toggle" popovertarget="site-nav" aria-label="{% include private/ui-message.html key='starlyt.menu' default='Menu' %}" aria-controls="site-nav">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path class="open-icon" fill="currentColor" d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/><path class="close-icon" fill="currentColor" d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg>
+    </button>
+    <nav id="site-nav" aria-label="{% include private/ui-message.html key='starlyt.menu' default='Menu' %}" popover="auto" data-base="{{ navigation_base | escape }}">
+      {% include navigation.html items=site.navigation %}
+    </nav>
+    <div class="page-frame">
+      <aside id="toc-slot">{{ toc }}</aside>
+      <main id="main-content" class="main-pane" tabindex="-1">
+        {% if page.hero %}
+          <div class="content-panel"><div class="content-container">{% include hero.html %}</div></div>
+        {% else %}
+          <div class="content-panel"><div class="content-container"><h1 id="page-title">{{ page.title | escape }}</h1></div></div>
+        {% endif %}
+        <div class="content-panel"><div class="content-container"><article id="article" class="sl-markdown-content">{{ content }}</article>{% include private/print-canonical.html %}</div></div>
+      </main>
+    </div>
+  </body>
+</html>

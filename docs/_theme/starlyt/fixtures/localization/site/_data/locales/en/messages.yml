@@ -1,0 +1,42 @@
+starlyt:
+  skip_to_content: "Skip to content"
+  menu: "Menu"
+  table_of_contents: "Table of contents"
+  on_this_page: "On this page"
+  overview: "Overview"
+  search:
+    label: "Search"
+    dialog_label: "Search documentation"
+    cancel: "Cancel"
+    input_label: "Search documentation"
+    placeholder: "Search documentation"
+    retry: "Retry"
+    empty: "Enter words to search this documentation."
+    loading: "Loading search…"
+    error: "Search could not load. Check your connection and retry."
+    no_results: "No results found. Try another term."
+    one_result: "{count} result"
+    results: "{count} results"
+  color_mode:
+    label: "Select theme"
+    dark: "Dark"
+    light: "Light"
+    auto: "Auto"
+  copy:
+    label: "Copy to clipboard"
+    success: "Copied!"
+    failure: "Copy failed"
+  language: "Language"
+  callout:
+    note: "Note"
+    tip: "Tip"
+    caution: "Caution"
+    danger: "Danger"
+  anchor_label: "Section titled “{title}”"
+  not_found:
+    title: "Page not found"
+    back_home: "Back to home"
+nav:
+  guides: "Guides"
+  home: "Home"
+  guide: "Guide"

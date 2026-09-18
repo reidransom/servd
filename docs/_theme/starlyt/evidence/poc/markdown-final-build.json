@@ -1,0 +1,12 @@
+{
+  "themeRevision": "2fb3de9e3fd5a0fc25a3c4f79ece3a800a82efb7",
+  "themeTree": "87f9225ae7c192611572107c7d2cad8d3e3cbd65",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "",
+  "source": "/home/reid/src/starlyt/.poc/markdown-final",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/markdown-final --theme /home/reid/src/starlyt/.poc/theme-markdown-final",
+    "jigyll build --source /home/reid/src/starlyt/.poc/markdown-final",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/markdown-final"
+  ]
+}

@@ -1,0 +1,2510 @@
+{
+  "environment": {
+    "chromium": "152.0.7977.82",
+    "executableSha256": "27c398e1738a5bf578e4414654b959b8fdb63446dfb309c114a95e97c5d243ff",
+    "kernel": "Linux 7.2.3-arch1-3 x86_64 GNU/Linux",
+    "fontconfig": [
+      "",
+      "/usr/share/fonts/Adwaita/AdwaitaMono-Bold.ttf: Adwaita Mono",
+      "/usr/share/fonts/Adwaita/AdwaitaMono-BoldItalic.ttf: Adwaita Mono",
+      "/usr/share/fonts/Adwaita/AdwaitaMono-Italic.ttf: Adwaita Mono",
+      "/usr/share/fonts/Adwaita/AdwaitaMono-Regular.ttf: Adwaita Mono",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Italic.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/Adwaita/AdwaitaSans-Regular.ttf: Adwaita Sans",
+      "/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Bold.ttf: JetBrainsMono Nerd Font,JetBrainsMono NF",
+      "/usr/share/fonts/TTF/JetBrainsMonoNerdFont-BoldItalic.ttf: JetBrainsMono Nerd Font,JetBrainsMono NF",
+      "/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Italic.ttf: JetBrainsMono Nerd Font,JetBrainsMono NF",
+      "/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Regular.ttf: JetBrainsMono Nerd Font,JetBrainsMono NF",
+      "/usr/share/fonts/WOFF2/fa-brands-400.woff2: Font Awesome 7 Brands",
+      "/usr/share/fonts/WOFF2/fa-regular-400.woff2: Font Awesome 7 Free",
+      "/usr/share/fonts/WOFF2/fa-solid-900.woff2: Font Awesome 7 Free,Font Awesome 7 Free Solid",
+      "/usr/share/fonts/WOFF2/fa-v4compatibility.woff2: Font Awesome v4 Compatibility",
+      "/usr/share/fonts/gsfonts/C059-BdIta.otf: C059",
+      "/usr/share/fonts/gsfonts/C059-Bold.otf: C059",
+      "/usr/share/fonts/gsfonts/C059-Italic.otf: C059",
+      "/usr/share/fonts/gsfonts/C059-Roman.otf: C059",
+      "/usr/share/fonts/gsfonts/D050000L.otf: D050000L",
+      "/usr/share/fonts/gsfonts/NimbusMonoPS-Bold.otf: Nimbus Mono PS",
+      "/usr/share/fonts/gsfonts/NimbusMonoPS-BoldItalic.otf: Nimbus Mono PS",
+      "/usr/share/fonts/gsfonts/NimbusMonoPS-Italic.otf: Nimbus Mono PS",
+      "/usr/share/fonts/gsfonts/NimbusMonoPS-Regular.otf: Nimbus Mono PS",
+      "/usr/share/fonts/gsfonts/NimbusRoman-Bold.otf: Nimbus Roman",
+      "/usr/share/fonts/gsfonts/NimbusRoman-BoldItalic.otf: Nimbus Roman",
+      "/usr/share/fonts/gsfonts/NimbusRoman-Italic.otf: Nimbus Roman",
+      "/usr/share/fonts/gsfonts/NimbusRoman-Regular.otf: Nimbus Roman",
+      "/usr/share/fonts/gsfonts/NimbusSans-Bold.otf: Nimbus Sans",
+      "/usr/share/fonts/gsfonts/NimbusSans-BoldItalic.otf: Nimbus Sans",
+      "/usr/share/fonts/gsfonts/NimbusSans-Italic.otf: Nimbus Sans",
+      "/usr/share/fonts/gsfonts/NimbusSans-Regular.otf: Nimbus Sans",
+      "/usr/share/fonts/gsfonts/NimbusSansNarrow-Bold.otf: Nimbus Sans Narrow",
+      "/usr/share/fonts/gsfonts/NimbusSansNarrow-BoldOblique.otf: Nimbus Sans Narrow",
+      "/usr/share/fonts/gsfonts/NimbusSansNarrow-Oblique.otf: Nimbus Sans Narrow",
+      "/usr/share/fonts/gsfonts/NimbusSansNarrow-Regular.otf: Nimbus Sans Narrow",
+      "/usr/share/fonts/gsfonts/P052-Bold.otf: P052",
+      "/usr/share/fonts/gsfonts/P052-BoldItalic.otf: P052",
+      "/usr/share/fonts/gsfonts/P052-Italic.otf: P052",
+      "/usr/share/fonts/gsfonts/P052-Roman.otf: P052",
+      "/usr/share/fonts/gsfonts/StandardSymbolsPS.otf: Standard Symbols PS",
+      "/usr/share/fonts/gsfonts/URWBookman-Demi.otf: URW Bookman",
+      "/usr/share/fonts/gsfonts/URWBookman-DemiItalic.otf: URW Bookman",
+      "/usr/share/fonts/gsfonts/URWBookman-Light.otf: URW Bookman",
+      "/usr/share/fonts/gsfonts/URWBookman-LightItalic.otf: URW Bookman",
+      "/usr/share/fonts/gsfonts/URWGothic-Book.otf: URW Gothic",
+      "/usr/share/fonts/gsfonts/URWGothic-BookOblique.otf: URW Gothic",
+      "/usr/share/fonts/gsfonts/URWGothic-Demi.otf: URW Gothic",
+      "/usr/share/fonts/gsfonts/URWGothic-DemiOblique.otf: URW Gothic",
+      "/usr/share/fonts/gsfonts/Z003-MediumItalic.otf: Z003",
+      "/usr/share/fonts/inter/Inter.ttc: Inter",
+      "/usr/share/fonts/inter/Inter.ttc: Inter",
+      "/usr/share/fonts/inter/Inter.ttc: Inter",
+      "/usr/share/fonts/inter/Inter.ttc: Inter",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Black",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Black",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display ExtraBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display ExtraBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display ExtraLight",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display ExtraLight",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Light",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Light",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Medium",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Medium",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display SemiBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display SemiBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Thin",
+      "/usr/share/fonts/inter/Inter.ttc: Inter Display,Inter Display Thin",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Black",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Black",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter ExtraBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter ExtraBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter ExtraLight",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter ExtraLight",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Light",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Light",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Medium",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Medium",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter SemiBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter SemiBold",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Thin",
+      "/usr/share/fonts/inter/Inter.ttc: Inter,Inter Thin",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable-Italic.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/inter/InterVariable.ttf: Inter Variable",
+      "/usr/share/fonts/liberation/LiberationMono-Bold.ttf: Liberation Mono",
+      "/usr/share/fonts/liberation/LiberationMono-BoldItalic.ttf: Liberation Mono",
+      "/usr/share/fonts/liberation/LiberationMono-Italic.ttf: Liberation Mono",
+      "/usr/share/fonts/liberation/LiberationMono-Regular.ttf: Liberation Mono",
+      "/usr/share/fonts/liberation/LiberationSans-Bold.ttf: Liberation Sans",
+      "/usr/share/fonts/liberation/LiberationSans-BoldItalic.ttf: Liberation Sans",
+      "/usr/share/fonts/liberation/LiberationSans-Italic.ttf: Liberation Sans",
+      "/usr/share/fonts/liberation/LiberationSans-Regular.ttf: Liberation Sans",
+      "/usr/share/fonts/liberation/LiberationSerif-Bold.ttf: Liberation Serif",
+      "/usr/share/fonts/liberation/LiberationSerif-BoldItalic.ttf: Liberation Serif",
+      "/usr/share/fonts/liberation/LiberationSerif-Italic.ttf: Liberation Serif",
+      "/usr/share/fonts/liberation/LiberationSerif-Regular.ttf: Liberation Serif",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc: Noto Sans CJK HK,Noto Sans CJK HK Black",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc: Noto Sans CJK JP,Noto Sans CJK JP Black",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc: Noto Sans CJK KR,Noto Sans CJK KR Black",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc: Noto Sans CJK SC,Noto Sans CJK SC Black",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc: Noto Sans CJK TC,Noto Sans CJK TC Black",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans CJK HK",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans CJK JP",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans CJK KR",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans CJK SC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans CJK TC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK HK",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK JP",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK KR",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK SC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK TC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-DemiLight.ttc: Noto Sans CJK HK,Noto Sans CJK HK DemiLight",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-DemiLight.ttc: Noto Sans CJK JP,Noto Sans CJK JP DemiLight",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-DemiLight.ttc: Noto Sans CJK KR,Noto Sans CJK KR DemiLight",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-DemiLight.ttc: Noto Sans CJK SC,Noto Sans CJK SC DemiLight",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-DemiLight.ttc: Noto Sans CJK TC,Noto Sans CJK TC DemiLight",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Light.ttc: Noto Sans CJK HK,Noto Sans CJK HK Light",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Light.ttc: Noto Sans CJK JP,Noto Sans CJK JP Light",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Light.ttc: Noto Sans CJK KR,Noto Sans CJK KR Light",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Light.ttc: Noto Sans CJK SC,Noto Sans CJK SC Light",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Light.ttc: Noto Sans CJK TC,Noto Sans CJK TC Light",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc: Noto Sans CJK HK,Noto Sans CJK HK Medium",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc: Noto Sans CJK JP,Noto Sans CJK JP Medium",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc: Noto Sans CJK KR,Noto Sans CJK KR Medium",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc: Noto Sans CJK SC,Noto Sans CJK SC Medium",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc: Noto Sans CJK TC,Noto Sans CJK TC Medium",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans CJK HK",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans CJK JP",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans CJK KR",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans CJK SC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans CJK TC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK HK",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK JP",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK KR",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK SC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK TC",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Thin.ttc: Noto Sans CJK HK,Noto Sans CJK HK Thin",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Thin.ttc: Noto Sans CJK JP,Noto Sans CJK JP Thin",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Thin.ttc: Noto Sans CJK KR,Noto Sans CJK KR Thin",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Thin.ttc: Noto Sans CJK SC,Noto Sans CJK SC Thin",
+      "/usr/share/fonts/noto-cjk/NotoSansCJK-Thin.ttc: Noto Sans CJK TC,Noto Sans CJK TC Thin",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Black.ttc: Noto Serif CJK HK,Noto Serif CJK HK Black",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Black.ttc: Noto Serif CJK JP,Noto Serif CJK JP Black",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Black.ttc: Noto Serif CJK KR,Noto Serif CJK KR Black",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Black.ttc: Noto Serif CJK SC,Noto Serif CJK SC Black",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Black.ttc: Noto Serif CJK TC,Noto Serif CJK TC Black",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Bold.ttc: Noto Serif CJK HK",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Bold.ttc: Noto Serif CJK JP",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Bold.ttc: Noto Serif CJK KR",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Bold.ttc: Noto Serif CJK SC",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Bold.ttc: Noto Serif CJK TC",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-ExtraLight.ttc: Noto Serif CJK HK,Noto Serif CJK HK ExtraLight",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-ExtraLight.ttc: Noto Serif CJK JP,Noto Serif CJK JP ExtraLight",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-ExtraLight.ttc: Noto Serif CJK KR,Noto Serif CJK KR ExtraLight",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-ExtraLight.ttc: Noto Serif CJK SC,Noto Serif CJK SC ExtraLight",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-ExtraLight.ttc: Noto Serif CJK TC,Noto Serif CJK TC ExtraLight",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Light.ttc: Noto Serif CJK HK,Noto Serif CJK HK Light",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Light.ttc: Noto Serif CJK JP,Noto Serif CJK JP Light",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Light.ttc: Noto Serif CJK KR,Noto Serif CJK KR Light",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Light.ttc: Noto Serif CJK SC,Noto Serif CJK SC Light",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Light.ttc: Noto Serif CJK TC,Noto Serif CJK TC Light",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Medium.ttc: Noto Serif CJK HK,Noto Serif CJK HK Medium",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Medium.ttc: Noto Serif CJK JP,Noto Serif CJK JP Medium",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Medium.ttc: Noto Serif CJK KR,Noto Serif CJK KR Medium",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Medium.ttc: Noto Serif CJK SC,Noto Serif CJK SC Medium",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Medium.ttc: Noto Serif CJK TC,Noto Serif CJK TC Medium",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc: Noto Serif CJK HK",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc: Noto Serif CJK JP",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc: Noto Serif CJK KR",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc: Noto Serif CJK SC",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc: Noto Serif CJK TC",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-SemiBold.ttc: Noto Serif CJK HK,Noto Serif CJK HK SemiBold",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-SemiBold.ttc: Noto Serif CJK JP,Noto Serif CJK JP SemiBold",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-SemiBold.ttc: Noto Serif CJK KR,Noto Serif CJK KR SemiBold",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-SemiBold.ttc: Noto Serif CJK SC,Noto Serif CJK SC SemiBold",
+      "/usr/share/fonts/noto-cjk/NotoSerifCJK-SemiBold.ttc: Noto Serif CJK TC,Noto Serif CJK TC SemiBold",
+      "/usr/share/fonts/noto/NotoColorEmoji.ttf: Noto Color Emoji",
+      "/usr/share/fonts/noto/NotoFangsongKSSRotated-Regular.ttf: Noto Fangsong KSS Rotated",
+      "/usr/share/fonts/noto/NotoFangsongKSSVertical-Regular.ttf: Noto Fangsong KSS Vertical",
+      "/usr/share/fonts/noto/NotoKufiArabic-Black.ttf: Noto Kufi Arabic,Noto Kufi Arabic Black",
+      "/usr/share/fonts/noto/NotoKufiArabic-Bold.ttf: Noto Kufi Arabic",
+      "/usr/share/fonts/noto/NotoKufiArabic-Light.ttf: Noto Kufi Arabic,Noto Kufi Arabic Light",
+      "/usr/share/fonts/noto/NotoKufiArabic-Medium.ttf: Noto Kufi Arabic,Noto Kufi Arabic Medium",
+      "/usr/share/fonts/noto/NotoKufiArabic-Regular.ttf: Noto Kufi Arabic",
+      "/usr/share/fonts/noto/NotoKufiArabic-Thin.ttf: Noto Kufi Arabic,Noto Kufi Arabic Thin",
+      "/usr/share/fonts/noto/NotoMusic-Regular.ttf: Noto Music",
+      "/usr/share/fonts/noto/NotoNaskhArabic-Bold.ttf: Noto Naskh Arabic",
+      "/usr/share/fonts/noto/NotoNaskhArabic-Medium.ttf: Noto Naskh Arabic,Noto Naskh Arabic Medium",
+      "/usr/share/fonts/noto/NotoNaskhArabic-Regular.ttf: Noto Naskh Arabic",
+      "/usr/share/fonts/noto/NotoNaskhArabicUI-Bold.ttf: Noto Naskh Arabic UI",
+      "/usr/share/fonts/noto/NotoNaskhArabicUI-Medium.ttf: Noto Naskh Arabic UI,Noto Naskh Arabic UI Medium",
+      "/usr/share/fonts/noto/NotoNaskhArabicUI-Regular.ttf: Noto Naskh Arabic UI",
+      "/usr/share/fonts/noto/NotoNastaliqUrdu-Bold.ttf: Noto Nastaliq Urdu",
+      "/usr/share/fonts/noto/NotoNastaliqUrdu-Regular.ttf: Noto Nastaliq Urdu",
+      "/usr/share/fonts/noto/NotoRashiHebrew-Black.ttf: Noto Rashi Hebrew,Noto Rashi Hebrew Blk",
+      "/usr/share/fonts/noto/NotoRashiHebrew-Bold.ttf: Noto Rashi Hebrew",
+      "/usr/share/fonts/noto/NotoRashiHebrew-Light.ttf: Noto Rashi Hebrew,Noto Rashi Hebrew Light",
+      "/usr/share/fonts/noto/NotoRashiHebrew-Medium.ttf: Noto Rashi Hebrew,Noto Rashi Hebrew Med",
+      "/usr/share/fonts/noto/NotoRashiHebrew-Regular.ttf: Noto Rashi Hebrew",
+      "/usr/share/fonts/noto/NotoRashiHebrew-Thin.ttf: Noto Rashi Hebrew,Noto Rashi Hebrew Thin",
+      "/usr/share/fonts/noto/NotoSans-Black.ttf: Noto Sans,Noto Sans Black",
+      "/usr/share/fonts/noto/NotoSans-BlackItalic.ttf: Noto Sans,Noto Sans Black",
+      "/usr/share/fonts/noto/NotoSans-Bold.ttf: Noto Sans",
+      "/usr/share/fonts/noto/NotoSans-BoldItalic.ttf: Noto Sans",
+      "/usr/share/fonts/noto/NotoSans-Italic.ttf: Noto Sans",
+      "/usr/share/fonts/noto/NotoSans-Light.ttf: Noto Sans,Noto Sans Light",
+      "/usr/share/fonts/noto/NotoSans-LightItalic.ttf: Noto Sans,Noto Sans Light",
+      "/usr/share/fonts/noto/NotoSans-Medium.ttf: Noto Sans,Noto Sans Medium",
+      "/usr/share/fonts/noto/NotoSans-MediumItalic.ttf: Noto Sans,Noto Sans Medium",
+      "/usr/share/fonts/noto/NotoSans-Regular.ttf: Noto Sans",
+      "/usr/share/fonts/noto/NotoSans-Thin.ttf: Noto Sans,Noto Sans Thin",
+      "/usr/share/fonts/noto/NotoSans-ThinItalic.ttf: Noto Sans,Noto Sans Thin",
+      "/usr/share/fonts/noto/NotoSansAdlam-Bold.ttf: Noto Sans Adlam",
+      "/usr/share/fonts/noto/NotoSansAdlam-Regular.ttf: Noto Sans Adlam",
+      "/usr/share/fonts/noto/NotoSansAdlamUnjoined-Bold.ttf: Noto Sans Adlam Unjoined",
+      "/usr/share/fonts/noto/NotoSansAdlamUnjoined-Regular.ttf: Noto Sans Adlam Unjoined",
+      "/usr/share/fonts/noto/NotoSansAnatolianHieroglyphs-Regular.ttf: Noto Sans Anatolian Hieroglyphs",
+      "/usr/share/fonts/noto/NotoSansArabic-Black.ttf: Noto Sans Arabic,Noto Sans Arabic Blk",
+      "/usr/share/fonts/noto/NotoSansArabic-Bold.ttf: Noto Sans Arabic",
+      "/usr/share/fonts/noto/NotoSansArabic-Light.ttf: Noto Sans Arabic,Noto Sans Arabic Light",
+      "/usr/share/fonts/noto/NotoSansArabic-Medium.ttf: Noto Sans Arabic,Noto Sans Arabic Med",
+      "/usr/share/fonts/noto/NotoSansArabic-Regular.ttf: Noto Sans Arabic",
+      "/usr/share/fonts/noto/NotoSansArabic-Thin.ttf: Noto Sans Arabic,Noto Sans Arabic Thin",
+      "/usr/share/fonts/noto/NotoSansArabicUI-Black.ttf: Noto Sans Arabic UI,Noto Sans Arabic UI Bk",
+      "/usr/share/fonts/noto/NotoSansArabicUI-Bold.ttf: Noto Sans Arabic UI",
+      "/usr/share/fonts/noto/NotoSansArabicUI-Light.ttf: Noto Sans Arabic UI,Noto Sans Arabic UI Lt",
+      "/usr/share/fonts/noto/NotoSansArabicUI-Medium.ttf: Noto Sans Arabic UI,Noto Sans Arabic UI Md",
+      "/usr/share/fonts/noto/NotoSansArabicUI-Regular.ttf: Noto Sans Arabic UI",
+      "/usr/share/fonts/noto/NotoSansArabicUI-Thin.ttf: Noto Sans Arabic UI,Noto Sans Arabic UI Th",
+      "/usr/share/fonts/noto/NotoSansArmenian-Black.ttf: Noto Sans Armenian,Noto Sans Armenian Black",
+      "/usr/share/fonts/noto/NotoSansArmenian-Bold.ttf: Noto Sans Armenian",
+      "/usr/share/fonts/noto/NotoSansArmenian-Light.ttf: Noto Sans Armenian,Noto Sans Armenian Light",
+      "/usr/share/fonts/noto/NotoSansArmenian-Medium.ttf: Noto Sans Armenian,Noto Sans Armenian Medium",
+      "/usr/share/fonts/noto/NotoSansArmenian-Regular.ttf: Noto Sans Armenian",
+      "/usr/share/fonts/noto/NotoSansArmenian-Thin.ttf: Noto Sans Armenian,Noto Sans Armenian Thin",
+      "/usr/share/fonts/noto/NotoSansAvestan-Regular.ttf: Noto Sans Avestan",
+      "/usr/share/fonts/noto/NotoSansBalinese-Bold.ttf: Noto Sans Balinese",
+      "/usr/share/fonts/noto/NotoSansBalinese-Medium.ttf: Noto Sans Balinese,Noto Sans Balinese Medium",
+      "/usr/share/fonts/noto/NotoSansBalinese-Regular.ttf: Noto Sans Balinese",
+      "/usr/share/fonts/noto/NotoSansBamum-Bold.ttf: Noto Sans Bamum",
+      "/usr/share/fonts/noto/NotoSansBamum-Medium.ttf: Noto Sans Bamum,Noto Sans Bamum Medium",
+      "/usr/share/fonts/noto/NotoSansBamum-Regular.ttf: Noto Sans Bamum",
+      "/usr/share/fonts/noto/NotoSansBassaVah-Bold.ttf: Noto Sans Bassa Vah",
+      "/usr/share/fonts/noto/NotoSansBassaVah-Medium.ttf: Noto Sans Bassa Vah,Noto Sans Bassa Vah Medium",
+      "/usr/share/fonts/noto/NotoSansBassaVah-Regular.ttf: Noto Sans Bassa Vah",
+      "/usr/share/fonts/noto/NotoSansBatak-Regular.ttf: Noto Sans Batak",
+      "/usr/share/fonts/noto/NotoSansBengali-Black.ttf: Noto Sans Bengali,Noto Sans Bengali Black",
+      "/usr/share/fonts/noto/NotoSansBengali-Bold.ttf: Noto Sans Bengali",
+      "/usr/share/fonts/noto/NotoSansBengali-Light.ttf: Noto Sans Bengali,Noto Sans Bengali Light",
+      "/usr/share/fonts/noto/NotoSansBengali-Medium.ttf: Noto Sans Bengali,Noto Sans Bengali Medium",
+      "/usr/share/fonts/noto/NotoSansBengali-Regular.ttf: Noto Sans Bengali",
+      "/usr/share/fonts/noto/NotoSansBengali-Thin.ttf: Noto Sans Bengali,Noto Sans Bengali Thin",
+      "/usr/share/fonts/noto/NotoSansBengaliUI-Black.ttf: Noto Sans Bengali UI,Noto Sans Bengali UI Black",
+      "/usr/share/fonts/noto/NotoSansBengaliUI-Bold.ttf: Noto Sans Bengali UI",
+      "/usr/share/fonts/noto/NotoSansBengaliUI-Light.ttf: Noto Sans Bengali UI,Noto Sans Bengali UI Light",
+      "/usr/share/fonts/noto/NotoSansBengaliUI-Medium.ttf: Noto Sans Bengali UI,Noto Sans Bengali UI Medium",
+      "/usr/share/fonts/noto/NotoSansBengaliUI-Regular.ttf: Noto Sans Bengali UI",
+      "/usr/share/fonts/noto/NotoSansBengaliUI-Thin.ttf: Noto Sans Bengali UI,Noto Sans Bengali UI Thin",
+      "/usr/share/fonts/noto/NotoSansBhaiksuki-Regular.ttf: Noto Sans Bhaiksuki",
+      "/usr/share/fonts/noto/NotoSansBrahmi-Regular.ttf: Noto Sans Brahmi",
+      "/usr/share/fonts/noto/NotoSansBuginese-Regular.ttf: Noto Sans Buginese",
+      "/usr/share/fonts/noto/NotoSansBuhid-Regular.ttf: Noto Sans Buhid",
+      "/usr/share/fonts/noto/NotoSansCanadianAboriginal-Black.ttf: Noto Sans Canadian Aboriginal,Noto Sans Canadian Aboriginal Black",
+      "/usr/share/fonts/noto/NotoSansCanadianAboriginal-Bold.ttf: Noto Sans Canadian Aboriginal",
+      "/usr/share/fonts/noto/NotoSansCanadianAboriginal-Light.ttf: Noto Sans Canadian Aboriginal,Noto Sans Canadian Aboriginal Light",
+      "/usr/share/fonts/noto/NotoSansCanadianAboriginal-Medium.ttf: Noto Sans Canadian Aboriginal,Noto Sans Canadian Aboriginal Medium",
+      "/usr/share/fonts/noto/NotoSansCanadianAboriginal-Regular.ttf: Noto Sans Canadian Aboriginal",
+      "/usr/share/fonts/noto/NotoSansCanadianAboriginal-Thin.ttf: Noto Sans Canadian Aboriginal,Noto Sans Canadian Aboriginal Thin",
+      "/usr/share/fonts/noto/NotoSansCarian-Regular.ttf: Noto Sans Carian",
+      "/usr/share/fonts/noto/NotoSansCaucasianAlbanian-Regular.ttf: Noto Sans Caucasian Albanian",
+      "/usr/share/fonts/noto/NotoSansChakma-Regular.ttf: Noto Sans Chakma",
+      "/usr/share/fonts/noto/NotoSansCham-Black.ttf: Noto Sans Cham,Noto Sans Cham Black",
+      "/usr/share/fonts/noto/NotoSansCham-Bold.ttf: Noto Sans Cham",
+      "/usr/share/fonts/noto/NotoSansCham-Light.ttf: Noto Sans Cham,Noto Sans Cham Light",
+      "/usr/share/fonts/noto/NotoSansCham-Medium.ttf: Noto Sans Cham,Noto Sans Cham Medium",
+      "/usr/share/fonts/noto/NotoSansCham-Regular.ttf: Noto Sans Cham",
+      "/usr/share/fonts/noto/NotoSansCham-Thin.ttf: Noto Sans Cham,Noto Sans Cham Thin",
+      "/usr/share/fonts/noto/NotoSansCherokee-Black.ttf: Noto Sans Cherokee,Noto Sans Cherokee Black",
+      "/usr/share/fonts/noto/NotoSansCherokee-Bold.ttf: Noto Sans Cherokee",
+      "/usr/share/fonts/noto/NotoSansCherokee-Light.ttf: Noto Sans Cherokee,Noto Sans Cherokee Light",
+      "/usr/share/fonts/noto/NotoSansCherokee-Medium.ttf: Noto Sans Cherokee,Noto Sans Cherokee Medium",
+      "/usr/share/fonts/noto/NotoSansCherokee-Regular.ttf: Noto Sans Cherokee",
+      "/usr/share/fonts/noto/NotoSansCherokee-Thin.ttf: Noto Sans Cherokee,Noto Sans Cherokee Thin",
+      "/usr/share/fonts/noto/NotoSansChorasmian-Regular.ttf: Noto Sans Chorasmian",
+      "/usr/share/fonts/noto/NotoSansCoptic-Regular.ttf: Noto Sans Coptic",
+      "/usr/share/fonts/noto/NotoSansCuneiform-Regular.ttf: Noto Sans Cuneiform",
+      "/usr/share/fonts/noto/NotoSansCypriot-Regular.ttf: Noto Sans Cypriot",
+      "/usr/share/fonts/noto/NotoSansCyproMinoan-Regular.ttf: Noto Sans Cypro Minoan",
+      "/usr/share/fonts/noto/NotoSansDeseret-Regular.ttf: Noto Sans Deseret",
+      "/usr/share/fonts/noto/NotoSansDevanagari-Black.ttf: Noto Sans Devanagari,Noto Sans Devanagari Black",
+      "/usr/share/fonts/noto/NotoSansDevanagari-Bold.ttf: Noto Sans Devanagari",
+      "/usr/share/fonts/noto/NotoSansDevanagari-Light.ttf: Noto Sans Devanagari,Noto Sans Devanagari Light",
+      "/usr/share/fonts/noto/NotoSansDevanagari-Medium.ttf: Noto Sans Devanagari,Noto Sans Devanagari Medium",
+      "/usr/share/fonts/noto/NotoSansDevanagari-Regular.ttf: Noto Sans Devanagari",
+      "/usr/share/fonts/noto/NotoSansDevanagari-Thin.ttf: Noto Sans Devanagari,Noto Sans Devanagari Thin",
+      "/usr/share/fonts/noto/NotoSansDevanagariUI-Black.ttf: Noto Sans Devanagari UI,Noto Sans Devanagari UI Black",
+      "/usr/share/fonts/noto/NotoSansDevanagariUI-Bold.ttf: Noto Sans Devanagari UI",
+      "/usr/share/fonts/noto/NotoSansDevanagariUI-Light.ttf: Noto Sans Devanagari UI,Noto Sans Devanagari UI Light",
+      "/usr/share/fonts/noto/NotoSansDevanagariUI-Medium.ttf: Noto Sans Devanagari UI,Noto Sans Devanagari UI Medium",
+      "/usr/share/fonts/noto/NotoSansDevanagariUI-Regular.ttf: Noto Sans Devanagari UI",
+      "/usr/share/fonts/noto/NotoSansDevanagariUI-Thin.ttf: Noto Sans Devanagari UI,Noto Sans Devanagari UI Thin",
+      "/usr/share/fonts/noto/NotoSansDuployan-Bold.ttf: Noto Sans Duployan",
+      "/usr/share/fonts/noto/NotoSansDuployan-Regular.ttf: Noto Sans Duployan",
+      "/usr/share/fonts/noto/NotoSansEgyptianHieroglyphs-Regular.ttf: Noto Sans Egyptian Hieroglyphs,Noto Sans EgyptHiero",
+      "/usr/share/fonts/noto/NotoSansElbasan-Regular.ttf: Noto Sans Elbasan",
+      "/usr/share/fonts/noto/NotoSansElymaic-Regular.ttf: Noto Sans Elymaic",
+      "/usr/share/fonts/noto/NotoSansEthiopic-Black.ttf: Noto Sans Ethiopic,Noto Sans Ethiopic Black",
+      "/usr/share/fonts/noto/NotoSansEthiopic-Bold.ttf: Noto Sans Ethiopic",
+      "/usr/share/fonts/noto/NotoSansEthiopic-Light.ttf: Noto Sans Ethiopic,Noto Sans Ethiopic Light",
+      "/usr/share/fonts/noto/NotoSansEthiopic-Medium.ttf: Noto Sans Ethiopic,Noto Sans Ethiopic Medium",
+      "/usr/share/fonts/noto/NotoSansEthiopic-Regular.ttf: Noto Sans Ethiopic",
+      "/usr/share/fonts/noto/NotoSansEthiopic-Thin.ttf: Noto Sans Ethiopic,Noto Sans Ethiopic Thin",
+      "/usr/share/fonts/noto/NotoSansGeorgian-Black.ttf: Noto Sans Georgian,Noto Sans Georgian Black",
+      "/usr/share/fonts/noto/NotoSansGeorgian-Bold.ttf: Noto Sans Georgian,Noto Sans Georgian Bold",
+      "/usr/share/fonts/noto/NotoSansGeorgian-Light.ttf: Noto Sans Georgian,Noto Sans Georgian Light",
+      "/usr/share/fonts/noto/NotoSansGeorgian-Medium.ttf: Noto Sans Georgian,Noto Sans Georgian Medium",
+      "/usr/share/fonts/noto/NotoSansGeorgian-Regular.ttf: Noto Sans Georgian",
+      "/usr/share/fonts/noto/NotoSansGeorgian-Thin.ttf: Noto Sans Georgian,Noto Sans Georgian Thin",
+      "/usr/share/fonts/noto/NotoSansGlagolitic-Regular.ttf: Noto Sans Glagolitic",
+      "/usr/share/fonts/noto/NotoSansGothic-Regular.ttf: Noto Sans Gothic",
+      "/usr/share/fonts/noto/NotoSansGrantha-Regular.ttf: Noto Sans Grantha",
+      "/usr/share/fonts/noto/NotoSansGujarati-Black.ttf: Noto Sans Gujarati,Noto Sans Gujarati Black",
+      "/usr/share/fonts/noto/NotoSansGujarati-Bold.ttf: Noto Sans Gujarati",
+      "/usr/share/fonts/noto/NotoSansGujarati-Light.ttf: Noto Sans Gujarati,Noto Sans Gujarati Light",
+      "/usr/share/fonts/noto/NotoSansGujarati-Medium.ttf: Noto Sans Gujarati,Noto Sans Gujarati Medium",
+      "/usr/share/fonts/noto/NotoSansGujarati-Regular.ttf: Noto Sans Gujarati",
+      "/usr/share/fonts/noto/NotoSansGujarati-Thin.ttf: Noto Sans Gujarati,Noto Sans Gujarati Thin",
+      "/usr/share/fonts/noto/NotoSansGujaratiUI-Black.ttf: Noto Sans Gujarati UI,Noto Sans Gujarati UI Black",
+      "/usr/share/fonts/noto/NotoSansGujaratiUI-Bold.ttf: Noto Sans Gujarati UI",
+      "/usr/share/fonts/noto/NotoSansGujaratiUI-Light.ttf: Noto Sans Gujarati UI,Noto Sans Gujarati UI Light",
+      "/usr/share/fonts/noto/NotoSansGujaratiUI-Medium.ttf: Noto Sans Gujarati UI,Noto Sans Gujarati UI Medium",
+      "/usr/share/fonts/noto/NotoSansGujaratiUI-Regular.ttf: Noto Sans Gujarati UI",
+      "/usr/share/fonts/noto/NotoSansGujaratiUI-Thin.ttf: Noto Sans Gujarati UI,Noto Sans Gujarati UI Thin",
+      "/usr/share/fonts/noto/NotoSansGunjalaGondi-Bold.ttf: Noto Sans Gunjala Gondi",
+      "/usr/share/fonts/noto/NotoSansGunjalaGondi-Medium.ttf: Noto Sans Gunjala Gondi,Noto Sans Gunjala Gondi Medium",
+      "/usr/share/fonts/noto/NotoSansGunjalaGondi-Regular.ttf: Noto Sans Gunjala Gondi",
+      "/usr/share/fonts/noto/NotoSansGurmukhi-Black.ttf: Noto Sans Gurmukhi,Noto Sans Gurmukhi Black",
+      "/usr/share/fonts/noto/NotoSansGurmukhi-Bold.ttf: Noto Sans Gurmukhi",
+      "/usr/share/fonts/noto/NotoSansGurmukhi-Light.ttf: Noto Sans Gurmukhi,Noto Sans Gurmukhi Light",
+      "/usr/share/fonts/noto/NotoSansGurmukhi-Medium.ttf: Noto Sans Gurmukhi,Noto Sans Gurmukhi Medium",
+      "/usr/share/fonts/noto/NotoSansGurmukhi-Regular.ttf: Noto Sans Gurmukhi",
+      "/usr/share/fonts/noto/NotoSansGurmukhi-Thin.ttf: Noto Sans Gurmukhi,Noto Sans Gurmukhi Thin",
+      "/usr/share/fonts/noto/NotoSansGurmukhiUI-Black.ttf: Noto Sans Gurmukhi UI,Noto Sans Gurmukhi UI Black",
+      "/usr/share/fonts/noto/NotoSansGurmukhiUI-Bold.ttf: Noto Sans Gurmukhi UI",
+      "/usr/share/fonts/noto/NotoSansGurmukhiUI-Light.ttf: Noto Sans Gurmukhi UI,Noto Sans Gurmukhi UI Light",
+      "/usr/share/fonts/noto/NotoSansGurmukhiUI-Medium.ttf: Noto Sans Gurmukhi UI,Noto Sans Gurmukhi UI Medium",
+      "/usr/share/fonts/noto/NotoSansGurmukhiUI-Regular.ttf: Noto Sans Gurmukhi UI",
+      "/usr/share/fonts/noto/NotoSansGurmukhiUI-Thin.ttf: Noto Sans Gurmukhi UI,Noto Sans Gurmukhi UI Thin",
+      "/usr/share/fonts/noto/NotoSansHanifiRohingya-Bold.ttf: Noto Sans Hanifi Rohingya",
+      "/usr/share/fonts/noto/NotoSansHanifiRohingya-Medium.ttf: Noto Sans Hanifi Rohingya,Noto Sans Hanifi Rohingya Medium",
+      "/usr/share/fonts/noto/NotoSansHanifiRohingya-Regular.ttf: Noto Sans Hanifi Rohingya",
+      "/usr/share/fonts/noto/NotoSansHanunoo-Regular.ttf: Noto Sans Hanunoo",
+      "/usr/share/fonts/noto/NotoSansHatran-Regular.ttf: Noto Sans Hatran",
+      "/usr/share/fonts/noto/NotoSansHebrew-Black.ttf: Noto Sans Hebrew,Noto Sans Hebrew Black",
+      "/usr/share/fonts/noto/NotoSansHebrew-Bold.ttf: Noto Sans Hebrew",
+      "/usr/share/fonts/noto/NotoSansHebrew-Light.ttf: Noto Sans Hebrew,Noto Sans Hebrew Light",
+      "/usr/share/fonts/noto/NotoSansHebrew-Medium.ttf: Noto Sans Hebrew,Noto Sans Hebrew Medium",
+      "/usr/share/fonts/noto/NotoSansHebrew-Regular.ttf: Noto Sans Hebrew",
+      "/usr/share/fonts/noto/NotoSansHebrew-Thin.ttf: Noto Sans Hebrew,Noto Sans Hebrew Thin",
+      "/usr/share/fonts/noto/NotoSansImperialAramaic-Regular.ttf: Noto Sans Imperial Aramaic,Noto Sans ImpAramaic",
+      "/usr/share/fonts/noto/NotoSansIndicSiyaqNumbers-Regular.ttf: Noto Sans Indic Siyaq Numbers",
+      "/usr/share/fonts/noto/NotoSansInscriptionalPahlavi-Regular.ttf: Noto Sans Inscriptional Pahlavi,Noto Sans InsPahlavi",
+      "/usr/share/fonts/noto/NotoSansInscriptionalParthian-Regular.ttf: Noto Sans Inscriptional Parthian",
+      "/usr/share/fonts/noto/NotoSansJavanese-Bold.ttf: Noto Sans Javanese",
+      "/usr/share/fonts/noto/NotoSansJavanese-Regular.ttf: Noto Sans Javanese",
+      "/usr/share/fonts/noto/NotoSansKaithi-Regular.ttf: Noto Sans Kaithi",
+      "/usr/share/fonts/noto/NotoSansKannada-Black.ttf: Noto Sans Kannada,Noto Sans Kannada Black",
+      "/usr/share/fonts/noto/NotoSansKannada-Bold.ttf: Noto Sans Kannada",
+      "/usr/share/fonts/noto/NotoSansKannada-Light.ttf: Noto Sans Kannada,Noto Sans Kannada Light",
+      "/usr/share/fonts/noto/NotoSansKannada-Medium.ttf: Noto Sans Kannada,Noto Sans Kannada Medium",
+      "/usr/share/fonts/noto/NotoSansKannada-Regular.ttf: Noto Sans Kannada",
+      "/usr/share/fonts/noto/NotoSansKannada-Thin.ttf: Noto Sans Kannada,Noto Sans Kannada Thin",
+      "/usr/share/fonts/noto/NotoSansKannadaUI-Black.ttf: Noto Sans Kannada UI,Noto Sans Kannada UI Black",
+      "/usr/share/fonts/noto/NotoSansKannadaUI-Bold.ttf: Noto Sans Kannada UI",
+      "/usr/share/fonts/noto/NotoSansKannadaUI-Light.ttf: Noto Sans Kannada UI,Noto Sans Kannada UI Light",
+      "/usr/share/fonts/noto/NotoSansKannadaUI-Medium.ttf: Noto Sans Kannada UI,Noto Sans Kannada UI Medium",
+      "/usr/share/fonts/noto/NotoSansKannadaUI-Regular.ttf: Noto Sans Kannada UI",
+      "/usr/share/fonts/noto/NotoSansKannadaUI-Thin.ttf: Noto Sans Kannada UI,Noto Sans Kannada UI Thin",
+      "/usr/share/fonts/noto/NotoSansKawi-Bold.ttf: Noto Sans Kawi",
+      "/usr/share/fonts/noto/NotoSansKawi-Regular.ttf: Noto Sans Kawi",
+      "/usr/share/fonts/noto/NotoSansKayahLi-Bold.ttf: Noto Sans Kayah Li",
+      "/usr/share/fonts/noto/NotoSansKayahLi-Medium.ttf: Noto Sans Kayah Li,Noto Sans Kayah Li Medium",
+      "/usr/share/fonts/noto/NotoSansKayahLi-Regular.ttf: Noto Sans Kayah Li",
+      "/usr/share/fonts/noto/NotoSansKharoshthi-Regular.ttf: Noto Sans Kharoshthi",
+      "/usr/share/fonts/noto/NotoSansKhmer-Black.ttf: Noto Sans Khmer,Noto Sans Khmer Black",
+      "/usr/share/fonts/noto/NotoSansKhmer-Bold.ttf: Noto Sans Khmer",
+      "/usr/share/fonts/noto/NotoSansKhmer-Light.ttf: Noto Sans Khmer,Noto Sans Khmer Light",
+      "/usr/share/fonts/noto/NotoSansKhmer-Medium.ttf: Noto Sans Khmer,Noto Sans Khmer Medium",
+      "/usr/share/fonts/noto/NotoSansKhmer-Regular.ttf: Noto Sans Khmer",
+      "/usr/share/fonts/noto/NotoSansKhmer-Thin.ttf: Noto Sans Khmer,Noto Sans Khmer Thin",
+      "/usr/share/fonts/noto/NotoSansKhojki-Regular.ttf: Noto Sans Khojki",
+      "/usr/share/fonts/noto/NotoSansKhudawadi-Regular.ttf: Noto Sans Khudawadi",
+      "/usr/share/fonts/noto/NotoSansLao-Black.ttf: Noto Sans Lao,Noto Sans Lao Black",
+      "/usr/share/fonts/noto/NotoSansLao-Bold.ttf: Noto Sans Lao",
+      "/usr/share/fonts/noto/NotoSansLao-Light.ttf: Noto Sans Lao,Noto Sans Lao Light",
+      "/usr/share/fonts/noto/NotoSansLao-Medium.ttf: Noto Sans Lao,Noto Sans Lao Medium",
+      "/usr/share/fonts/noto/NotoSansLao-Regular.ttf: Noto Sans Lao",
+      "/usr/share/fonts/noto/NotoSansLao-Thin.ttf: Noto Sans Lao,Noto Sans Lao Thin",
+      "/usr/share/fonts/noto/NotoSansLaoLooped-Black.ttf: Noto Sans Lao Looped,Noto Sans Lao Looped Black",
+      "/usr/share/fonts/noto/NotoSansLaoLooped-Bold.ttf: Noto Sans Lao Looped",
+      "/usr/share/fonts/noto/NotoSansLaoLooped-Light.ttf: Noto Sans Lao Looped,Noto Sans Lao Looped Light",
+      "/usr/share/fonts/noto/NotoSansLaoLooped-Medium.ttf: Noto Sans Lao Looped,Noto Sans Lao Looped Medium",
+      "/usr/share/fonts/noto/NotoSansLaoLooped-Regular.ttf: Noto Sans Lao Looped",
+      "/usr/share/fonts/noto/NotoSansLaoLooped-Thin.ttf: Noto Sans Lao Looped,Noto Sans Lao Looped Thin",
+      "/usr/share/fonts/noto/NotoSansLepcha-Regular.ttf: Noto Sans Lepcha",
+      "/usr/share/fonts/noto/NotoSansLimbu-Regular.ttf: Noto Sans Limbu",
+      "/usr/share/fonts/noto/NotoSansLinearA-Regular.ttf: Noto Sans Linear A",
+      "/usr/share/fonts/noto/NotoSansLinearB-Regular.ttf: Noto Sans Linear B",
+      "/usr/share/fonts/noto/NotoSansLisu-Bold.ttf: Noto Sans Lisu",
+      "/usr/share/fonts/noto/NotoSansLisu-Medium.ttf: Noto Sans Lisu,Noto Sans Lisu Medium",
+      "/usr/share/fonts/noto/NotoSansLisu-Regular.ttf: Noto Sans Lisu",
+      "/usr/share/fonts/noto/NotoSansLycian-Regular.ttf: Noto Sans Lycian",
+      "/usr/share/fonts/noto/NotoSansLydian-Regular.ttf: Noto Sans Lydian",
+      "/usr/share/fonts/noto/NotoSansMahajani-Regular.ttf: Noto Sans Mahajani",
+      "/usr/share/fonts/noto/NotoSansMalayalam-Black.ttf: Noto Sans Malayalam,Noto Sans Malayalam Black",
+      "/usr/share/fonts/noto/NotoSansMalayalam-Bold.ttf: Noto Sans Malayalam",
+      "/usr/share/fonts/noto/NotoSansMalayalam-Light.ttf: Noto Sans Malayalam,Noto Sans Malayalam Light",
+      "/usr/share/fonts/noto/NotoSansMalayalam-Medium.ttf: Noto Sans Malayalam,Noto Sans Malayalam Medium",
+      "/usr/share/fonts/noto/NotoSansMalayalam-Regular.ttf: Noto Sans Malayalam",
+      "/usr/share/fonts/noto/NotoSansMalayalam-Thin.ttf: Noto Sans Malayalam,Noto Sans Malayalam Thin",
+      "/usr/share/fonts/noto/NotoSansMalayalamUI-Black.ttf: Noto Sans Malayalam UI,Noto Sans Malayalam UI Black",
+      "/usr/share/fonts/noto/NotoSansMalayalamUI-Bold.ttf: Noto Sans Malayalam UI",
+      "/usr/share/fonts/noto/NotoSansMalayalamUI-Light.ttf: Noto Sans Malayalam UI,Noto Sans Malayalam UI Light",
+      "/usr/share/fonts/noto/NotoSansMalayalamUI-Medium.ttf: Noto Sans Malayalam UI,Noto Sans Malayalam UI Medium",
+      "/usr/share/fonts/noto/NotoSansMalayalamUI-Regular.ttf: Noto Sans Malayalam UI",
+      "/usr/share/fonts/noto/NotoSansMalayalamUI-Thin.ttf: Noto Sans Malayalam UI,Noto Sans Malayalam UI Thin",
+      "/usr/share/fonts/noto/NotoSansMandaic-Regular.ttf: Noto Sans Mandaic",
+      "/usr/share/fonts/noto/NotoSansManichaean-Regular.ttf: Noto Sans Manichaean",
+      "/usr/share/fonts/noto/NotoSansMarchen-Regular.ttf: Noto Sans Marchen",
+      "/usr/share/fonts/noto/NotoSansMasaramGondi-Regular.ttf: Noto Sans Masaram Gondi",
+      "/usr/share/fonts/noto/NotoSansMath-Regular.ttf: Noto Sans Math",
+      "/usr/share/fonts/noto/NotoSansMayanNumerals-Regular.ttf: Noto Sans Mayan Numerals",
+      "/usr/share/fonts/noto/NotoSansMedefaidrin-Bold.ttf: Noto Sans Medefaidrin",
+      "/usr/share/fonts/noto/NotoSansMedefaidrin-Medium.ttf: Noto Sans Medefaidrin,Noto Sans Medefaidrin Medium",
+      "/usr/share/fonts/noto/NotoSansMedefaidrin-Regular.ttf: Noto Sans Medefaidrin",
+      "/usr/share/fonts/noto/NotoSansMeeteiMayek-Black.ttf: Noto Sans Meetei Mayek,Noto Sans Meetei Mayek Black",
+      "/usr/share/fonts/noto/NotoSansMeeteiMayek-Bold.ttf: Noto Sans Meetei Mayek",
+      "/usr/share/fonts/noto/NotoSansMeeteiMayek-Light.ttf: Noto Sans Meetei Mayek,Noto Sans Meetei Mayek Light",
+      "/usr/share/fonts/noto/NotoSansMeeteiMayek-Medium.ttf: Noto Sans Meetei Mayek,Noto Sans Meetei Mayek Medium",
+      "/usr/share/fonts/noto/NotoSansMeeteiMayek-Regular.ttf: Noto Sans Meetei Mayek",
+      "/usr/share/fonts/noto/NotoSansMeeteiMayek-Thin.ttf: Noto Sans Meetei Mayek,Noto Sans Meetei Mayek Thin",
+      "/usr/share/fonts/noto/NotoSansMendeKikakui-Regular.ttf: Noto Sans Mende Kikakui",
+      "/usr/share/fonts/noto/NotoSansMeroitic-Regular.ttf: Noto Sans Meroitic",
+      "/usr/share/fonts/noto/NotoSansMiao-Regular.ttf: Noto Sans Miao",
+      "/usr/share/fonts/noto/NotoSansModi-Regular.ttf: Noto Sans Modi",
+      "/usr/share/fonts/noto/NotoSansMongolian-Regular.ttf: Noto Sans Mongolian",
+      "/usr/share/fonts/noto/NotoSansMono-Black.ttf: Noto Sans Mono,Noto Sans Mono Black",
+      "/usr/share/fonts/noto/NotoSansMono-Bold.ttf: Noto Sans Mono",
+      "/usr/share/fonts/noto/NotoSansMono-Light.ttf: Noto Sans Mono,Noto Sans Mono Light",
+      "/usr/share/fonts/noto/NotoSansMono-Medium.ttf: Noto Sans Mono,Noto Sans Mono Medium",
+      "/usr/share/fonts/noto/NotoSansMono-Regular.ttf: Noto Sans Mono",
+      "/usr/share/fonts/noto/NotoSansMono-Thin.ttf: Noto Sans Mono,Noto Sans Mono Thin",
+      "/usr/share/fonts/noto/NotoSansMro-Regular.ttf: Noto Sans Mro",
+      "/usr/share/fonts/noto/NotoSansMultani-Regular.ttf: Noto Sans Multani",
+      "/usr/share/fonts/noto/NotoSansMyanmar-Black.ttf: Noto Sans Myanmar,Noto Sans Myanmar Black",
+      "/usr/share/fonts/noto/NotoSansMyanmar-Bold.ttf: Noto Sans Myanmar",
+      "/usr/share/fonts/noto/NotoSansMyanmar-Light.ttf: Noto Sans Myanmar,Noto Sans Myanmar Light",
+      "/usr/share/fonts/noto/NotoSansMyanmar-Medium.ttf: Noto Sans Myanmar,Noto Sans Myanmar Medium",
+      "/usr/share/fonts/noto/NotoSansMyanmar-Regular.ttf: Noto Sans Myanmar",
+      "/usr/share/fonts/noto/NotoSansMyanmar-Thin.ttf: Noto Sans Myanmar,Noto Sans Myanmar Thin",
+      "/usr/share/fonts/noto/NotoSansNKo-Regular.ttf: Noto Sans NKo",
+      "/usr/share/fonts/noto/NotoSansNKoUnjoined-Bold.ttf: Noto Sans NKo Unjoined",
+      "/usr/share/fonts/noto/NotoSansNKoUnjoined-Regular.ttf: Noto Sans NKo Unjoined",
+      "/usr/share/fonts/noto/NotoSansNabataean-Regular.ttf: Noto Sans Nabataean",
+      "/usr/share/fonts/noto/NotoSansNagMundari-Bold.ttf: Noto Sans Nag Mundari",
+      "/usr/share/fonts/noto/NotoSansNagMundari-Regular.ttf: Noto Sans Nag Mundari",
+      "/usr/share/fonts/noto/NotoSansNandinagari-Regular.ttf: Noto Sans Nandinagari",
+      "/usr/share/fonts/noto/NotoSansNewTaiLue-Bold.ttf: Noto Sans New Tai Lue",
+      "/usr/share/fonts/noto/NotoSansNewTaiLue-Medium.ttf: Noto Sans New Tai Lue,Noto Sans New Tai Lue Medium",
+      "/usr/share/fonts/noto/NotoSansNewTaiLue-Regular.ttf: Noto Sans New Tai Lue",
+      "/usr/share/fonts/noto/NotoSansNewa-Regular.ttf: Noto Sans Newa",
+      "/usr/share/fonts/noto/NotoSansNushu-Regular.ttf: Noto Sans Nushu",
+      "/usr/share/fonts/noto/NotoSansOgham-Regular.ttf: Noto Sans Ogham",
+      "/usr/share/fonts/noto/NotoSansOlChiki-Bold.ttf: Noto Sans Ol Chiki",
+      "/usr/share/fonts/noto/NotoSansOlChiki-Medium.ttf: Noto Sans Ol Chiki,Noto Sans Ol Chiki Medium",
+      "/usr/share/fonts/noto/NotoSansOlChiki-Regular.ttf: Noto Sans Ol Chiki",
+      "/usr/share/fonts/noto/NotoSansOldHungarian-Regular.ttf: Noto Sans Old Hungarian",
+      "/usr/share/fonts/noto/NotoSansOldItalic-Regular.ttf: Noto Sans Old Italic",
+      "/usr/share/fonts/noto/NotoSansOldNorthArabian-Regular.ttf: Noto Sans Old North Arabian",
+      "/usr/share/fonts/noto/NotoSansOldPermic-Regular.ttf: Noto Sans Old Permic",
+      "/usr/share/fonts/noto/NotoSansOldPersian-Regular.ttf: Noto Sans Old Persian",
+      "/usr/share/fonts/noto/NotoSansOldSogdian-Regular.ttf: Noto Sans Old Sogdian",
+      "/usr/share/fonts/noto/NotoSansOldSouthArabian-Regular.ttf: Noto Sans Old South Arabian",
+      "/usr/share/fonts/noto/NotoSansOldTurkic-Regular.ttf: Noto Sans Old Turkic",
+      "/usr/share/fonts/noto/NotoSansOriya-Black.ttf: Noto Sans Oriya,Noto Sans Oriya Blk",
+      "/usr/share/fonts/noto/NotoSansOriya-Bold.ttf: Noto Sans Oriya",
+      "/usr/share/fonts/noto/NotoSansOriya-Regular.ttf: Noto Sans Oriya",
+      "/usr/share/fonts/noto/NotoSansOriya-Thin.ttf: Noto Sans Oriya,Noto Sans Oriya Thin",
+      "/usr/share/fonts/noto/NotoSansOsage-Regular.ttf: Noto Sans Osage",
+      "/usr/share/fonts/noto/NotoSansOsmanya-Regular.ttf: Noto Sans Osmanya",
+      "/usr/share/fonts/noto/NotoSansPahawhHmong-Regular.ttf: Noto Sans Pahawh Hmong",
+      "/usr/share/fonts/noto/NotoSansPalmyrene-Regular.ttf: Noto Sans Palmyrene",
+      "/usr/share/fonts/noto/NotoSansPauCinHau-Regular.ttf: Noto Sans Pau Cin Hau",
+      "/usr/share/fonts/noto/NotoSansPhagsPa-Regular.ttf: Noto Sans PhagsPa",
+      "/usr/share/fonts/noto/NotoSansPhoenician-Regular.ttf: Noto Sans Phoenician",
+      "/usr/share/fonts/noto/NotoSansPsalterPahlavi-Regular.ttf: Noto Sans Psalter Pahlavi,Noto Sans PsaPahlavi",
+      "/usr/share/fonts/noto/NotoSansRejang-Regular.ttf: Noto Sans Rejang",
+      "/usr/share/fonts/noto/NotoSansRunic-Regular.ttf: Noto Sans Runic",
+      "/usr/share/fonts/noto/NotoSansSamaritan-Regular.ttf: Noto Sans Samaritan",
+      "/usr/share/fonts/noto/NotoSansSaurashtra-Regular.ttf: Noto Sans Saurashtra",
+      "/usr/share/fonts/noto/NotoSansSharada-Regular.ttf: Noto Sans Sharada",
+      "/usr/share/fonts/noto/NotoSansShavian-Regular.ttf: Noto Sans Shavian",
+      "/usr/share/fonts/noto/NotoSansSiddham-Regular.ttf: Noto Sans Siddham",
+      "/usr/share/fonts/noto/NotoSansSignWriting-Regular.ttf: Noto Sans SignWriting",
+      "/usr/share/fonts/noto/NotoSansSinhala-Black.ttf: Noto Sans Sinhala,Noto Sans Sinhala Black",
+      "/usr/share/fonts/noto/NotoSansSinhala-BlackCondensed.ttf: Noto Sans Sinhala,Noto Sans Sinhala Black Condensed",
+      "/usr/share/fonts/noto/NotoSansSinhala-Bold.ttf: Noto Sans Sinhala",
+      "/usr/share/fonts/noto/NotoSansSinhala-Light.ttf: Noto Sans Sinhala,Noto Sans Sinhala Light",
+      "/usr/share/fonts/noto/NotoSansSinhala-Medium.ttf: Noto Sans Sinhala,Noto Sans Sinhala Medium",
+      "/usr/share/fonts/noto/NotoSansSinhala-Regular.ttf: Noto Sans Sinhala",
+      "/usr/share/fonts/noto/NotoSansSinhala-Thin.ttf: Noto Sans Sinhala,Noto Sans Sinhala Thin",
+      "/usr/share/fonts/noto/NotoSansSinhala-ThinCondensed.ttf: Noto Sans Sinhala,Noto Sans Sinhala Thin Condensed",
+      "/usr/share/fonts/noto/NotoSansSinhalaUI-Black.ttf: Noto Sans Sinhala UI,Noto Sans Sinhala UI Black",
+      "/usr/share/fonts/noto/NotoSansSinhalaUI-Bold.ttf: Noto Sans Sinhala UI",
+      "/usr/share/fonts/noto/NotoSansSinhalaUI-Light.ttf: Noto Sans Sinhala UI,Noto Sans Sinhala UI Light",
+      "/usr/share/fonts/noto/NotoSansSinhalaUI-Medium.ttf: Noto Sans Sinhala UI,Noto Sans Sinhala UI Medium",
+      "/usr/share/fonts/noto/NotoSansSinhalaUI-Regular.ttf: Noto Sans Sinhala UI",
+      "/usr/share/fonts/noto/NotoSansSinhalaUI-Thin.ttf: Noto Sans Sinhala UI,Noto Sans Sinhala UI Thin",
+      "/usr/share/fonts/noto/NotoSansSogdian-Regular.ttf: Noto Sans Sogdian",
+      "/usr/share/fonts/noto/NotoSansSoraSompeng-Bold.ttf: Noto Sans Sora Sompeng",
+      "/usr/share/fonts/noto/NotoSansSoraSompeng-Medium.ttf: Noto Sans Sora Sompeng,Noto Sans Sora Sompeng Medium",
+      "/usr/share/fonts/noto/NotoSansSoraSompeng-Regular.ttf: Noto Sans Sora Sompeng",
+      "/usr/share/fonts/noto/NotoSansSoyombo-Regular.ttf: Noto Sans Soyombo",
+      "/usr/share/fonts/noto/NotoSansSundanese-Bold.ttf: Noto Sans Sundanese",
+      "/usr/share/fonts/noto/NotoSansSundanese-Medium.ttf: Noto Sans Sundanese",
+      "/usr/share/fonts/noto/NotoSansSundanese-Regular.ttf: Noto Sans Sundanese",
+      "/usr/share/fonts/noto/NotoSansSunuwar-Regular.ttf: Noto Sans Sunuwar",
+      "/usr/share/fonts/noto/NotoSansSylotiNagri-Regular.ttf: Noto Sans Syloti Nagri",
+      "/usr/share/fonts/noto/NotoSansSymbols-Black.ttf: Noto Sans Symbols,Noto Sans Symbols Black",
+      "/usr/share/fonts/noto/NotoSansSymbols-Bold.ttf: Noto Sans Symbols",
+      "/usr/share/fonts/noto/NotoSansSymbols-Light.ttf: Noto Sans Symbols,Noto Sans Symbols Light",
+      "/usr/share/fonts/noto/NotoSansSymbols-Medium.ttf: Noto Sans Symbols,Noto Sans Symbols Medium",
+      "/usr/share/fonts/noto/NotoSansSymbols-Regular.ttf: Noto Sans Symbols",
+      "/usr/share/fonts/noto/NotoSansSymbols-Thin.ttf: Noto Sans Symbols,Noto Sans Symbols Thin",
+      "/usr/share/fonts/noto/NotoSansSymbols2-Regular.ttf: Noto Sans Symbols 2",
+      "/usr/share/fonts/noto/NotoSansSyriac-Black.ttf: Noto Sans Syriac,Noto Sans Syriac Black",
+      "/usr/share/fonts/noto/NotoSansSyriac-Regular.ttf: Noto Sans Syriac",
+      "/usr/share/fonts/noto/NotoSansSyriac-Thin.ttf: Noto Sans Syriac,Noto Sans Syriac Thin",
+      "/usr/share/fonts/noto/NotoSansSyriacEastern-Black.ttf: Noto Sans Syriac Eastern,Noto Sans Syriac Eastern Black",
+      "/usr/share/fonts/noto/NotoSansSyriacEastern-Regular.ttf: Noto Sans Syriac Eastern",
+      "/usr/share/fonts/noto/NotoSansSyriacEastern-Thin.ttf: Noto Sans Syriac Eastern,Noto Sans Syriac Eastern Thin",
+      "/usr/share/fonts/noto/NotoSansSyriacWestern-Black.ttf: Noto Sans Syriac Western,Noto Sans Syriac Western Black",
+      "/usr/share/fonts/noto/NotoSansSyriacWestern-Regular.ttf: Noto Sans Syriac Western",
+      "/usr/share/fonts/noto/NotoSansSyriacWestern-Thin.ttf: Noto Sans Syriac Western,Noto Sans Syriac Western Thin",
+      "/usr/share/fonts/noto/NotoSansTagalog-Regular.ttf: Noto Sans Tagalog",
+      "/usr/share/fonts/noto/NotoSansTagbanwa-Regular.ttf: Noto Sans Tagbanwa",
+      "/usr/share/fonts/noto/NotoSansTaiLe-Regular.ttf: Noto Sans Tai Le",
+      "/usr/share/fonts/noto/NotoSansTaiTham-Bold.ttf: Noto Sans Tai Tham",
+      "/usr/share/fonts/noto/NotoSansTaiTham-Medium.ttf: Noto Sans Tai Tham,Noto Sans Tai Tham Medium",
+      "/usr/share/fonts/noto/NotoSansTaiTham-Regular.ttf: Noto Sans Tai Tham",
+      "/usr/share/fonts/noto/NotoSansTaiViet-Regular.ttf: Noto Sans Tai Viet",
+      "/usr/share/fonts/noto/NotoSansTakri-Regular.ttf: Noto Sans Takri",
+      "/usr/share/fonts/noto/NotoSansTamil-Black.ttf: Noto Sans Tamil,Noto Sans Tamil Black",
+      "/usr/share/fonts/noto/NotoSansTamil-Bold.ttf: Noto Sans Tamil",
+      "/usr/share/fonts/noto/NotoSansTamil-Light.ttf: Noto Sans Tamil,Noto Sans Tamil Light",
+      "/usr/share/fonts/noto/NotoSansTamil-Medium.ttf: Noto Sans Tamil,Noto Sans Tamil Medium",
+      "/usr/share/fonts/noto/NotoSansTamil-Regular.ttf: Noto Sans Tamil",
+      "/usr/share/fonts/noto/NotoSansTamil-Thin.ttf: Noto Sans Tamil,Noto Sans Tamil Thin",
+      "/usr/share/fonts/noto/NotoSansTamilSupplement-Regular.ttf: Noto Sans Tamil Supplement",
+      "/usr/share/fonts/noto/NotoSansTamilUI-Black.ttf: Noto Sans Tamil UI,Noto Sans Tamil UI Black",
+      "/usr/share/fonts/noto/NotoSansTamilUI-Bold.ttf: Noto Sans Tamil UI",
+      "/usr/share/fonts/noto/NotoSansTamilUI-Light.ttf: Noto Sans Tamil UI,Noto Sans Tamil UI Light",
+      "/usr/share/fonts/noto/NotoSansTamilUI-Medium.ttf: Noto Sans Tamil UI,Noto Sans Tamil UI Medium",
+      "/usr/share/fonts/noto/NotoSansTamilUI-Regular.ttf: Noto Sans Tamil UI",
+      "/usr/share/fonts/noto/NotoSansTamilUI-Thin.ttf: Noto Sans Tamil UI,Noto Sans Tamil UI Thin",
+      "/usr/share/fonts/noto/NotoSansTangsa-Bold.ttf: Noto Sans Tangsa",
+      "/usr/share/fonts/noto/NotoSansTangsa-Medium.ttf: Noto Sans Tangsa,Noto Sans Tangsa Medium",
+      "/usr/share/fonts/noto/NotoSansTangsa-Regular.ttf: Noto Sans Tangsa",
+      "/usr/share/fonts/noto/NotoSansTelugu-Black.ttf: Noto Sans Telugu,Noto Sans Telugu Black",
+      "/usr/share/fonts/noto/NotoSansTelugu-Bold.ttf: Noto Sans Telugu",
+      "/usr/share/fonts/noto/NotoSansTelugu-Light.ttf: Noto Sans Telugu,Noto Sans Telugu Light",
+      "/usr/share/fonts/noto/NotoSansTelugu-Medium.ttf: Noto Sans Telugu,Noto Sans Telugu Medium",
+      "/usr/share/fonts/noto/NotoSansTelugu-Regular.ttf: Noto Sans Telugu",
+      "/usr/share/fonts/noto/NotoSansTelugu-Thin.ttf: Noto Sans Telugu,Noto Sans Telugu Thin",
+      "/usr/share/fonts/noto/NotoSansTeluguUI-Black.ttf: Noto Sans Telugu UI,Noto Sans Telugu UI Black",
+      "/usr/share/fonts/noto/NotoSansTeluguUI-Bold.ttf: Noto Sans Telugu UI",
+      "/usr/share/fonts/noto/NotoSansTeluguUI-Light.ttf: Noto Sans Telugu UI,Noto Sans Telugu UI Light",
+      "/usr/share/fonts/noto/NotoSansTeluguUI-Medium.ttf: Noto Sans Telugu UI,Noto Sans Telugu UI Medium",
+      "/usr/share/fonts/noto/NotoSansTeluguUI-Regular.ttf: Noto Sans Telugu UI",
+      "/usr/share/fonts/noto/NotoSansTeluguUI-Thin.ttf: Noto Sans Telugu UI,Noto Sans Telugu UI Thin",
+      "/usr/share/fonts/noto/NotoSansTest-Regular.ttf: Noto Sans Test",
+      "/usr/share/fonts/noto/NotoSansThaana-Black.ttf: Noto Sans Thaana,Noto Sans Thaana Black",
+      "/usr/share/fonts/noto/NotoSansThaana-Bold.ttf: Noto Sans Thaana",
+      "/usr/share/fonts/noto/NotoSansThaana-Light.ttf: Noto Sans Thaana,Noto Sans Thaana Light",
+      "/usr/share/fonts/noto/NotoSansThaana-Medium.ttf: Noto Sans Thaana,Noto Sans Thaana Medium",
+      "/usr/share/fonts/noto/NotoSansThaana-Regular.ttf: Noto Sans Thaana",
+      "/usr/share/fonts/noto/NotoSansThaana-Thin.ttf: Noto Sans Thaana,Noto Sans Thaana Thin",
+      "/usr/share/fonts/noto/NotoSansThai-Black.ttf: Noto Sans Thai,Noto Sans Thai Blk",
+      "/usr/share/fonts/noto/NotoSansThai-Bold.ttf: Noto Sans Thai",
+      "/usr/share/fonts/noto/NotoSansThai-Light.ttf: Noto Sans Thai,Noto Sans Thai Light",
+      "/usr/share/fonts/noto/NotoSansThai-Medium.ttf: Noto Sans Thai,Noto Sans Thai Med",
+      "/usr/share/fonts/noto/NotoSansThai-Regular.ttf: Noto Sans Thai",
+      "/usr/share/fonts/noto/NotoSansThai-Thin.ttf: Noto Sans Thai,Noto Sans Thai Thin",
+      "/usr/share/fonts/noto/NotoSansThaiLooped-Black.ttf: Noto Sans Thai Looped,Noto Sans Thai Looped Black",
+      "/usr/share/fonts/noto/NotoSansThaiLooped-Bold.ttf: Noto Sans Thai Looped",
+      "/usr/share/fonts/noto/NotoSansThaiLooped-Light.ttf: Noto Sans Thai Looped,Noto Sans Thai Looped Light",
+      "/usr/share/fonts/noto/NotoSansThaiLooped-Medium.ttf: Noto Sans Thai Looped,Noto Sans Thai Looped Medium",
+      "/usr/share/fonts/noto/NotoSansThaiLooped-Regular.ttf: Noto Sans Thai Looped",
+      "/usr/share/fonts/noto/NotoSansThaiLooped-Thin.ttf: Noto Sans Thai Looped,Noto Sans Thai Looped Thin",
+      "/usr/share/fonts/noto/NotoSansTifinagh-Regular.ttf: Noto Sans Tifinagh",
+      "/usr/share/fonts/noto/NotoSansTifinaghAPT-Regular.ttf: Noto Sans Tifinagh APT",
+      "/usr/share/fonts/noto/NotoSansTifinaghAdrar-Regular.ttf: Noto Sans Tifinagh Adrar",
+      "/usr/share/fonts/noto/NotoSansTifinaghAgrawImazighen-Regular.ttf: Noto Sans Tifinagh Agraw Imazighen",
+      "/usr/share/fonts/noto/NotoSansTifinaghAhaggar-Regular.ttf: Noto Sans Tifinagh Ahaggar",
+      "/usr/share/fonts/noto/NotoSansTifinaghAir-Regular.ttf: Noto Sans Tifinagh Air",
+      "/usr/share/fonts/noto/NotoSansTifinaghAzawagh-Regular.ttf: Noto Sans Tifinagh Azawagh",
+      "/usr/share/fonts/noto/NotoSansTifinaghGhat-Regular.ttf: Noto Sans Tifinagh Ghat",
+      "/usr/share/fonts/noto/NotoSansTifinaghHawad-Regular.ttf: Noto Sans Tifinagh Hawad",
+      "/usr/share/fonts/noto/NotoSansTifinaghRhissaIxa-Regular.ttf: Noto Sans Tifinagh Rhissa Ixa",
+      "/usr/share/fonts/noto/NotoSansTifinaghSIL-Regular.ttf: Noto Sans Tifinagh SIL",
+      "/usr/share/fonts/noto/NotoSansTifinaghTawellemmet-Regular.ttf: Noto Sans Tifinagh Tawellemmet",
+      "/usr/share/fonts/noto/NotoSansTirhuta-Regular.ttf: Noto Sans Tirhuta",
+      "/usr/share/fonts/noto/NotoSansUgaritic-Regular.ttf: Noto Sans Ugaritic",
+      "/usr/share/fonts/noto/NotoSansVai-Regular.ttf: Noto Sans Vai",
+      "/usr/share/fonts/noto/NotoSansVithkuqi-Bold.ttf: Noto Sans Vithkuqi",
+      "/usr/share/fonts/noto/NotoSansVithkuqi-Medium.ttf: Noto Sans Vithkuqi,Noto Sans Vithkuqi Medium",
+      "/usr/share/fonts/noto/NotoSansVithkuqi-Regular.ttf: Noto Sans Vithkuqi",
+      "/usr/share/fonts/noto/NotoSansWancho-Regular.ttf: Noto Sans Wancho",
+      "/usr/share/fonts/noto/NotoSansWarangCiti-Regular.ttf: Noto Sans Warang Citi",
+      "/usr/share/fonts/noto/NotoSansYi-Regular.ttf: Noto Sans Yi",
+      "/usr/share/fonts/noto/NotoSansZanabazarSquare-Regular.ttf: Noto Sans Zanabazar Square",
+      "/usr/share/fonts/noto/NotoSerif-Black.ttf: Noto Serif,Noto Serif Black",
+      "/usr/share/fonts/noto/NotoSerif-BlackItalic.ttf: Noto Serif,Noto Serif Black",
+      "/usr/share/fonts/noto/NotoSerif-Bold.ttf: Noto Serif",
+      "/usr/share/fonts/noto/NotoSerif-BoldItalic.ttf: Noto Serif",
+      "/usr/share/fonts/noto/NotoSerif-Italic.ttf: Noto Serif",
+      "/usr/share/fonts/noto/NotoSerif-Light.ttf: Noto Serif,Noto Serif Light",
+      "/usr/share/fonts/noto/NotoSerif-LightItalic.ttf: Noto Serif,Noto Serif Light",
+      "/usr/share/fonts/noto/NotoSerif-Medium.ttf: Noto Serif,Noto Serif Medium",
+      "/usr/share/fonts/noto/NotoSerif-MediumItalic.ttf: Noto Serif,Noto Serif Medium",
+      "/usr/share/fonts/noto/NotoSerif-Regular.ttf: Noto Serif",
+      "/usr/share/fonts/noto/NotoSerif-Thin.ttf: Noto Serif,Noto Serif Thin",
+      "/usr/share/fonts/noto/NotoSerif-ThinItalic.ttf: Noto Serif,Noto Serif Thin",
+      "/usr/share/fonts/noto/NotoSerifAhom-Regular.ttf: Noto Serif Ahom",
+      "/usr/share/fonts/noto/NotoSerifArmenian-Black.ttf: Noto Serif Armenian,Noto Serif Armenian Black",
+      "/usr/share/fonts/noto/NotoSerifArmenian-Bold.ttf: Noto Serif Armenian",
+      "/usr/share/fonts/noto/NotoSerifArmenian-Light.ttf: Noto Serif Armenian,Noto Serif Armenian Light",
+      "/usr/share/fonts/noto/NotoSerifArmenian-Medium.ttf: Noto Serif Armenian,Noto Serif Armenian Medium",
+      "/usr/share/fonts/noto/NotoSerifArmenian-Regular.ttf: Noto Serif Armenian",
+      "/usr/share/fonts/noto/NotoSerifArmenian-Thin.ttf: Noto Serif Armenian,Noto Serif Armenian Thin",
+      "/usr/share/fonts/noto/NotoSerifBalinese-Regular.ttf: Noto Serif Balinese",
+      "/usr/share/fonts/noto/NotoSerifBengali-Black.ttf: Noto Serif Bengali,Noto Serif Bengali Black",
+      "/usr/share/fonts/noto/NotoSerifBengali-Bold.ttf: Noto Serif Bengali",
+      "/usr/share/fonts/noto/NotoSerifBengali-Light.ttf: Noto Serif Bengali,Noto Serif Bengali Light",
+      "/usr/share/fonts/noto/NotoSerifBengali-Medium.ttf: Noto Serif Bengali,Noto Serif Bengali Medium",
+      "/usr/share/fonts/noto/NotoSerifBengali-Regular.ttf: Noto Serif Bengali",
+      "/usr/share/fonts/noto/NotoSerifBengali-Thin.ttf: Noto Serif Bengali,Noto Serif Bengali Thin",
+      "/usr/share/fonts/noto/NotoSerifDevanagari-Black.ttf: Noto Serif Devanagari,Noto Serif Devanagari Black",
+      "/usr/share/fonts/noto/NotoSerifDevanagari-Bold.ttf: Noto Serif Devanagari",
+      "/usr/share/fonts/noto/NotoSerifDevanagari-Light.ttf: Noto Serif Devanagari,Noto Serif Devanagari Light",
+      "/usr/share/fonts/noto/NotoSerifDevanagari-Medium.ttf: Noto Serif Devanagari,Noto Serif Devanagari Medium",
+      "/usr/share/fonts/noto/NotoSerifDevanagari-Regular.ttf: Noto Serif Devanagari",
+      "/usr/share/fonts/noto/NotoSerifDevanagari-Thin.ttf: Noto Serif Devanagari,Noto Serif Devanagari Thin",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Black.ttf: Noto Serif Display,Noto Serif Display Black",
+      "/usr/share/fonts/noto/NotoSerifDisplay-BlackItalic.ttf: Noto Serif Display,Noto Serif Display Black",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Bold.ttf: Noto Serif Display",
+      "/usr/share/fonts/noto/NotoSerifDisplay-BoldItalic.ttf: Noto Serif Display",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Italic.ttf: Noto Serif Display",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Light.ttf: Noto Serif Display,Noto Serif Display Light",
+      "/usr/share/fonts/noto/NotoSerifDisplay-LightItalic.ttf: Noto Serif Display,Noto Serif Display Light",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Medium.ttf: Noto Serif Display,Noto Serif Display Medium",
+      "/usr/share/fonts/noto/NotoSerifDisplay-MediumItalic.ttf: Noto Serif Display,Noto Serif Display Medium",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Regular.ttf: Noto Serif Display",
+      "/usr/share/fonts/noto/NotoSerifDisplay-Thin.ttf: Noto Serif Display,Noto Serif Display Thin",
+      "/usr/share/fonts/noto/NotoSerifDisplay-ThinItalic.ttf: Noto Serif Display,Noto Serif Display Thin",
+      "/usr/share/fonts/noto/NotoSerifDivesAkuru-Regular.ttf: Noto Serif Dives Akuru",
+      "/usr/share/fonts/noto/NotoSerifDogra-Regular.ttf: Noto Serif Dogra",
+      "/usr/share/fonts/noto/NotoSerifEthiopic-Black.ttf: Noto Serif Ethiopic,Noto Serif Ethiopic Black",
+      "/usr/share/fonts/noto/NotoSerifEthiopic-Bold.ttf: Noto Serif Ethiopic",
+      "/usr/share/fonts/noto/NotoSerifEthiopic-Light.ttf: Noto Serif Ethiopic,Noto Serif Ethiopic Light",
+      "/usr/share/fonts/noto/NotoSerifEthiopic-Medium.ttf: Noto Serif Ethiopic,Noto Serif Ethiopic Medium",
+      "/usr/share/fonts/noto/NotoSerifEthiopic-Regular.ttf: Noto Serif Ethiopic",
+      "/usr/share/fonts/noto/NotoSerifEthiopic-Thin.ttf: Noto Serif Ethiopic,Noto Serif Ethiopic Thin",
+      "/usr/share/fonts/noto/NotoSerifGeorgian-Black.ttf: Noto Serif Georgian,Noto Serif Georgian Bk",
+      "/usr/share/fonts/noto/NotoSerifGeorgian-Bold.ttf: Noto Serif Georgian",
+      "/usr/share/fonts/noto/NotoSerifGeorgian-Light.ttf: Noto Serif Georgian,Noto Serif Georgian Lt",
+      "/usr/share/fonts/noto/NotoSerifGeorgian-Medium.ttf: Noto Serif Georgian,Noto Serif Georgian Md",
+      "/usr/share/fonts/noto/NotoSerifGeorgian-Regular.ttf: Noto Serif Georgian",
+      "/usr/share/fonts/noto/NotoSerifGeorgian-Thin.ttf: Noto Serif Georgian,Noto Serif Georgian Th",
+      "/usr/share/fonts/noto/NotoSerifGrantha-Regular.ttf: Noto Serif Grantha",
+      "/usr/share/fonts/noto/NotoSerifGujarati-Black.ttf: Noto Serif Gujarati,Noto Serif Gujarati Black",
+      "/usr/share/fonts/noto/NotoSerifGujarati-Bold.ttf: Noto Serif Gujarati",
+      "/usr/share/fonts/noto/NotoSerifGujarati-Light.ttf: Noto Serif Gujarati,Noto Serif Gujarati Light",
+      "/usr/share/fonts/noto/NotoSerifGujarati-Medium.ttf: Noto Serif Gujarati,Noto Serif Gujarati Medium",
+      "/usr/share/fonts/noto/NotoSerifGujarati-Regular.ttf: Noto Serif Gujarati",
+      "/usr/share/fonts/noto/NotoSerifGujarati-Thin.ttf: Noto Serif Gujarati,Noto Serif Gujarati Thin",
+      "/usr/share/fonts/noto/NotoSerifGurmukhi-Black.ttf: Noto Serif Gurmukhi,Noto Serif Gurmukhi Black",
+      "/usr/share/fonts/noto/NotoSerifGurmukhi-Bold.ttf: Noto Serif Gurmukhi",
+      "/usr/share/fonts/noto/NotoSerifGurmukhi-Light.ttf: Noto Serif Gurmukhi,Noto Serif Gurmukhi Light",
+      "/usr/share/fonts/noto/NotoSerifGurmukhi-Medium.ttf: Noto Serif Gurmukhi,Noto Serif Gurmukhi Medium",
+      "/usr/share/fonts/noto/NotoSerifGurmukhi-Regular.ttf: Noto Serif Gurmukhi",
+      "/usr/share/fonts/noto/NotoSerifGurmukhi-Thin.ttf: Noto Serif Gurmukhi,Noto Serif Gurmukhi Thin",
+      "/usr/share/fonts/noto/NotoSerifHebrew-Black.ttf: Noto Serif Hebrew,Noto Serif Hebrew Black",
+      "/usr/share/fonts/noto/NotoSerifHebrew-Bold.ttf: Noto Serif Hebrew",
+      "/usr/share/fonts/noto/NotoSerifHebrew-Light.ttf: Noto Serif Hebrew,Noto Serif Hebrew Light",
+      "/usr/share/fonts/noto/NotoSerifHebrew-Medium.ttf: Noto Serif Hebrew,Noto Serif Hebrew Medium",
+      "/usr/share/fonts/noto/NotoSerifHebrew-Regular.ttf: Noto Serif Hebrew",
+      "/usr/share/fonts/noto/NotoSerifHebrew-Thin.ttf: Noto Serif Hebrew,Noto Serif Hebrew Thin",
+      "/usr/share/fonts/noto/NotoSerifHentaigana-Black.ttf: Noto Serif Hentaigana,Noto Serif Hentaigana Black",
+      "/usr/share/fonts/noto/NotoSerifHentaigana-Bold.ttf: Noto Serif Hentaigana,Noto Serif Hentaigana Bold",
+      "/usr/share/fonts/noto/NotoSerifHentaigana-Light.ttf: Noto Serif Hentaigana,Noto Serif Hentaigana Light",
+      "/usr/share/fonts/noto/NotoSerifHentaigana-Medium.ttf: Noto Serif Hentaigana,Noto Serif Hentaigana Medium",
+      "/usr/share/fonts/noto/NotoSerifHentaigana-Regular.ttf: Noto Serif Hentaigana",
+      "/usr/share/fonts/noto/NotoSerifKannada-Black.ttf: Noto Serif Kannada,Noto Serif Kannada Black",
+      "/usr/share/fonts/noto/NotoSerifKannada-Bold.ttf: Noto Serif Kannada",
+      "/usr/share/fonts/noto/NotoSerifKannada-Light.ttf: Noto Serif Kannada,Noto Serif Kannada Light",
+      "/usr/share/fonts/noto/NotoSerifKannada-Medium.ttf: Noto Serif Kannada,Noto Serif Kannada Medium",
+      "/usr/share/fonts/noto/NotoSerifKannada-Regular.ttf: Noto Serif Kannada",
+      "/usr/share/fonts/noto/NotoSerifKannada-Thin.ttf: Noto Serif Kannada,Noto Serif Kannada Thin",
+      "/usr/share/fonts/noto/NotoSerifKhitanSmallScript-Regular.ttf: Noto Serif Khitan Small Script",
+      "/usr/share/fonts/noto/NotoSerifKhmer-Black.ttf: Noto Serif Khmer,Noto Serif Khmer Black",
+      "/usr/share/fonts/noto/NotoSerifKhmer-Bold.ttf: Noto Serif Khmer",
+      "/usr/share/fonts/noto/NotoSerifKhmer-Light.ttf: Noto Serif Khmer,Noto Serif Khmer Light",
+      "/usr/share/fonts/noto/NotoSerifKhmer-Medium.ttf: Noto Serif Khmer,Noto Serif Khmer Medium",
+      "/usr/share/fonts/noto/NotoSerifKhmer-Regular.ttf: Noto Serif Khmer",
+      "/usr/share/fonts/noto/NotoSerifKhmer-Thin.ttf: Noto Serif Khmer,Noto Serif Khmer Thin",
+      "/usr/share/fonts/noto/NotoSerifKhojki-Bold.ttf: Noto Serif Khojki",
+      "/usr/share/fonts/noto/NotoSerifKhojki-Regular.ttf: Noto Serif Khojki",
+      "/usr/share/fonts/noto/NotoSerifLao-Black.ttf: Noto Serif Lao,Noto Serif Lao Black",
+      "/usr/share/fonts/noto/NotoSerifLao-Bold.ttf: Noto Serif Lao",
+      "/usr/share/fonts/noto/NotoSerifLao-Light.ttf: Noto Serif Lao,Noto Serif Lao Light",
+      "/usr/share/fonts/noto/NotoSerifLao-Medium.ttf: Noto Serif Lao,Noto Serif Lao Medium",
+      "/usr/share/fonts/noto/NotoSerifLao-Regular.ttf: Noto Serif Lao",
+      "/usr/share/fonts/noto/NotoSerifLao-Thin.ttf: Noto Serif Lao,Noto Serif Lao Thin",
+      "/usr/share/fonts/noto/NotoSerifMakasar-Regular.ttf: Noto Serif Makasar",
+      "/usr/share/fonts/noto/NotoSerifMalayalam-Black.ttf: Noto Serif Malayalam,Noto Serif Malayalam Black",
+      "/usr/share/fonts/noto/NotoSerifMalayalam-Bold.ttf: Noto Serif Malayalam",
+      "/usr/share/fonts/noto/NotoSerifMalayalam-Light.ttf: Noto Serif Malayalam,Noto Serif Malayalam Light",
+      "/usr/share/fonts/noto/NotoSerifMalayalam-Medium.ttf: Noto Serif Malayalam,Noto Serif Malayalam Medium",
+      "/usr/share/fonts/noto/NotoSerifMalayalam-Regular.ttf: Noto Serif Malayalam",
+      "/usr/share/fonts/noto/NotoSerifMalayalam-Thin.ttf: Noto Serif Malayalam,Noto Serif Malayalam Thin",
+      "/usr/share/fonts/noto/NotoSerifMyanmar-Black.ttf: Noto Serif Myanmar,Noto Serif Myanmar Black",
+      "/usr/share/fonts/noto/NotoSerifMyanmar-Bold.ttf: Noto Serif Myanmar",
+      "/usr/share/fonts/noto/NotoSerifMyanmar-Light.ttf: Noto Serif Myanmar,Noto Serif Myanmar Light",
+      "/usr/share/fonts/noto/NotoSerifMyanmar-Medium.ttf: Noto Serif Myanmar,Noto Serif Myanmar Medium",
+      "/usr/share/fonts/noto/NotoSerifMyanmar-Regular.ttf: Noto Serif Myanmar",
+      "/usr/share/fonts/noto/NotoSerifMyanmar-Thin.ttf: Noto Serif Myanmar,Noto Serif Myanmar Thin",
+      "/usr/share/fonts/noto/NotoSerifNPHmong-Bold.ttf: Noto Serif NP Hmong",
+      "/usr/share/fonts/noto/NotoSerifNPHmong-Medium.ttf: Noto Serif NP Hmong,Noto Serif NP Hmong Medium",
+      "/usr/share/fonts/noto/NotoSerifNPHmong-Regular.ttf: Noto Serif NP Hmong",
+      "/usr/share/fonts/noto/NotoSerifOldUyghur-Regular.ttf: Noto Serif Old Uyghur",
+      "/usr/share/fonts/noto/NotoSerifOriya-Bold.ttf: Noto Serif Oriya",
+      "/usr/share/fonts/noto/NotoSerifOriya-Medium.ttf: Noto Serif Oriya,Noto Serif Oriya Medium",
+      "/usr/share/fonts/noto/NotoSerifOriya-Regular.ttf: Noto Serif Oriya",
+      "/usr/share/fonts/noto/NotoSerifOttomanSiyaq-Regular.ttf: Noto Serif Ottoman Siyaq",
+      "/usr/share/fonts/noto/NotoSerifSinhala-Black.ttf: Noto Serif Sinhala,Noto Serif Sinhala Black",
+      "/usr/share/fonts/noto/NotoSerifSinhala-Bold.ttf: Noto Serif Sinhala",
+      "/usr/share/fonts/noto/NotoSerifSinhala-Light.ttf: Noto Serif Sinhala,Noto Serif Sinhala Light",
+      "/usr/share/fonts/noto/NotoSerifSinhala-Medium.ttf: Noto Serif Sinhala,Noto Serif Sinhala Medium",
+      "/usr/share/fonts/noto/NotoSerifSinhala-Regular.ttf: Noto Serif Sinhala",
+      "/usr/share/fonts/noto/NotoSerifSinhala-Thin.ttf: Noto Serif Sinhala,Noto Serif Sinhala Thin",
+      "/usr/share/fonts/noto/NotoSerifTamil-Black.ttf: Noto Serif Tamil,Noto Serif Tamil Black",
+      "/usr/share/fonts/noto/NotoSerifTamil-BlackItalic.ttf: Noto Serif Tamil,Noto Serif Tamil Black",
+      "/usr/share/fonts/noto/NotoSerifTamil-Bold.ttf: Noto Serif Tamil",
+      "/usr/share/fonts/noto/NotoSerifTamil-BoldItalic.ttf: Noto Serif Tamil",
+      "/usr/share/fonts/noto/NotoSerifTamil-Italic.ttf: Noto Serif Tamil",
+      "/usr/share/fonts/noto/NotoSerifTamil-Light.ttf: Noto Serif Tamil,Noto Serif Tamil Light",
+      "/usr/share/fonts/noto/NotoSerifTamil-LightItalic.ttf: Noto Serif Tamil,Noto Serif Tamil Light",
+      "/usr/share/fonts/noto/NotoSerifTamil-Medium.ttf: Noto Serif Tamil,Noto Serif Tamil Medium",
+      "/usr/share/fonts/noto/NotoSerifTamil-MediumItalic.ttf: Noto Serif Tamil,Noto Serif Tamil Medium",
+      "/usr/share/fonts/noto/NotoSerifTamil-Regular.ttf: Noto Serif Tamil",
+      "/usr/share/fonts/noto/NotoSerifTamil-Thin.ttf: Noto Serif Tamil,Noto Serif Tamil Thin",
+      "/usr/share/fonts/noto/NotoSerifTamil-ThinItalic.ttf: Noto Serif Tamil,Noto Serif Tamil Thin",
+      "/usr/share/fonts/noto/NotoSerifTangut-Regular.ttf: Noto Serif Tangut",
+      "/usr/share/fonts/noto/NotoSerifTelugu-Black.ttf: Noto Serif Telugu,Noto Serif Telugu Black",
+      "/usr/share/fonts/noto/NotoSerifTelugu-Bold.ttf: Noto Serif Telugu",
+      "/usr/share/fonts/noto/NotoSerifTelugu-Light.ttf: Noto Serif Telugu,Noto Serif Telugu Light",
+      "/usr/share/fonts/noto/NotoSerifTelugu-Medium.ttf: Noto Serif Telugu,Noto Serif Telugu Medium",
+      "/usr/share/fonts/noto/NotoSerifTelugu-Regular.ttf: Noto Serif Telugu",
+      "/usr/share/fonts/noto/NotoSerifTelugu-Thin.ttf: Noto Serif Telugu,Noto Serif Telugu Thin",
+      "/usr/share/fonts/noto/NotoSerifTest-Bold.ttf: Noto Serif Test",
+      "/usr/share/fonts/noto/NotoSerifTest-Regular.ttf: Noto Serif Test",
+      "/usr/share/fonts/noto/NotoSerifThai-Black.ttf: Noto Serif Thai,Noto Serif Thai Black",
+      "/usr/share/fonts/noto/NotoSerifThai-Bold.ttf: Noto Serif Thai",
+      "/usr/share/fonts/noto/NotoSerifThai-Light.ttf: Noto Serif Thai,Noto Serif Thai Light",
+      "/usr/share/fonts/noto/NotoSerifThai-Medium.ttf: Noto Serif Thai,Noto Serif Thai Medium",
+      "/usr/share/fonts/noto/NotoSerifThai-Regular.ttf: Noto Serif Thai",
+      "/usr/share/fonts/noto/NotoSerifThai-Thin.ttf: Noto Serif Thai,Noto Serif Thai Thin",
+      "/usr/share/fonts/noto/NotoSerifTibetan-Black.ttf: Noto Serif Tibetan,Noto Serif Tibetan Black",
+      "/usr/share/fonts/noto/NotoSerifTibetan-Bold.ttf: Noto Serif Tibetan",
+      "/usr/share/fonts/noto/NotoSerifTibetan-Light.ttf: Noto Serif Tibetan,Noto Serif Tibetan Light",
+      "/usr/share/fonts/noto/NotoSerifTibetan-Medium.ttf: Noto Serif Tibetan,Noto Serif Tibetan Medium",
+      "/usr/share/fonts/noto/NotoSerifTibetan-Regular.ttf: Noto Serif Tibetan",
+      "/usr/share/fonts/noto/NotoSerifTibetan-Thin.ttf: Noto Serif Tibetan,Noto Serif Tibetan Thin",
+      "/usr/share/fonts/noto/NotoSerifTodhri-Regular.ttf: Noto Serif Todhri",
+      "/usr/share/fonts/noto/NotoSerifToto-Bold.ttf: Noto Serif Toto",
+      "/usr/share/fonts/noto/NotoSerifToto-Medium.ttf: Noto Serif Toto,Noto Serif Toto Medium",
+      "/usr/share/fonts/noto/NotoSerifToto-Regular.ttf: Noto Serif Toto",
+      "/usr/share/fonts/noto/NotoSerifVithkuqi-Bold.ttf: Noto Serif Vithkuqi",
+      "/usr/share/fonts/noto/NotoSerifVithkuqi-Medium.ttf: Noto Serif Vithkuqi,Noto Serif Vithkuqi Medium",
+      "/usr/share/fonts/noto/NotoSerifVithkuqi-Regular.ttf: Noto Serif Vithkuqi",
+      "/usr/share/fonts/noto/NotoSerifYezidi-Bold.ttf: Noto Serif Yezidi",
+      "/usr/share/fonts/noto/NotoSerifYezidi-Medium.ttf: Noto Serif Yezidi,Noto Serif Yezidi Medium",
+      "/usr/share/fonts/noto/NotoSerifYezidi-Regular.ttf: Noto Serif Yezidi",
+      "/usr/share/fonts/noto/NotoTraditionalNushu-Bold.ttf: Noto Traditional Nushu",
+      "/usr/share/fonts/noto/NotoTraditionalNushu-Light.ttf: Noto Traditional Nushu,Noto Traditional Nushu Light",
+      "/usr/share/fonts/noto/NotoTraditionalNushu-Regular.ttf: Noto Traditional Nushu",
+      "/usr/share/fonts/noto/NotoZnamennyMusicalNotation-Regular.ttf: Noto Znamenny Musical Notation",
+      "/usr/share/fonts/omarchy/omarchy.ttf: omarchy",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuoS-Bold.ttf: iA Writer Duo S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuoS-BoldItalic.ttf: iA Writer Duo S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuoS-Italic.ttf: iA Writer Duo S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuoS-Regular.ttf: iA Writer Duo S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuospace-Bold.ttf: iA Writer Duospace,iA Writer Duospace Bold",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuospace-BoldItalic.ttf: iA Writer Duospace,iA Writer Duospace Bold",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuospace-Italic.ttf: iA Writer Duospace",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterDuospace-Regular.ttf: iA Writer Duospace",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterMonoS-Bold.ttf: iA Writer Mono S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterMonoS-BoldItalic.ttf: iA Writer Mono S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterMonoS-Italic.ttf: iA Writer Mono S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterMonoS-Regular.ttf: iA Writer Mono S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterQuattroS-Bold.ttf: iA Writer Quattro S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterQuattroS-BoldItalic.ttf: iA Writer Quattro S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterQuattroS-Italic.ttf: iA Writer Quattro S",
+      "/usr/share/fonts/ttf-ia-writer/iAWriterQuattroS-Regular.ttf: iA Writer Quattro S"
+    ],
+    "dpr": 1,
+    "zoom": 1,
+    "defaultFontSize": 16,
+    "locale": "en-US",
+    "timezone": "UTC"
+  },
+  "origin": "http://127.0.0.1:4321",
+  "captures": [
+    {
+      "name": "overview-390x844-light-top",
+      "page": {
+        "file": "index.md",
+        "url": "/",
+        "title": "Overview"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 390,
+      "height": 1366,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 111
+        },
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans-Bold",
+          "isCustomFont": false,
+          "glyphCount": 12
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "overview-1024x768-light-top",
+      "page": {
+        "file": "index.md",
+        "url": "/",
+        "title": "Overview"
+      },
+      "size": [
+        1024,
+        768
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1024,
+      "height": 1367,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 112
+        },
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans-Bold",
+          "isCustomFont": false,
+          "glyphCount": 12
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "overview-1440x900-light-top",
+      "page": {
+        "file": "index.md",
+        "url": "/",
+        "title": "Overview"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1440,
+      "height": 1323,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 112
+        },
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans-Bold",
+          "isCustomFont": false,
+          "glyphCount": 12
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-390x844-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 390,
+      "height": 7505,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 142
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1024x768-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1024,
+        768
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1024,
+      "height": 5612,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-390x844-light-top",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 390,
+      "height": 1359,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 16,
+          "y": 385.296875,
+          "width": 358,
+          "height": 173
+        },
+        {
+          "x": 16,
+          "y": 652.59375,
+          "width": 358,
+          "height": 148.5
+        },
+        {
+          "x": 16,
+          "y": 895.390625,
+          "width": 358,
+          "height": 99.5
+        },
+        {
+          "x": 16,
+          "y": 1089.1875,
+          "width": 358,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 84
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-1024x768-light-top",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        1024,
+        768
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1024,
+      "height": 1409,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 316,
+          "y": 389.890625,
+          "width": 692,
+          "height": 173
+        },
+        {
+          "x": 316,
+          "y": 673.390625,
+          "width": 692,
+          "height": 148.5
+        },
+        {
+          "x": 316,
+          "y": 932.390625,
+          "width": 692,
+          "height": 99.5
+        },
+        {
+          "x": 316,
+          "y": 1142.390625,
+          "width": 692,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 85
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-1440x900-light-top",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1440,
+      "height": 1365,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 336,
+          "y": 341.890625,
+          "width": 720,
+          "height": 173
+        },
+        {
+          "x": 336,
+          "y": 625.390625,
+          "width": 720,
+          "height": 148.5
+        },
+        {
+          "x": 336,
+          "y": 884.390625,
+          "width": 720,
+          "height": 99.5
+        },
+        {
+          "x": 336,
+          "y": 1094.390625,
+          "width": 720,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 85
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-799x900-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        799,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 799,
+      "height": 5232,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-800x900-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        800,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 800,
+      "height": 6708,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 143
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1151x900-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1151,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1151,
+      "height": 5560,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1152x900-light-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1152,
+        900
+      ],
+      "state": "top",
+      "mode": "light",
+      "width": 1152,
+      "height": 6324,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 143
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-390x844-light-menu",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "menu",
+      "mode": "light",
+      "width": 390,
+      "height": 7505,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 142
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-390x844-light-toc",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "toc",
+      "mode": "light",
+      "width": 390,
+      "height": 7505,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 142
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-light-collapsed",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "collapsed",
+      "mode": "light",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-light-expanded",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "expanded",
+      "mode": "light",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-light-scrolled",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "scrolled",
+      "mode": "light",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        2059
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-light-focus",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "focus",
+      "mode": "light",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-1440x900-light-copy",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "copy",
+      "mode": "light",
+      "width": 1440,
+      "height": 1365,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 336,
+          "y": 341.890625,
+          "width": 720,
+          "height": 173
+        },
+        {
+          "x": 336,
+          "y": 625.390625,
+          "width": 720,
+          "height": 148.5
+        },
+        {
+          "x": 336,
+          "y": 884.390625,
+          "width": 720,
+          "height": 99.5
+        },
+        {
+          "x": 336,
+          "y": 1094.390625,
+          "width": 720,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 85
+        }
+      ],
+      "clipboard": "// Preserve indentation and line breaks.\nconst greeting = \"Hello, reader\";\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet(\"Starlyt\"));",
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "overview-390x844-dark-top",
+      "page": {
+        "file": "index.md",
+        "url": "/",
+        "title": "Overview"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 390,
+      "height": 1366,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 111
+        },
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans-Bold",
+          "isCustomFont": false,
+          "glyphCount": 12
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "overview-1024x768-dark-top",
+      "page": {
+        "file": "index.md",
+        "url": "/",
+        "title": "Overview"
+      },
+      "size": [
+        1024,
+        768
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1024,
+      "height": 1367,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 112
+        },
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans-Bold",
+          "isCustomFont": false,
+          "glyphCount": 12
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "overview-1440x900-dark-top",
+      "page": {
+        "file": "index.md",
+        "url": "/",
+        "title": "Overview"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1440,
+      "height": 1323,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 112
+        },
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans-Bold",
+          "isCustomFont": false,
+          "glyphCount": 12
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-390x844-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 390,
+      "height": 7505,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 142
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1024x768-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1024,
+        768
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1024,
+      "height": 5612,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-390x844-dark-top",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 390,
+      "height": 1359,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 16,
+          "y": 385.296875,
+          "width": 358,
+          "height": 173
+        },
+        {
+          "x": 16,
+          "y": 652.59375,
+          "width": 358,
+          "height": 148.5
+        },
+        {
+          "x": 16,
+          "y": 895.390625,
+          "width": 358,
+          "height": 99.5
+        },
+        {
+          "x": 16,
+          "y": 1089.1875,
+          "width": 358,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 84
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-1024x768-dark-top",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        1024,
+        768
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1024,
+      "height": 1409,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 316,
+          "y": 389.890625,
+          "width": 692,
+          "height": 173
+        },
+        {
+          "x": 316,
+          "y": 673.390625,
+          "width": 692,
+          "height": 148.5
+        },
+        {
+          "x": 316,
+          "y": 932.390625,
+          "width": 692,
+          "height": 99.5
+        },
+        {
+          "x": 316,
+          "y": 1142.390625,
+          "width": 692,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 85
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-1440x900-dark-top",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1440,
+      "height": 1365,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 336,
+          "y": 341.890625,
+          "width": 720,
+          "height": 173
+        },
+        {
+          "x": 336,
+          "y": 625.390625,
+          "width": 720,
+          "height": 148.5
+        },
+        {
+          "x": 336,
+          "y": 884.390625,
+          "width": 720,
+          "height": 99.5
+        },
+        {
+          "x": 336,
+          "y": 1094.390625,
+          "width": 720,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 85
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-799x900-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        799,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 799,
+      "height": 5232,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-800x900-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        800,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 800,
+      "height": 6708,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 143
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1151x900-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1151,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1151,
+      "height": 5560,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1152x900-dark-top",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1152,
+        900
+      ],
+      "state": "top",
+      "mode": "dark",
+      "width": 1152,
+      "height": 6324,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 143
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-390x844-dark-menu",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "menu",
+      "mode": "dark",
+      "width": 390,
+      "height": 7505,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 142
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-390x844-dark-toc",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        390,
+        844
+      ],
+      "state": "toc",
+      "mode": "dark",
+      "width": 390,
+      "height": 7505,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 142
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-dark-collapsed",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "collapsed",
+      "mode": "dark",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-dark-expanded",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "expanded",
+      "mode": "dark",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-dark-scrolled",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "scrolled",
+      "mode": "dark",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        2059
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "long-guide-1440x900-dark-focus",
+      "page": {
+        "file": "guides/long-guide.md",
+        "url": "/guides/long-guide/",
+        "title": "Long guide"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "focus",
+      "mode": "dark",
+      "width": 1440,
+      "height": 5512,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": null
+      },
+      "code": [],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 144
+        }
+      ],
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    },
+    {
+      "name": "code-examples-1440x900-dark-copy",
+      "page": {
+        "file": "reference/code-examples.md",
+        "url": "/reference/code-examples/",
+        "title": "Code examples"
+      },
+      "size": [
+        1440,
+        900
+      ],
+      "state": "copy",
+      "mode": "dark",
+      "width": 1440,
+      "height": 1365,
+      "scroll": [
+        0,
+        0
+      ],
+      "fonts": {
+        "body": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "code": "monospace"
+      },
+      "code": [
+        {
+          "x": 336,
+          "y": 341.890625,
+          "width": 720,
+          "height": 173
+        },
+        {
+          "x": 336,
+          "y": 625.390625,
+          "width": 720,
+          "height": 148.5
+        },
+        {
+          "x": 336,
+          "y": 884.390625,
+          "width": 720,
+          "height": 99.5
+        },
+        {
+          "x": 336,
+          "y": 1094.390625,
+          "width": 720,
+          "height": 124
+        }
+      ],
+      "resolvedFonts": [
+        {
+          "familyName": "Liberation Sans",
+          "postScriptName": "LiberationSans",
+          "isCustomFont": false,
+          "glyphCount": 85
+        }
+      ],
+      "clipboard": "// Preserve indentation and line breaks.\nconst greeting = \"Hello, reader\";\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet(\"Starlyt\"));",
+      "repeatDifferingPixels": 0,
+      "repeatDifferencePercent": 0
+    }
+  ]
+}

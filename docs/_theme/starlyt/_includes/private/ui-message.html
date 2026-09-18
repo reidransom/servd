@@ -1,0 +1,1 @@
+{%- if page.language -%}{{- include.key | translate | escape -}}{%- else -%}{{- include.default | escape -}}{%- endif -%}

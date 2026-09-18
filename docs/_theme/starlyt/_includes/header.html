@@ -1,0 +1,34 @@
+{% assign site_title_href = '/' | relative_url %}{% if page.language %}{% assign site_title_href = '/' | localized_url | relative_url %}{% endif %}
+<a class="site-title" href="{{ site_title_href | escape }}">{{ site.title | escape }}</a>
+<div id="site-search"{% unless page.language %} data-corpus="{{ '/assets/search-data.json' | relative_url | escape }}"{% endunless %} data-search-retry="{% include private/ui-message.html key='starlyt.search.retry' default='Retry' %}" data-search-empty="{% include private/ui-message.html key='starlyt.search.empty' default='Enter words to search this documentation.' %}" data-search-loading="{% include private/ui-message.html key='starlyt.search.loading' default='Loading search…' %}" data-search-error="{% include private/ui-message.html key='starlyt.search.error' default='Search could not load. Check your connection and retry.' %}" data-search-no-results="{% include private/ui-message.html key='starlyt.search.no_results' default='No results found. Try another term.' %}" data-search-one-result="{% include private/ui-message.html key='starlyt.search.one_result' default='{count} result' %}" data-search-results="{% include private/ui-message.html key='starlyt.search.results' default='{count} results' %}">
+  <button id="search-toggle" type="button" disabled aria-label="{% include private/ui-message.html key='starlyt.search.label' default='Search' %}" aria-keyshortcuts="Control+K">
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+    <span aria-hidden="true">{% include private/ui-message.html key='starlyt.search.label' default='Search' %}</span>
+    <kbd aria-hidden="true"><kbd data-search-key>Ctrl</kbd><kbd>K</kbd></kbd>
+  </button>
+  <dialog id="search-dialog" aria-label="{% include private/ui-message.html key='starlyt.search.dialog_label' default='Search documentation' %}">
+    <div class="search-dialog-frame">
+      <button id="search-close" type="button">{% include private/ui-message.html key='starlyt.search.cancel' default='Cancel' %}</button>
+      <label for="search-input" class="sr-only">{% include private/ui-message.html key='starlyt.search.input_label' default='Search documentation' %}</label>
+      <input id="search-input" type="search" dir="auto" autocomplete="off" placeholder="{% include private/ui-message.html key='starlyt.search.placeholder' default='Search documentation' %}">
+      <div id="search-status" role="status"></div>
+      <div id="search-results"></div>
+    </div>
+  </dialog>
+  {% if page.language %}<script id="search-corpus" type="application/json">{% include private/search-corpus.html %}</script>{% endif %}
+</div>
+<div id="global-controls">
+  {% include private/language-picker.html %}
+  <div id="mode-picker" data-global-control hidden>
+    <label>
+      <span class="sr-only">{% include private/ui-message.html key='starlyt.color_mode.label' default='Select theme' %}</span>
+      <svg class="mode-icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      <select id="color-mode" autocomplete="off">
+        <option value="dark">{% include private/ui-message.html key='starlyt.color_mode.dark' default='Dark' %}</option>
+        <option value="light">{% include private/ui-message.html key='starlyt.color_mode.light' default='Light' %}</option>
+        <option value="auto" selected>{% include private/ui-message.html key='starlyt.color_mode.auto' default='Auto' %}</option>
+      </select>
+      <svg class="mode-caret" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m6.3 9 5.7 5.7L17.7 9l1.4 1.4-7.1 7.1-7.1 7.1Z"/></svg>
+    </label>
+  </div>
+</div>

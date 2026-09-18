@@ -1,0 +1,23 @@
+{"documents":[
+{%- assign count = 0 -%}
+{%- for corpus_page in site.html_pages -%}
+  {%- if corpus_page.layout == 'default' and corpus_page.search_exclude != true -%}
+    {%- unless count == 0 -%},{%- endunless -%}
+    {%- capture search_body -%}{%- include private/searchable-content.html content=corpus_page.content -%}{%- endcapture -%}
+    {"title":{{ corpus_page.title | default: '' | jsonify }},"url":{{ corpus_page.url | relative_url | jsonify }},"body":{{ search_body | strip_html | normalize_whitespace | jsonify }},"headings":{{ corpus_page.headings | jsonify }}}
+    {%- assign count = count | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for collection in site.collections -%}
+  {%- if collection.output == true -%}
+    {%- for corpus_page in collection.docs -%}
+      {%- if corpus_page.layout == 'default' and corpus_page.search_exclude != true -%}
+        {%- unless count == 0 -%},{%- endunless -%}
+        {%- capture search_body -%}{%- include private/searchable-content.html content=corpus_page.content -%}{%- endcapture -%}
+        {"title":{{ corpus_page.title | default: '' | jsonify }},"url":{{ corpus_page.url | relative_url | jsonify }},"body":{{ search_body | strip_html | normalize_whitespace | jsonify }},"headings":{{ corpus_page.headings | jsonify }}}
+        {%- assign count = count | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+]}

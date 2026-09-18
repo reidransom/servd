@@ -1,0 +1,12 @@
+{
+  "themeRevision": "1012d5b3ec28ab98e9b66205cef373002e98ff98",
+  "themeTree": "ff1e4de1fee1789fbf9616a181a7fde15216ecba",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "/docs",
+  "source": "/home/reid/src/starlyt/.poc/toc-base",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/toc-base --theme /home/reid/src/starlyt/.poc/theme-toc-base",
+    "jigyll build --source /home/reid/src/starlyt/.poc/toc-base",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/toc-base"
+  ]
+}

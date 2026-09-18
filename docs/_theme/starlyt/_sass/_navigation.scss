@@ -1,0 +1,148 @@
+/*! Adapted from stock Starlight sidebar and mobile menu; MIT, Astro contributors. */
+@layer starlyt {
+  #site-nav {
+    position: fixed;
+    inset: var(--sl-nav-height) 0 0;
+    margin: 0;
+    border: 0;
+    width: 100%;
+    height: auto;
+    padding: 1rem var(--sl-sidebar-pad-x);
+    color: var(--sl-color-text);
+    background: var(--sl-color-bg);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    scrollbar-gutter: stable;
+    z-index: 5;
+  }
+  #site-nav ul {
+    --item-pad: 0.5rem;
+    list-style: none;
+    padding: 0;
+  }
+  #site-nav ul ul li {
+    margin-inline-start: var(--item-pad);
+    border-inline-start: 1px solid var(--sl-color-hairline-light);
+    padding-inline-start: var(--item-pad);
+  }
+  #site-nav > ul > li + li {
+    margin-top: 0.75rem;
+  }
+  #site-nav a {
+    display: block;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    color: var(--sl-color-gray-2);
+    padding: 0.3em var(--item-pad);
+    line-height: 1.4;
+  }
+  #site-nav summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.2em var(--item-pad);
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+  }
+  #site-nav summary,
+  #site-nav > ul > li > a {
+    font-weight: 600;
+    color: var(--sl-color-white);
+  }
+  #site-nav > ul > li > a,
+  #site-nav summary > span {
+    font-size: var(--sl-text-lg);
+  }
+  #site-nav summary::marker,
+  #site-nav summary::-webkit-details-marker {
+    display: none;
+  }
+  .caret {
+    flex-shrink: 0;
+  }
+  details[open] > summary .caret {
+    transform: rotate(90deg);
+  }
+  #site-nav a:hover,
+  #site-nav a:focus {
+    color: var(--sl-color-white);
+  }
+  #site-nav a[aria-current='page'] {
+    font-weight: 600;
+    color: var(--sl-color-text-invert);
+    background: var(--sl-color-text-accent);
+  }
+  html[dir='rtl'] details:not([open]) > summary .caret {
+    transform: rotate(180deg);
+  }
+  #menu-toggle {
+    position: fixed;
+    z-index: 10;
+    top: calc((var(--sl-nav-height) - 2rem) / 2);
+    inset-inline-end: var(--sl-nav-pad-x);
+    border: 0;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    padding: 0.5rem;
+    background: var(--sl-color-white);
+    color: var(--sl-color-black);
+    box-shadow: var(--sl-shadow-md);
+    cursor: pointer;
+  }
+  [data-theme='light'] #menu-toggle {
+    background: var(--sl-color-black);
+    color: var(--sl-color-white);
+  }
+  #menu-toggle .close-icon {
+    display: none;
+  }
+  body:has(#site-nav:popover-open) {
+    overflow: hidden;
+  }
+  body:has(#site-nav:popover-open) #menu-toggle {
+    background: var(--sl-color-gray-2);
+    box-shadow: none;
+  }
+  [data-theme='light'] body:has(#site-nav:popover-open) #menu-toggle {
+    background: var(--sl-color-gray-5);
+  }
+  body:has(#site-nav:popover-open) #menu-toggle .open-icon {
+    display: none;
+  }
+  body:has(#site-nav:popover-open) #menu-toggle .close-icon {
+    display: block;
+  }
+  @media (max-width: 49.999rem) {
+    :root {
+      --menu-space: 3rem;
+    }
+  }
+  @media (min-width: 50rem) {
+    #menu-toggle {
+      display: none;
+    }
+    #site-nav {
+      display: block;
+      width: var(--sl-sidebar-width);
+      inset-inline-end: auto;
+      border-inline-end: 1px solid var(--sl-color-hairline-shade);
+      background: var(--sl-color-bg-sidebar);
+    }
+    #site-nav > ul > li + li {
+      margin-top: 0.5rem;
+    }
+    #site-nav a {
+      font-size: var(--sl-text-sm);
+    }
+    #site-nav > ul > li > a,
+    #site-nav summary > span {
+      font-size: var(--sl-text-base);
+    }
+    body:has(#site-nav:popover-open) {
+      overflow: auto;
+    }
+  }
+}

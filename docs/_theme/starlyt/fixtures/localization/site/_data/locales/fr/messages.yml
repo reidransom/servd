@@ -1,0 +1,42 @@
+starlyt:
+  skip_to_content: "Aller au contenu"
+  menu: "Menu"
+  table_of_contents: "Table des matières"
+  on_this_page: "Sur cette page"
+  overview: "Vue d’ensemble"
+  search:
+    label: "Rechercher"
+    dialog_label: "Rechercher dans la documentation"
+    cancel: "Annuler"
+    input_label: "Rechercher dans la documentation"
+    placeholder: "Rechercher dans cette documentation extraordinairement détaillée"
+    retry: "Réessayer"
+    empty: "Saisissez des mots à rechercher dans cette documentation."
+    loading: "Chargement de la recherche…"
+    error: "La recherche n’a pas pu être chargée. Vérifiez votre connexion et réessayez."
+    no_results: "Aucun résultat. Essayez un autre terme."
+    one_result: "{count} résultat"
+    results: "{count} résultats"
+  color_mode:
+    label: "Choisir le thème"
+    dark: "Sombre"
+    light: "Clair"
+    auto: "Automatique"
+  copy:
+    label: "Copier dans le presse-papiers"
+    success: "Copié !"
+    failure: "Échec de la copie"
+  language: "Langue"
+  callout:
+    note: "Remarque"
+    tip: "Conseil"
+    caution: "Attention"
+    danger: "Danger"
+  anchor_label: "Section intitulée « {title} »"
+  not_found:
+    title: "Page introuvable"
+    back_home: "Retour à l’accueil"
+nav:
+  guides: "Guides et références exceptionnellement détaillés"
+  home: "Accueil"
+  guide: "Guide"

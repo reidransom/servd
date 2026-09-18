@@ -1,0 +1,77 @@
+{
+  "ticket": "07-badges",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/components/badges/",
+    "captures": [
+      "reference-badges-390-light.png",
+      "reference-badges-800-light.png",
+      "reference-badges-1440-light.png",
+      "reference-badges-390-dark.png",
+      "reference-badges-800-dark.png",
+      "reference-badges-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4323/badges/",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "badges-390-light.png",
+      "badges-800-light.png",
+      "badges-1440-light.png",
+      "badges-390-dark.png",
+      "badges-800-dark.png",
+      "badges-1440-dark.png",
+      "badges-nav-390-light.png",
+      "badges-nav-390-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation_medium": {
+      "padding": "2.8px 5.6px",
+      "font_size": "14px",
+      "line_height": "normal",
+      "border": "1px",
+      "border_radius": "4px"
+    }
+  },
+  "behavior": {
+    "variants": ["default", "note", "tip", "caution", "danger", "success"],
+    "variant_icons": {
+      "default": "star",
+      "note": "information",
+      "tip": "rocket",
+      "caution": "warning",
+      "danger": "error",
+      "success": "approve-check-circle"
+    },
+    "variant_icons_decorative": true,
+    "sizes": ["small", "medium", "large"],
+    "markup_like_text_is_literal": true,
+    "invalid_values_fall_back_to_default_medium": true,
+    "badge_controls_or_tab_stops": 0,
+    "heading_id": "release-status",
+    "heading_accessible_name": "Release status",
+    "heading_anchor_label": "Section titled “Release status”",
+    "badge_is_outside_heading_element": true,
+    "heading_badge_enhanced_and_no_javascript_visible": true,
+    "navigation_name_with_badge": "Badges New!",
+    "navigation_explicit_name": "Tabs, stable",
+    "redundant_navigation_badge_aria_hidden": true,
+    "current_page_marker": "page",
+    "current_page_badge_uses_outline_variant": true,
+    "native_navigation_keyboard_focus_visible": true,
+    "native_navigation_activation_root": "/tabs/",
+    "native_navigation_activation_prefix": "/docs/tabs/",
+    "long_badge_wraps": true,
+    "page_wide_overflow": false
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-09-09",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

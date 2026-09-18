@@ -1,0 +1,97 @@
+{
+  "ticket": "09-file-trees",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/components/file-tree/",
+    "captures": [
+      "reference-light-390.png",
+      "reference-light-480.png",
+      "reference-light-800.png",
+      "reference-light-1440.png",
+      "reference-dark-390.png",
+      "reference-dark-480.png",
+      "reference-dark-800.png",
+      "reference-dark-1440.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4322/file-trees/",
+    "viewports": [390, 479, 480, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-light-390.png",
+      "implementation-light-480.png",
+      "implementation-light-800.png",
+      "implementation-light-1440.png",
+      "implementation-dark-390.png",
+      "implementation-dark-480.png",
+      "implementation-dark-800.png",
+      "implementation-dark-1440.png",
+      "implementation-focus-light-390.png",
+      "implementation-focus-dark-390.png",
+      "implementation-scrolled-light-390.png",
+      "implementation-scrolled-dark-390.png",
+      "implementation-depth-light-390.png",
+      "implementation-depth-light-1440.png",
+      "implementation-depth-dark-390.png",
+      "implementation-depth-dark-1440.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation": {
+      "padding": "16px",
+      "border": "1px solid rgb(53, 56, 65)",
+      "border_radius": "0px",
+      "dark_background": "rgb(35, 38, 47)",
+      "light_background": "rgb(237, 238, 243)",
+      "font_size": "13px",
+      "line_height": "22.75px"
+    },
+    "comment_wrap_breakpoint": "30em"
+  },
+  "behavior": {
+    "rendered_trees": 3,
+    "project_files": 11,
+    "project_directories": 5,
+    "project_omissions": 2,
+    "project_highlights": 2,
+    "deep_directories": 8,
+    "depth_limit_omissions": 1,
+    "level_9_rows": 0,
+    "invalid_rows": 0,
+    "escaped_name_and_comment": true,
+    "initial_open_and_closed_states": true,
+    "enter_and_space_toggle_native_details": true,
+    "focused_summary_visible": true,
+    "unrelated_disclosure_state_preserved": true,
+    "collapsed_nested_summary_skipped_by_tab": true,
+    "expanded_nested_summary_reached_by_tab": true,
+    "javascript_disabled_native_toggle": true,
+    "css_disabled_nested_lists_and_details": true,
+    "local_horizontal_scroll_left": 200,
+    "page_wide_overflow": false,
+    "search_exclusion_attribute": "data-search-exclude",
+    "file_tree_search_needle_excluded": true,
+    "surrounding_article_prose_retained": true,
+    "root_and_prefix_builds": true,
+    "prefix_sprite_href": "/docs/assets/file-tree-icons.svg"
+  },
+  "icons": {
+    "sprite_symbols": 151,
+    "registry_file_names": 92,
+    "registry_extensions": 309,
+    "registry_partials": 48,
+    "case_insensitive_final_suffix": true,
+    "dotfile_fallback": "seti-default",
+    "unknown_extension_fallback": "seti-default",
+    "external_svg_use_rendered_nonzero_bounds": true,
+    "license": "assets/file-tree-icons-LICENSE"
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

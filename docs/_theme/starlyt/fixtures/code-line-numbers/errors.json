@@ -1,0 +1,11 @@
+{
+  "assigned-flag.md": "showLineNumbers must be a bare flag",
+  "duplicate-flag.md": "duplicate showLineNumbers metadata",
+  "missing-start.md": "startLineNumber must use a decimal value",
+  "empty-start.md": "startLineNumber must use a decimal value",
+  "nondecimal-start.md": "startLineNumber must use a decimal value",
+  "negative-start.md": "startLineNumber must use a decimal value",
+  "zero-start.md": "startLineNumber must be between 1 and 999999",
+  "large-start.md": "startLineNumber must be between 1 and 999999",
+  "duplicate-start.md": "duplicate startLineNumber metadata"
+}

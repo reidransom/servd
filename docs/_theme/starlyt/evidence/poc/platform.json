@@ -1,0 +1,63 @@
+{
+  "packages": [
+    "chromium 152.0.7977.82-1",
+    "fontconfig 2:2.18.3-2",
+    "ttf-liberation 2.1.5-2"
+  ],
+  "sass": "1.98.0",
+  "node": "v26.7.0",
+  "results": [
+    {
+      "origin": "http://127.0.0.1:4321",
+      "fonts": {
+        "p": [
+          {
+            "familyName": "Liberation Sans",
+            "postScriptName": "LiberationSans",
+            "isCustomFont": false,
+            "glyphCount": 85
+          }
+        ],
+        "pre span:not(:has(*))": [
+          {
+            "familyName": "Liberation Mono",
+            "postScriptName": "LiberationMono",
+            "isCustomFont": false,
+            "glyphCount": 40
+          }
+        ]
+      },
+      "display": {
+        "dpr": 1,
+        "scale": 1,
+        "rootFontSize": "16px"
+      }
+    },
+    {
+      "origin": "http://127.0.0.1:4322",
+      "fonts": {
+        "p": [
+          {
+            "familyName": "Liberation Sans",
+            "postScriptName": "LiberationSans",
+            "isCustomFont": false,
+            "glyphCount": 85
+          }
+        ],
+        "pre span:not(:has(*))": [
+          {
+            "familyName": "Liberation Mono",
+            "postScriptName": "LiberationMono",
+            "isCustomFont": false,
+            "glyphCount": 40
+          }
+        ]
+      },
+      "display": {
+        "dpr": 1,
+        "scale": 1,
+        "rootFontSize": "16px"
+      }
+    }
+  ]
+}

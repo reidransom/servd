@@ -1,0 +1,341 @@
+// Copy-control presentation adapted from Expressive Code 0.44.0 (MIT).
+// Copyright (c) 2023 Tibor Schiemann; see assets/expressive-code-LICENSE.
+@layer starlyt {
+  #article pre {
+    max-width: 100%;
+    overflow: auto;
+    // Expressive Code adds a one-pixel inner border before its line padding.
+    padding: 0.75rem 3rem 0.75rem calc(0.90625rem + 1px);
+    border: 1px solid var(--code-border);
+    border-radius: 1px;
+    font: var(--sl-text-code) / var(--sl-line-height) var(--__sl-font-mono);
+    color: var(--code-text);
+    background: var(--code-bg);
+    tab-size: 2;
+  }
+  #article pre code {
+    all: unset;
+    font: inherit;
+    white-space: pre;
+  }
+  #article pre :is(.c, .ch, .cm, .c1, .cs, .cp, .cpf) {
+    color: var(--code-comment);
+  }
+  #article pre :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .o, .ow) {
+    color: var(--code-keyword);
+  }
+  #article pre :is(.s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss) {
+    color: var(--code-string);
+  }
+  #article pre :is(.m, .mb, .mf, .mh, .mi, .il, .mo) {
+    color: var(--code-number);
+  }
+  #article pre :is(.n, .na, .nb, .bp, .nc, .no, .nd, .ne, .nf, .fm, .nl, .nn, .nx) {
+    color: var(--code-name);
+  }
+  #article pre :is(.nt, .nv, .vc, .vg, .vi, .vm) {
+    color: var(--code-property);
+  }
+
+  #article pre:has(.code-line) {
+    padding-inline: 0;
+    --marker-neutral-bg: rgb(255 255 255 / 9%);
+    --marker-neutral-gutter: color-mix(in srgb, white 9%, var(--code-bg));
+    --marker-neutral-edge: var(--sl-color-gray-3);
+    --marker-insert-bg: rgb(30 87 21 / 60%);
+    --marker-insert-gutter: color-mix(in srgb, rgb(30 87 21) 60%, var(--code-bg));
+    --marker-insert-edge: #58a64b;
+    --marker-delete-bg: rgb(134 45 39 / 60%);
+    --marker-delete-gutter: color-mix(in srgb, rgb(134 45 39) 60%, var(--code-bg));
+    --marker-delete-edge: #f85149;
+    --marker-pattern: rgb(255 255 255 / 6%);
+  }
+
+  #article .code-line {
+    display: block;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    padding-inline: calc(0.90625rem - 2px) 3rem;
+    border-inline-start: 3px solid transparent;
+  }
+
+  #article code[data-line-number-width='1'] {
+    --line-number-width: 1ch;
+  }
+  #article code[data-line-number-width='2'] {
+    --line-number-width: 2ch;
+  }
+  #article code[data-line-number-width='3'] {
+    --line-number-width: 3ch;
+  }
+  #article code[data-line-number-width='4'] {
+    --line-number-width: 4ch;
+  }
+  #article code[data-line-number-width='5'] {
+    --line-number-width: 5ch;
+  }
+  #article code[data-line-number-width='6'] {
+    --line-number-width: 6ch;
+  }
+
+  #article .code-line[data-line-number]::before {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    display: inline-block;
+    box-sizing: content-box;
+    width: var(--line-number-width);
+    margin-inline-end: 0.75rem;
+    padding-inline-end: 0.75rem;
+    border-inline-end: 1px solid var(--code-border);
+    color: var(--sl-color-gray-2);
+    background-color: var(--code-bg);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    user-select: none;
+    content: attr(data-line-number) / '';
+  }
+
+  #article :is(.code-line, mark).is-marked {
+    background-color: var(--marker-neutral-bg);
+  }
+
+  #article :is(.code-line, mark).is-inserted {
+    background-color: var(--marker-insert-bg);
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 6px,
+      var(--marker-pattern) 6px 8px
+    );
+  }
+
+  #article :is(.code-line, mark).is-deleted {
+    background-color: var(--marker-delete-bg);
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0 6px,
+      var(--marker-pattern) 6px 8px
+    );
+  }
+
+  #article .code-line.is-marked::before {
+    background-color: var(--marker-neutral-gutter);
+  }
+
+  #article .code-line.is-inserted::before {
+    background-color: var(--marker-insert-gutter);
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 6px,
+      var(--marker-pattern) 6px 8px
+    );
+  }
+
+  #article .code-line.is-deleted::before {
+    background-color: var(--marker-delete-gutter);
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0 6px,
+      var(--marker-pattern) 6px 8px
+    );
+  }
+
+  #article .code-line.is-marked {
+    border-inline-start-color: var(--marker-neutral-edge);
+  }
+
+  #article .code-line.is-inserted {
+    border-inline-start-color: var(--marker-insert-edge);
+  }
+
+  #article .code-line.is-deleted {
+    border-inline-start-color: var(--marker-delete-edge);
+  }
+
+  #article mark:is(.is-marked, .is-inserted, .is-deleted) {
+    padding: 0;
+    border-radius: 0.125rem;
+    color: inherit;
+    box-shadow: inset 0 -1px currentcolor;
+  }
+
+  [data-theme='light'] #article pre:has(.code-line) {
+    --marker-neutral-bg: rgb(0 0 0 / 10%);
+    --marker-neutral-gutter: color-mix(in srgb, black 10%, var(--code-bg));
+    --marker-neutral-edge: var(--sl-color-gray-3);
+    --marker-insert-bg: rgb(142 199 125 / 60%);
+    --marker-insert-gutter: color-mix(in srgb, rgb(142 199 125) 60%, var(--code-bg));
+    --marker-insert-edge: #2da043;
+    --marker-delete-bg: rgb(255 156 142 / 60%);
+    --marker-delete-gutter: color-mix(in srgb, rgb(255 156 142) 60%, var(--code-bg));
+    --marker-delete-edge: #cf222e;
+    --marker-pattern: rgb(255 255 255 / 10%);
+  }
+  #article .code-frame {
+    position: relative;
+    --copy-size: 2.5rem;
+  }
+  #article .code-frame > pre {
+    margin: 0;
+  }
+
+  #article figure.highlight[data-code-frame] {
+    position: relative;
+    display: block;
+    min-width: 0;
+    margin: 0;
+    background: var(--sl-color-black);
+    border-radius: 1px;
+  }
+
+  #article figure.highlight[data-code-frame] > pre {
+    margin: 0;
+  }
+
+  #article figure.highlight[data-code-frame] > .code-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--sl-color-gray-2);
+    font: 0.9rem / 1.65 var(--__sl-font);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #article figure.highlight[data-code-frame='editor'] > .code-title {
+    width: fit-content;
+    max-width: 100%;
+    padding: calc(0.25rem + 1px) 1rem;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-block-start-color: var(--sl-color-accent-high);
+    border-block-end: 0;
+  }
+
+  #article figure.highlight[data-code-frame] > .code-title + pre {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+
+  #article figure.highlight[data-code-frame='terminal']::before {
+    display: block;
+    height: calc(0.9rem * 1.65 + 0.5625rem);
+    content: '';
+    background: var(--sl-color-black);
+    border: 1px solid var(--code-border);
+    border-block-end: 0;
+  }
+
+  #article figure.highlight[data-code-frame='terminal']::after {
+    position: absolute;
+    inset-block-start: calc(0.9rem * 0.825 + 0.28125rem - 0.21875rem);
+    inset-inline-start: 1rem;
+    width: 0.4375rem;
+    height: 0.4375rem;
+    color: var(--sl-color-gray-4);
+    content: '';
+    background: currentColor;
+    border-radius: 50%;
+    box-shadow: 0.75rem 0 currentColor, 1.5rem 0 currentColor;
+    opacity: 0.75;
+  }
+
+  #article figure.highlight[data-code-frame='terminal'] > .code-title {
+    position: absolute;
+    inset: 0 0 auto;
+    display: block;
+    padding: 0.25rem 3.5rem 0.3125rem;
+    overflow: hidden;
+    font-weight: 500;
+    letter-spacing: 0.025ch;
+    text-align: center;
+  }
+
+  [data-theme='light'] #article figure.highlight[data-code-frame],
+  [data-theme='light'] #article figure.highlight[data-code-frame='terminal']::before {
+    background: var(--sl-color-gray-6);
+  }
+  #article .copy-button {
+    position: absolute;
+    inset-inline-end: calc(0.5rem + 1px);
+    top: calc(0.4rem + 1px);
+    width: var(--copy-size);
+    height: var(--copy-size);
+    margin: 0;
+    border: 0;
+    border-radius: 0.2rem;
+    padding: 0;
+    background: var(--code-bg);
+    color: var(--sl-color-text);
+    cursor: pointer;
+    opacity: 0.75;
+  }
+  #article .copy-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid currentColor;
+    border-radius: inherit;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  #article .copy-button svg {
+    display: block;
+    width: calc(100% - 0.95rem);
+    height: calc(100% - 0.95rem);
+    margin: 0.475rem;
+  }
+  #article .copy-button:focus-visible {
+    outline: revert;
+    outline-offset: 0;
+  }
+  #article .copy-button:hover,
+  #article .copy-button:focus-visible {
+    background: color-mix(in srgb, var(--sl-color-text) 20%, var(--code-bg));
+    opacity: 1;
+  }
+  #article .copy-feedback {
+    --feedback-bg: var(--code-success);
+    position: absolute;
+    inset-inline-end: calc(0.5rem + 1px + var(--copy-size) + 0.6rem);
+    top: calc(0.4rem + 1px);
+    padding: 0.125rem 0.75rem;
+    font: 0.9rem / 1.65 var(--__sl-font);
+    color: white;
+    background: var(--feedback-bg);
+    border-radius: 0.2rem;
+    pointer-events: none;
+    user-select: none;
+  }
+  #article .copy-feedback::after {
+    content: '';
+    position: absolute;
+    top: calc(50% - 0.35rem);
+    inset-inline-end: calc(-2 * (0.35rem - 0.5px));
+    border: 0.35rem solid transparent;
+    border-inline-start-color: var(--feedback-bg);
+  }
+  #article .copy-feedback[data-error] {
+    --feedback-bg: var(--sl-color-red-low);
+    color: var(--sl-color-red-high);
+  }
+  #article .copy-feedback:empty {
+    display: none;
+  }
+  @media (hover: hover) {
+    #article .code-frame {
+      --copy-size: 2rem;
+    }
+    #article .copy-button {
+      opacity: 0;
+    }
+    #article .code-frame:hover .copy-button:not(:hover):not(:focus-visible),
+    #article .code-frame:focus-within .copy-button:not(:hover):not(:focus-visible) {
+      opacity: 0.75;
+    }
+    #article .copy-button:hover,
+    #article .copy-button:focus-visible {
+      opacity: 1;
+    }
+  }
+}

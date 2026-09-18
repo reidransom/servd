@@ -1,0 +1,5 @@
+{% assign tabs_content = include.content | strip %}
+{% assign tabs_sync = include.sync | strip %}
+{% assign tabs_persist = false %}
+{% if include.persist == true and tabs_sync != '' %}{% assign tabs_persist = true %}{% endif %}
+{% if tabs_content != '' %}<div class="tabs not-content" data-tabs{% if tabs_persist %} data-tabs-persist{% endif %}>{% if tabs_sync != '' %}<span class="tabs-sync-key" hidden>{{ include.sync | escape }}</span>{% endif %}{{ include.content }}</div>{% endif %}

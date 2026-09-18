@@ -1,0 +1,72 @@
+{
+  "ticket": "08-steps",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/components/steps/",
+    "captures": [
+      "reference-steps-390-light.png",
+      "reference-steps-800-light.png",
+      "reference-steps-1440-light.png",
+      "reference-steps-390-dark.png",
+      "reference-steps-800-dark.png",
+      "reference-steps-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4321/steps/",
+    "viewports": [390, 799, 800, 1024, 1151, 1152, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "steps-390-light.png",
+      "steps-799-light.png",
+      "steps-800-light.png",
+      "steps-1024-light.png",
+      "steps-1151-light.png",
+      "steps-1152-light.png",
+      "steps-1440-light.png",
+      "steps-390-dark.png",
+      "steps-799-dark.png",
+      "steps-800-dark.png",
+      "steps-1024-dark.png",
+      "steps-1151-dark.png",
+      "steps-1152-dark.png",
+      "steps-1440-dark.png",
+      "steps-code-focus-390-light.png",
+      "steps-code-focus-390-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation": {
+      "content_padding_inline_start": "44px",
+      "number_circle_width": "28px",
+      "number_circle_height": "28px",
+      "number_circle_top": "0px"
+    }
+  },
+  "behavior": {
+    "ordered_list_starts": [1, 8],
+    "css_counter_starts": [0, 7],
+    "outer_items_per_fixture": [3, 3],
+    "visible_numbers_include": [1, 2, 3, 8, 9, 10],
+    "nested_unordered_list_retained": true,
+    "rich_headings_links_paragraphs_and_code": true,
+    "malformed_input_decorated_lists": 0,
+    "invalid_start_cases_fall_back_to_one": 6,
+    "decorative_focus_stops": 0,
+    "contained_links_and_code_controls_follow_document_order": true,
+    "code_focus_visible": true,
+    "wide_code_scroll_width": 1324,
+    "wide_code_client_width": 312,
+    "css_unavailable_ordered_lists": 2,
+    "css_unavailable_ordered_list_starts": [1, 8],
+    "css_unavailable_items": 6,
+    "page_wide_overflow": false
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

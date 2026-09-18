@@ -1,0 +1,26 @@
+{% assign has_toc = false %}
+{% for heading in include.headings %}
+  {% if heading.level == 2 or heading.level == 3 %}
+    {% if heading.id != "" and heading.text != "" %}
+      {% assign has_toc = true %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if has_toc %}
+<nav id="toc" aria-label="{% include private/ui-message.html key='starlyt.table_of_contents' default='Table of contents' %}">
+  <h2>{% include private/ui-message.html key='starlyt.on_this_page' default='On this page' %}</h2>
+  <details open>
+    <summary><span class="toc-toggle">{% include private/ui-message.html key='starlyt.on_this_page' default='On this page' %}<svg class="caret" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29.998.998 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="toc-current"></span></summary>
+    <ul>
+      <li><a href="#main-content" data-toc-target="main-content" style="--depth: 0">{% include private/ui-message.html key='starlyt.overview' default='Overview' %}</a></li>
+      {% for heading in include.headings %}
+        {% if heading.level == 2 or heading.level == 3 %}
+          {% if heading.id != "" and heading.text != "" %}
+      <li><a href="#{{ heading.id | cgi_escape | replace: '+', '%20' | escape }}" data-toc-target="{{ heading.id | escape }}" style="--depth: {% if heading.level == 3 %}1{% else %}0{% endif %}">{{ heading.text | escape }}</a></li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </details>
+</nav>
+{% endif %}

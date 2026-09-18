@@ -1,0 +1,90 @@
+{
+  "ticket": "12-link-buttons",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/components/link-buttons/",
+    "captures": [
+      "reference-390-light.png",
+      "reference-799-light.png",
+      "reference-800-light.png",
+      "reference-1440-light.png",
+      "reference-390-dark.png",
+      "reference-799-dark.png",
+      "reference-800-dark.png",
+      "reference-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4325/link-buttons/",
+    "viewports": [390, 799, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-390-light.png",
+      "implementation-799-light.png",
+      "implementation-800-light.png",
+      "implementation-1440-light.png",
+      "implementation-390-dark.png",
+      "implementation-799-dark.png",
+      "implementation-800-dark.png",
+      "implementation-1440-dark.png",
+      "implementation-focus-390-light.png",
+      "implementation-focus-390-dark.png",
+      "hero-after-migration-390-light.png",
+      "hero-after-migration-1440-light.png",
+      "hero-after-migration-390-dark.png",
+      "hero-after-migration-1440-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation": {
+      "small_padding": "7px 18px",
+      "small_font_size": "14px",
+      "small_line_height": "16.625px",
+      "small_height": "32.625px",
+      "large_padding": "15px 20px",
+      "large_font_size": "16px",
+      "large_line_height": "19px",
+      "large_height": "51px",
+      "border_width": "1px",
+      "border_radius": "15984px",
+      "focus_outline": "auto 1px",
+      "focus_outline_offset": "4px",
+      "transition_css_pixels": 800
+    }
+  },
+  "behavior": {
+    "rendered_fixture_links": 16,
+    "variants_without_icons": ["primary", "secondary", "minimal"],
+    "leading_icon": "rocket",
+    "trailing_icon": "right-arrow",
+    "unknown_icon_omitted": true,
+    "invalid_variant_falls_back_to_primary": true,
+    "invalid_position_falls_back_to_leading": true,
+    "missing_and_unsupported_links_omitted": 4,
+    "escaped_plain_text_name": "Fallback options with literal <markup> & text",
+    "root_relative_prefixed": true,
+    "fragment_mail_tel_http_unchanged": true,
+    "external_target_not_inferred": true,
+    "explicit_new_window": {
+      "target": "_blank",
+      "rel": "noopener noreferrer"
+    },
+    "adjacent_direct_links": 3,
+    "keyboard_order_complete": true,
+    "keyboard_enter_fragment_url": "/link-buttons/#variants",
+    "decorative_icons_not_in_accessible_names": true,
+    "page_wide_overflow": false,
+    "root_and_prefix_builds": true,
+    "hero_action_names_preserved": ["Get started", "Explore page layouts"],
+    "hero_action_hrefs_preserved": ["/getting-started/", "/pages/"],
+    "not_found_action_names_preserved": ["Go to documentation home", "Open the deployment guide"],
+    "single_rendering_include": "_includes/components/link-button.html"
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

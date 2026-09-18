@@ -1,0 +1,12 @@
+{
+  "themeRevision": "1cc611022604724b9405e5521a61c13b396bd063",
+  "themeTree": "ce1d9cb57857b5f1752ad5a391e657e4e0c8b0ab",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "/docs",
+  "source": "/home/reid/src/starlyt/.poc/integrated-base",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/integrated-base --theme /home/reid/src/starlyt/.poc/theme-integrated-base",
+    "jigyll build --source /home/reid/src/starlyt/.poc/integrated-base",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/integrated-base"
+  ]
+}

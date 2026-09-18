@@ -1,0 +1,1 @@
+{%- if page.language -%}lang="{{ page.language.tag | escape }}" dir="{{ page.language.direction | escape }}"{%- else -%}lang="{{ site.lang | default: 'en' | escape }}"{%- endif -%}

@@ -1,0 +1,22 @@
+[
+  {
+    "origin": "http://127.0.0.1:4322",
+    "orderedHeadings": true,
+    "repeatedIDs": true,
+    "inlineCode": true,
+    "directFragment": true,
+    "anchorOffset": true,
+    "escapeFocus": true,
+    "lastActive": true
+  },
+  {
+    "origin": "http://127.0.0.1:4323/docs",
+    "orderedHeadings": true,
+    "repeatedIDs": true,
+    "inlineCode": true,
+    "directFragment": true,
+    "anchorOffset": true,
+    "escapeFocus": true,
+    "lastActive": true
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+  "source": "/home/reid/tmp/starlight",
+  "node": "v26.7.0",
+  "pnpm": "11.22.0",
+  "lockfileSha256": "eca46f69cd37689861eadc485a85da08cbd88a22d22c779980f63c4b4b1dd7d8",
+  "configuration": "import { defineConfig } from 'astro/config';\nimport starlight from '@astrojs/starlight';\nexport default defineConfig({ integrations: [starlight({\n  title: \"Starlyt Docs\",\n  pagefind: false,\n  pagination: false,\n  credits: false,\n  expressiveCode: { defaultProps: { showLineNumbers: false, frame: 'none' } },\n  sidebar: [{\"label\":\"Overview\",\"link\":\"/\"},{\"label\":\"Guides\",\"items\":[{\"label\":\"A deliberately long navigation label for the complete guide\",\"link\":\"/guides/long-guide/\"},{\"label\":\"Reference\",\"items\":[{\"label\":\"Code examples\",\"link\":\"/reference/code-examples/\"}]}]}]\n})] });\n",
+  "fixtureFiles": [
+    {
+      "file": "index.md",
+      "url": "/",
+      "title": "Overview"
+    },
+    {
+      "file": "guides/long-guide.md",
+      "url": "/guides/long-guide/",
+      "title": "Long guide"
+    },
+    {
+      "file": "reference/code-examples.md",
+      "url": "/reference/code-examples/",
+      "title": "Code examples"
+    }
+  ]
+}

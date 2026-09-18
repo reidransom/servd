@@ -1,0 +1,1 @@
+cmd = "rm -rf .poc/servd-docs && jigyll new .poc/servd-docs --theme \"$PWD\" && cp -R docs/site/. .poc/servd-docs/ && rm -f .poc/servd-docs/404.html && exec jigyll serve -s .poc/servd-docs -H {host} -P {port} -w --unpublished"

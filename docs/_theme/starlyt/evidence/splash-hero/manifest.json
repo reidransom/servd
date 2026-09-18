@@ -1,0 +1,56 @@
+{
+  "ticket": "03-splash-hero",
+  "reference": {
+    "repository": ".poc/reference",
+    "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "page": "/404/",
+    "screenshots": "reference-404-{390,799,800,1024,1151,1152,1440}-{light,dark}.png"
+  },
+  "consumer": {
+    "source": "docs/site",
+    "rootScreenshots": [
+      "splash-hero-{390,1024,1440}-{light,dark}.png",
+      "doc-hero-{390,1024,1440}-{light,dark}.png",
+      "splash-plain-{390,1024,1440}-{light,dark}.png",
+      "doc-minimal-{390,799,800,1024,1151,1152,1440}-{light,dark}.png",
+      "splash-edges-{799,800,1151,1152}-{light,dark}.png"
+    ],
+    "prefix": "/docs/"
+  },
+  "environment": {
+    "playwrightMcp": "0.0.80",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "platform": "Linux",
+    "deviceScaleFactor": 1,
+    "browserZoom": 1,
+    "defaultFontPixels": 16
+  },
+  "checks": {
+    "captures": 54,
+    "singleHeadingPerPage": true,
+    "pageWideOverflow": false,
+    "rootAndPrefixAssets": true,
+    "rootAndPrefixActions": true,
+    "keyboardFocusOutline": true,
+    "noJavaScriptContentAndActions": true,
+    "modeSpecificImageSelection": true,
+    "referenceHeroTitleGeometry": {
+      "widths": [390, 799, 800, 1024, 1151, 1152, 1440],
+      "modes": ["light", "dark"],
+      "matchingProperties": ["y", "height", "font-size", "text-align"],
+      "mismatches": 0
+    },
+    "referencePrimaryActionGeometry": {
+      "widths": [390, 800, 1440],
+      "matchingProperties": ["display", "padding", "font-size", "line-height", "border-radius", "border-width"],
+      "mismatches": 0
+    }
+  },
+  "acceptedDifferences": [
+    "Starlyt uses Jigyll/Liquid authoring rather than Astro content collections.",
+    "Consumer-hosted SVG artwork and page copy intentionally differ from the frozen reference fixture.",
+    "The splash header uses Starlyt's search and color controls rather than the reference documentation site's configured header controls.",
+    "No claim is made beyond the pinned Chromium/Linux capture environment."
+  ]
+}

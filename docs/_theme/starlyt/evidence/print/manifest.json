@@ -1,0 +1,97 @@
+{
+  "ticket": 22,
+  "environment": {
+    "os": "Arch Linux x86_64",
+    "playwright": "1.63.0",
+    "playwright_mcp": "0.0.80",
+    "browser": "Chromium 153.0.8010.12",
+    "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+  },
+  "settings": {
+    "media": "print",
+    "papers": ["A4 portrait", "US Letter portrait"],
+    "margins": "12mm on every edge",
+    "scale": 1,
+    "print_background": false,
+    "display_header_footer": false,
+    "prefer_css_page_size": false
+  },
+  "implementation": {
+    "origin": "http://127.0.0.1:4331",
+    "pages": {
+      "overview": "/",
+      "long-guide": "/guides/long-guide.html",
+      "code": "/reference/code-examples.html"
+    },
+    "pdfs": [
+      "starlyt-overview-dark-a4.pdf",
+      "starlyt-overview-dark-letter.pdf",
+      "starlyt-overview-light-a4.pdf",
+      "starlyt-overview-light-letter.pdf",
+      "starlyt-long-guide-dark-a4.pdf",
+      "starlyt-long-guide-dark-letter.pdf",
+      "starlyt-long-guide-light-a4.pdf",
+      "starlyt-long-guide-light-letter.pdf",
+      "starlyt-code-dark-a4.pdf",
+      "starlyt-code-dark-letter.pdf",
+      "starlyt-code-light-a4.pdf",
+      "starlyt-code-light-letter.pdf"
+    ],
+    "page_counts": {
+      "overview_a4": 2,
+      "overview_letter": 2,
+      "long_guide_a4": 5,
+      "long_guide_letter": 6,
+      "code_a4": 2,
+      "code_letter": 2
+    }
+  },
+  "reference": {
+    "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "origin": "http://127.0.0.1:4312",
+    "page_mapping": {
+      "overview": "/",
+      "long-guide": "/guides/authoring-content/",
+      "code": "/components/code/"
+    },
+    "pdfs": [
+      "reference-overview-a4.pdf",
+      "reference-overview-letter.pdf",
+      "reference-long-guide-a4.pdf",
+      "reference-long-guide-letter.pdf",
+      "reference-code-a4.pdf",
+      "reference-code-letter.pdf"
+    ],
+    "accepted_differences": [
+      "Reference pages contain different article copy and therefore have different page counts.",
+      "Starlyt retains a text site title rather than the reference logo treatment.",
+      "Starlyt prints one canonical URL and appends HTTP(S) article destinations.",
+      "Starlyt allows oversized code and tables to split instead of applying the reference blanket keep-together rule."
+    ]
+  },
+  "verified": {
+    "all_implementation_pages_nonblank": true,
+    "required_start_and_end_article_text_present": true,
+    "site_title_count": 1,
+    "article_title_count": 1,
+    "canonical_url_count": 1,
+    "external_destination_appended": true,
+    "internal_fragment_mail_tel_suffixes_absent": true,
+    "hidden_tab_panels_expanded": true,
+    "closed_file_tree_expanded": true,
+    "fixture_image_loaded_and_fit": true,
+    "code_white_space": "pre-wrap",
+    "code_overflow": "visible",
+    "table_header_repeated_when_table_split": true,
+    "light_dark_extracted_text_equal": true,
+    "screen_code_behavior_unchanged": {
+      "white_space": "pre",
+      "overflow": "auto"
+    }
+  },
+  "inspection": {
+    "text": "pdftotext 26.08.0",
+    "metadata": "pdfinfo 26.08.0",
+    "raster": "pdftoppm 26.08.0; temporary rasters removed after visual inspection"
+  }
+}

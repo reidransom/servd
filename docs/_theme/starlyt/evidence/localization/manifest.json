@@ -1,0 +1,75 @@
+{
+  "ticket": "19-localization",
+  "fixture": {
+    "path": "fixtures/localization/site",
+    "locales": ["en", "fr", "ar"],
+    "default_locale": "en",
+    "rtl_locale": "ar",
+    "paired_translation_keys": ["home", "guide"],
+    "optional_translation_key": "optional",
+    "optional_arabic_edition_published": false,
+    "catalog_keys": 32,
+    "catalogs": [
+      "_data/locales/en/messages.yml",
+      "_data/locales/fr/messages.yml",
+      "_data/locales/ar/messages.yml"
+    ]
+  },
+  "verification": {
+    "command": "python tools/localization/check.py --jigyll /tmp/jigyll-code-annotations",
+    "root_build": true,
+    "docs_prefix_build": true,
+    "single_language_build_without_localization": true,
+    "message_inventory_matches_all_catalogs": true,
+    "english_fallbacks_match_english_catalog": true,
+    "literal_browser_ui_labels": false,
+    "missing_message_default_policy_fails": true,
+    "missing_messages_key_policy_exposes_key": true,
+    "missing_required_edition_fails": true,
+    "conflicting_navigation_label_fields_fail": true,
+    "unknown_localized_navigation_route_fails": true
+  },
+  "rendered_contract": {
+    "document_languages": {"en": "en", "fr": "fr", "ar": "ar"},
+    "document_directions": {"en": "ltr", "fr": "ltr", "ar": "rtl"},
+    "canonical_and_alternate_links": true,
+    "x_default_points_to_default_edition": true,
+    "translated_shell_labels": true,
+    "translated_search_labels_and_states": true,
+    "translated_copy_labels_and_feedback": true,
+    "translated_callout_defaults": true,
+    "translated_heading_anchor_labels": true,
+    "navigation_label_keys_translated": true,
+    "navigation_routes_localized": true,
+    "assets_retain_baseurl": true,
+    "localized_search_corpus_is_active_locale_only": true,
+    "search_ranking_logic_changed": false
+  },
+  "browser": {
+    "url": "http://127.0.0.1:4329/",
+    "french_search_query": "facultative",
+    "french_search_status": "1 résultat",
+    "french_search_result": "Page française facultative",
+    "french_clipboard_exact": "Exemple français à copier\n",
+    "french_copy_feedback": "Copié !",
+    "translated_failure_and_retry": true,
+    "arabic_corpus_titles": ["البداية العربية", "الدليل العربي"],
+    "page_wide_overflow_at_390": false,
+    "long_labels_remain_bounded": true,
+    "captures": [
+      "french-navigation-390-light.png",
+      "french-guide-800-dark.png",
+      "french-search-1440-light.png",
+      "arabic-navigation-390-dark.png"
+    ],
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser_engine": "Chromium 153.0.8010.12",
+    "headless": true
+  },
+  "reviews": {
+    "standards": "Passed after consolidating locale attributes, canonical metadata, UI fallback selection, and search-corpus rendering behind private includes; localized pages no longer advertise the nonlocalized corpus URL.",
+    "spec": "Passed against all ticket 19 criteria reachable before the ticket 20 language selector and ticket 21 RTL layout certification; the retained checker covers catalogs, routes, prefixes, locale corpora, fallback policies, required coverage, and the nonlocalized path."
+  },
+  "scope_boundary": "Ticket 19 sets lang and dir from Jigyll metadata. Ticket 21 owns broader RTL geometry and interaction certification."
+}

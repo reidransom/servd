@@ -1,0 +1,12 @@
+{
+  "themeRevision": "f5b7ef7efc8469df0c9a04508d5b7b8d4ede1f75",
+  "themeTree": "6cada9fa49a68d4eb74bfa52ed4ed6a9df22fdf5",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "",
+  "source": "/home/reid/src/starlyt/.poc/navigation-final",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/navigation-final --theme /home/reid/src/starlyt/.poc/theme-navigation-final",
+    "jigyll build --source /home/reid/src/starlyt/.poc/navigation-final",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/navigation-final"
+  ]
+}

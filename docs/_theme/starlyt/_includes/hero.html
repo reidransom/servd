@@ -1,0 +1,29 @@
+{% assign hero = page.hero %}
+{% assign hero_title = hero.title | default: page.title %}
+<div class="hero not-content">
+  {% assign image = hero.image %}
+  {% if image %}
+    {% assign image_width = image.width | plus: 0 %}
+    {% assign image_height = image.height | plus: 0 %}
+    {% assign image_src_prefix = image.src | slice: 0, 1 %}
+    {% assign image_light_prefix = image.light | slice: 0, 1 %}
+    {% assign image_dark_prefix = image.dark | slice: 0, 1 %}
+    {% if image.alt != nil and image_width > 0 and image_height > 0 %}
+      {% if image.src and image.light == nil and image.dark == nil and image_src_prefix == '/' %}
+        <img class="hero-image" src="{{ image.src | relative_url | escape }}" alt="{{ image.alt | escape }}" width="{{ image_width }}" height="{{ image_height }}" decoding="async" fetchpriority="high">
+      {% elsif image.src == nil and image.light and image.dark and image_light_prefix == '/' and image_dark_prefix == '/' %}
+        <img class="hero-image hero-image-dark" src="{{ image.dark | relative_url | escape }}" alt="{{ image.alt | escape }}" width="{{ image_width }}" height="{{ image_height }}" decoding="async" fetchpriority="high">
+        <img class="hero-image hero-image-light" src="{{ image.light | relative_url | escape }}" alt="{{ image.alt | escape }}" width="{{ image_width }}" height="{{ image_height }}" decoding="async" fetchpriority="high">
+      {% endif %}
+    {% endif %}
+  {% endif %}
+  <div class="hero-stack">
+    <div class="hero-copy">
+      <h1 id="page-title">{{ hero_title | escape }}</h1>
+      {% if hero.tagline %}{% assign tagline = hero.tagline | strip %}{% if tagline != '' %}<p class="hero-tagline">{{ hero.tagline | escape }}</p>{% endif %}{% endif %}
+    </div>
+    {% capture hero_actions %}{% for action in hero.actions %}{% include components/link-button.html text=action.text href=action.link variant=action.variant %}{% endfor %}{% endcapture %}
+    {% assign hero_actions = hero_actions | strip %}
+    {% if hero_actions != '' %}<div class="hero-actions">{{ hero_actions }}</div>{% endif %}
+  </div>
+</div>

@@ -1,0 +1,20 @@
+[
+  {
+    "origin": "http://127.0.0.1:4322",
+    "menu": true,
+    "focus": true,
+    "escape": true,
+    "resize": true,
+    "persistence": true,
+    "currentPage": true
+  },
+  {
+    "origin": "http://127.0.0.1:4323/docs",
+    "menu": true,
+    "focus": true,
+    "escape": true,
+    "resize": true,
+    "persistence": true,
+    "currentPage": true
+  }
+]

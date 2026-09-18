@@ -1,0 +1,80 @@
+[
+  {
+    "name": "overview-390x844-light-top",
+    "reference": 1366,
+    "consumer": 1366,
+    "delta": 0
+  },
+  {
+    "name": "overview-1024x768-light-top",
+    "reference": 1367,
+    "consumer": 1367,
+    "delta": 0
+  },
+  {
+    "name": "overview-1440x900-light-top",
+    "reference": 1323,
+    "consumer": 1323,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-390x844-light-top",
+    "reference": 7505,
+    "consumer": 7505,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-1024x768-light-top",
+    "reference": 5612,
+    "consumer": 5612,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-1440x900-light-top",
+    "reference": 5512,
+    "consumer": 5512,
+    "delta": 0
+  },
+  {
+    "name": "code-examples-390x844-light-top",
+    "reference": 1359,
+    "consumer": 1359,
+    "delta": 0
+  },
+  {
+    "name": "code-examples-1024x768-light-top",
+    "reference": 1409,
+    "consumer": 1409,
+    "delta": 0
+  },
+  {
+    "name": "code-examples-1440x900-light-top",
+    "reference": 1365,
+    "consumer": 1365,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-799x900-light-top",
+    "reference": 5232,
+    "consumer": 5232,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-800x900-light-top",
+    "reference": 6708,
+    "consumer": 6708,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-1151x900-light-top",
+    "reference": 5560,
+    "consumer": 5560,
+    "delta": 0
+  },
+  {
+    "name": "long-guide-1152x900-light-top",
+    "reference": 6324,
+    "consumer": 6324,
+    "delta": 0
+  }
+]

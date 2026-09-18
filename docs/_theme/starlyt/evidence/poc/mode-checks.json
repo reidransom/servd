@@ -1,0 +1,153 @@
+[
+  {
+    "origin": "http://127.0.0.1:4322",
+    "autoLive": true,
+    "explicitPrecedence": true,
+    "navigationReloadPersistence": true,
+    "keyboardAndResize": true
+  },
+  {
+    "origin": "http://127.0.0.1:4323/docs",
+    "autoLive": true,
+    "explicitPrecedence": true,
+    "navigationReloadPersistence": true,
+    "keyboardAndResize": true
+  },
+  {
+    "storedOppositeSystem": "light",
+    "mutations": [
+      {
+        "time": 27,
+        "mode": "light"
+      }
+    ],
+    "frames": [
+      {
+        "time": 51.400000002235174,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 73,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 75.90000000223517,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 97,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 106.90000000223517,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 123.60000000149012,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 140.30000000074506,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      },
+      {
+        "time": 156.90000000223517,
+        "mode": "light",
+        "background": "rgb(255, 255, 255)"
+      }
+    ],
+    "paints": [
+      {
+        "time": 72,
+        "name": "first-paint",
+        "mode": "light"
+      },
+      {
+        "time": 72,
+        "name": "first-contentful-paint",
+        "mode": "light"
+      }
+    ]
+  },
+  {
+    "storedOppositeSystem": "dark",
+    "mutations": [
+      {
+        "time": 36.099999997764826,
+        "mode": "dark"
+      }
+    ],
+    "frames": [
+      {
+        "time": 63.5,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 90.80000000074506,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 94.80000000074506,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 116.09999999776483,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 120.30000000074506,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 136.59999999776483,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 154.59999999776483,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      },
+      {
+        "time": 170.09999999776483,
+        "mode": "dark",
+        "background": "rgb(23, 24, 28)"
+      }
+    ],
+    "paints": [
+      {
+        "time": 88,
+        "name": "first-paint",
+        "mode": "dark"
+      },
+      {
+        "time": 88,
+        "name": "first-contentful-paint",
+        "mode": "dark"
+      }
+    ]
+  },
+  {
+    "storage": "invalid",
+    "readingAndSessionSelection": true
+  },
+  {
+    "storage": "denied",
+    "readingAndSessionSelection": true
+  },
+  {
+    "noJavaScript": "Legible fixed dark palette; hidden preference control"
+  }
+]

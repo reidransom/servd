@@ -1,0 +1,10 @@
+{
+  "unquoted-title.md": "title must use a double-quoted value",
+  "empty-title.md": "title must not be empty",
+  "invalid-escape.md": "title contains invalid escape \\n",
+  "duplicate-title.md": "duplicate title metadata",
+  "duplicate-frame.md": "duplicate frame metadata",
+  "invalid-frame.md": "frame must be one of \"editor\", \"terminal\", or \"none\"",
+  "title-with-none.md": "frame=\"none\" cannot be combined with title",
+  "unterminated-title.md": "title has an unterminated double-quoted value"
+}

@@ -1,0 +1,96 @@
+{
+  "ticket": "13-code-frames",
+  "jigyll": {
+    "commit": "c61d80247759a2cec077ab001e03763691756328",
+    "release_target": "1.13.0",
+    "interface": "figure.highlight[data-code-frame=editor|terminal]",
+    "validation_fixtures": 8,
+    "all_validation_fixtures_failed_with_path_line_and_expected_diagnostic": true
+  },
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/guides/authoring-content/#code-blocks",
+    "captures": [
+      "reference-editor-390-light.png",
+      "reference-editor-800-light.png",
+      "reference-editor-1440-light.png",
+      "reference-editor-390-dark.png",
+      "reference-editor-800-dark.png",
+      "reference-editor-1440-dark.png",
+      "reference-terminal-390-light.png",
+      "reference-terminal-800-light.png",
+      "reference-terminal-1440-light.png",
+      "reference-terminal-390-dark.png",
+      "reference-terminal-800-dark.png",
+      "reference-terminal-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4326/code/",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-editor-390-light.png",
+      "implementation-editor-800-light.png",
+      "implementation-editor-1440-light.png",
+      "implementation-editor-390-dark.png",
+      "implementation-editor-800-dark.png",
+      "implementation-editor-1440-dark.png",
+      "implementation-terminal-390-light.png",
+      "implementation-terminal-800-light.png",
+      "implementation-terminal-1440-light.png",
+      "implementation-terminal-390-dark.png",
+      "implementation-terminal-800-dark.png",
+      "implementation-terminal-1440-dark.png",
+      "implementation-focus-390-light.png",
+      "implementation-focus-390-dark.png",
+      "implementation-wide-scrolled-light.png",
+      "implementation-wide-scrolled-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation": {
+      "frame_radius": "1px",
+      "editor_title_padding": "5px 16px",
+      "title_font_size": "14.4px",
+      "title_line_height": "23.76px",
+      "light_title_color": "rgb(53, 56, 65)",
+      "light_editor_title_background": "rgb(246, 247, 249)",
+      "dark_title_color": "rgb(193, 195, 200)",
+      "dark_editor_title_background": "rgb(35, 38, 47)",
+      "terminal_header_height": "32.75px",
+      "code_bottom_radius": "0px 0px 1px 1px"
+    }
+  },
+  "behavior": {
+    "semantic_frames": 6,
+    "frame_types": ["editor", "editor", "terminal", "terminal", "editor", "editor"],
+    "titled_and_untitled": true,
+    "language_inference": true,
+    "explicit_frame_precedence": true,
+    "escaped_long_title": true,
+    "frame_none_unframed": true,
+    "unknown_metadata_unframed": true,
+    "titles_outside_copied_code": true,
+    "chroma_tokens_preserved": true,
+    "language_classes_preserved": true,
+    "trailing_newline_preserved": true,
+    "canonical_frame_not_rewrapped": true,
+    "code_copy_keyboard_sequence": ["code", "copy"],
+    "copy_success_exact_source": true,
+    "copy_success_feedback": "Copied!",
+    "copy_failure_feedback": "Copy failed",
+    "focused_controls_visible": true,
+    "wide_code_scrolls_locally": true,
+    "page_wide_overflow": false,
+    "root_and_prefix_builds": true,
+    "minimum_jigyll": "1.13.0"
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

@@ -1,0 +1,66 @@
+title: Starlyt
+lang: en
+theme: starlyt
+url: ""
+baseurl: ""
+navigation:
+  - label: Overview
+    link: /
+  - label: Guides
+    items:
+      - label: Getting started
+        link: /getting-started/
+      - label: Navigation
+        link: /navigation/
+      - label: Localization
+        link: /localization/
+      - label: Page layouts and heroes
+        link: /pages/
+      - label: Cards and grids
+        link: /cards/
+      - label: Tabs
+        link: /tabs/
+        aria_label: Tabs, stable
+        badge:
+          text: Stable
+          variant: note
+          size: small
+      - label: Badges
+        link: /badges/
+        badge:
+          text: New!
+          variant: success
+          size: large
+      - label: Steps
+        link: /steps/
+      - label: File trees
+        link: /file-trees/
+      - label: Icons
+        link: /icons/
+      - label: Callouts
+        link: /callouts/
+      - label: Link buttons
+        link: /link-buttons/
+      - label: Headings and table of contents
+        link: /headings/
+      - label: Reference
+        items:
+          - label: Markdown
+            link: /markdown/
+          - label: Code blocks
+            link: /code/
+          - label: Color modes and fallback behavior
+            link: /color-modes/
+      - label: Deployment
+        link: /deployment/
+  - label: Maintainers
+    items:
+      - label: Theme internals
+        link: /internals/
+      - label: Manual inspection of navigation, headings, and code
+        link: /inspection/
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

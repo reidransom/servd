@@ -1,0 +1,55 @@
+{
+  "ticket": "05-cards-grids",
+  "reference": {
+    "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "page": "/components/card-grids/",
+    "screenshots": "reference-card-grid-{390,800,1440}-{light,dark}.png"
+  },
+  "consumer": {
+    "page": "/cards/",
+    "matrix": "cards-{390,799,800,1024,1151,1152,1440}-{light,dark}.png",
+    "states": [
+      "link-card-hover-{390,1440}-{light,dark}.png",
+      "link-card-focus-{390,1440}-{light,dark}.png",
+      "link-card-focus-context-390-{light,dark}.png",
+      "card-icon-{390,1440}-{light,dark}.png"
+    ]
+  },
+  "environment": {
+    "playwrightMcp": "0.0.80",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "platform": "Linux"
+  },
+  "checks": {
+    "standardAndStaggeredGrids": true,
+    "referenceGridGeometry": {
+      "widths": [390, 800, 1440],
+      "matchingProperties": ["column-count", "gap", "card-padding", "card-gap"],
+      "mismatches": 0
+    },
+    "phoneTransitionDesktopModes": true,
+    "pageWideOverflow": false,
+    "wideCodeScrollsLocally": true,
+    "richMarkdownBodies": true,
+    "escapedTitlesAndDescriptions": true,
+    "invalidInputsFallbackOrOmit": true,
+    "oneAnchorPerLinkCard": true,
+    "rootAndPrefixDestinations": true,
+    "keyboardFocusOutline": true,
+    "ordinaryCardsAddNoTabStop": true
+  },
+  "iconIntegration": {
+    "url": "http://127.0.0.1:4323/cards/",
+    "validCardIcon": "rocket",
+    "unknownCardIconSvgCount": 0,
+    "decorativeIconAccessibilityTree": false,
+    "screenshots": "card-icon-{390,1440}-{light,dark}.png"
+  },
+  "acceptedDifferences": [
+    "Jigyll cards use captured Markdown and Liquid includes rather than Astro slots.",
+    "LinkCard is one wrapping anchor instead of a child anchor with a stretched pseudo-element; observable navigation semantics remain one target.",
+    "Consumer copy and container widths differ from the frozen reference fixture.",
+    "No browser claim is made beyond the pinned Chromium/Linux evidence."
+  ]
+}

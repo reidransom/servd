@@ -1,0 +1,150 @@
+@use 'reset';
+@use 'props';
+@use 'navigation';
+@use 'toc';
+@use 'markdown';
+@use 'anchor-links';
+@use 'code';
+@use 'color-mode';
+@use 'global-controls';
+@use 'search';
+@use 'hero';
+@use 'components';
+@use 'print';
+
+/*! Shell geometry adapted from stock Starlight 39d4e71; MIT, Astro contributors.
+ * See assets/starlight-LICENSE. Consumers use the compiled assets/starlyt.css. */
+@layer starlight.reset, starlight.base, starlyt;
+@layer starlyt {
+  [hidden] {
+    display: none !important;
+  }
+  :root {
+    --sl-content-inline-start: 0rem;
+  }
+  html {
+    scroll-padding-top: calc(1.5rem + var(--sl-nav-height) + var(--sl-mobile-toc-height));
+  }
+  html:not([data-has-toc]) {
+    --sl-mobile-toc-height: 0rem;
+  }
+  a {
+    color: var(--sl-color-text-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 2px;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    inset-inline-start: 0.75rem;
+    clip: rect(0, 0, 0, 0);
+  }
+  .skip-link:focus {
+    clip: unset;
+    z-index: 20;
+    display: block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: var(--sl-color-text-invert);
+    background: var(--sl-color-text-accent);
+    box-shadow: var(--sl-shadow-lg);
+  }
+  .site-header {
+    position: fixed;
+    z-index: 10;
+    inset: 0 0 auto;
+    height: var(--sl-nav-height);
+    padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+    padding-inline-end: calc(var(--sl-nav-pad-x) + var(--menu-space, 0rem));
+    border-bottom: 1px solid var(--sl-color-hairline-shade);
+    background: var(--sl-color-bg-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .site-title {
+    min-width: 0;
+    font-size: var(--sl-text-h4);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .page-frame {
+    padding-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height));
+    padding-inline-start: var(--sl-content-inline-start);
+    min-height: 100vh;
+  }
+  .main-pane {
+    min-width: 0;
+    padding: var(--sl-main-pad);
+  }
+  .content-panel {
+    padding: 1.5rem var(--sl-content-pad-x);
+  }
+  .content-panel + .content-panel {
+    border-top: 1px solid var(--sl-color-hairline);
+  }
+  .content-panel:last-child {
+    padding-bottom: 7.5rem;
+  }
+  .content-container {
+    max-width: var(--sl-content-width);
+  }
+  h1 {
+    margin-top: 1rem;
+    font-size: var(--sl-text-h1);
+    line-height: var(--sl-line-height-headings);
+    font-weight: 600;
+    color: var(--sl-color-white);
+  }
+  #toc-slot:empty {
+    display: none;
+  }
+  @media (min-width: 50rem) {
+    :root {
+      --sl-content-inline-start: var(--sl-sidebar-width);
+    }
+  }
+  @media (min-width: 72rem) {
+    .page-frame {
+      display: flex;
+    }
+    .main-pane {
+      width: 100%;
+    }
+    [data-has-toc] .main-pane {
+      width: min(
+        calc(100% - var(--sl-sidebar-width)),
+        calc(
+          var(--sl-content-width) + (100% - var(--sl-content-width) - var(--sl-sidebar-width)) / 2
+        )
+      );
+    }
+    .content-container {
+      margin-inline: auto;
+    }
+    [data-has-toc] .content-container {
+      margin-inline: auto 0;
+    }
+    #toc-slot {
+      order: 2;
+      flex: 1;
+      min-width: var(--sl-sidebar-width);
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "empty-lines.md": "line marker selector must not be empty",
+  "zero-line.md": "marker lines must be positive",
+  "reversed-range.md": "marker line range 2-1 is reversed",
+  "out-of-range.md": "marker line 2 is out of range (code has 1 line)",
+  "malformed-range.md": "invalid line marker selector \"1-\"",
+  "empty-text.md": "text marker selector must not be empty",
+  "empty-typed-text.md": "text marker selector must not be empty",
+  "missing-text.md": "marker text \"absent\" was not found",
+  "whole-overlap.md": "inserted and deleted markers overlap on line 1",
+  "line-text-overlap.md": "inserted and deleted markers overlap on line 1",
+  "text-overlap.md": "inserted and deleted markers overlap on line 1",
+  "invalid-escape.md": "ins contains invalid escape \\n",
+  "unterminated-text.md": "del has an unterminated double-quoted value",
+  "unquoted-text.md": "ins must use a line selector or double-quoted text"
+}

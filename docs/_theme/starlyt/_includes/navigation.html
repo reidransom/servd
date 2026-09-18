@@ -1,0 +1,21 @@
+<ul>
+  {% for entry in include.items %}
+  {% comment %}Two target arguments deliberately use Jigyll's filter error seam so conflicting label fields cannot render under either missing-message policy.{% endcomment %}
+  {% if page.language and entry.label and entry.label_key %}{% assign navigation_label_conflict = '/' | localized_url: page.language.key, page.language.key %}{% endif %}
+  {% assign navigation_label = entry.label | strip %}
+  {% if entry.label_key %}{% assign navigation_label = entry.label_key | translate %}{% endif %}
+  <li>
+    {% if entry.items %}
+      <details open>
+        <summary><span>{{ navigation_label | escape }}</span><svg class="caret" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary>
+        {% include navigation.html items=entry.items %}
+      </details>
+    {% else %}
+      {% assign navigation_route = entry.link %}{% if page.language %}{% assign navigation_route = entry.link | localized_url %}{% endif %}{% assign navigation_href = navigation_route | relative_url %}
+      {% assign navigation_aria_label = entry.aria_label | strip %}
+      {% assign navigation_badge_hidden = false %}{% if navigation_aria_label != '' %}{% assign navigation_badge_hidden = true %}{% endif %}
+      <a href="{{ navigation_href | escape }}"{% if page.url == navigation_route %} aria-current="page"{% endif %}>{% if navigation_aria_label != '' %}<span class="sr-only">{{ entry.aria_label | escape }}</span><span aria-hidden="true">{{ navigation_label | escape }}</span>{% else %}<span>{{ navigation_label | escape }}</span>{% endif %}{% if entry.badge %}{% include components/badge.html text=entry.badge.text variant=entry.badge.variant size=entry.badge.size aria_hidden=navigation_badge_hidden %}{% endif %}</a>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>

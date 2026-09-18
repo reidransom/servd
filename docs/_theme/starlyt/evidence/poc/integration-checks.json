@@ -1,0 +1,62 @@
+[
+  {
+    "origin": "http://127.0.0.1:4322",
+    "mode": "light",
+    "fixtureLinksAndAssets": true,
+    "headingIDs": true,
+    "skipLink": true,
+    "menuFocusEscape": true,
+    "tocFocusOutsideEscape": true,
+    "directFragments": true,
+    "breakpointTransitions": true,
+    "destinationNavigation": true,
+    "groupPersistence": true,
+    "firstLastActive": true,
+    "pageErrors": []
+  },
+  {
+    "origin": "http://127.0.0.1:4322",
+    "mode": "dark",
+    "fixtureLinksAndAssets": true,
+    "headingIDs": true,
+    "skipLink": true,
+    "menuFocusEscape": true,
+    "tocFocusOutsideEscape": true,
+    "directFragments": true,
+    "breakpointTransitions": true,
+    "destinationNavigation": true,
+    "groupPersistence": true,
+    "firstLastActive": true,
+    "pageErrors": []
+  },
+  {
+    "origin": "http://127.0.0.1:4323/docs",
+    "mode": "light",
+    "fixtureLinksAndAssets": true,
+    "headingIDs": true,
+    "skipLink": true,
+    "menuFocusEscape": true,
+    "tocFocusOutsideEscape": true,
+    "directFragments": true,
+    "breakpointTransitions": true,
+    "destinationNavigation": true,
+    "groupPersistence": true,
+    "firstLastActive": true,
+    "pageErrors": []
+  },
+  {
+    "origin": "http://127.0.0.1:4323/docs",
+    "mode": "dark",
+    "fixtureLinksAndAssets": true,
+    "headingIDs": true,
+    "skipLink": true,
+    "menuFocusEscape": true,
+    "tocFocusOutsideEscape": true,
+    "directFragments": true,
+    "breakpointTransitions": true,
+    "destinationNavigation": true,
+    "groupPersistence": true,
+    "firstLastActive": true,
+    "pageErrors": []
+  }
+]

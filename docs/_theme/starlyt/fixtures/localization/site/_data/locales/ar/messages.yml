@@ -1,0 +1,42 @@
+starlyt:
+  skip_to_content: "انتقل إلى المحتوى"
+  menu: "القائمة"
+  table_of_contents: "جدول المحتويات"
+  on_this_page: "في هذه الصفحة"
+  overview: "نظرة عامة"
+  search:
+    label: "بحث"
+    dialog_label: "البحث في الوثائق"
+    cancel: "إلغاء"
+    input_label: "البحث في الوثائق"
+    placeholder: "ابحث في هذه الوثائق التفصيلية الطويلة للغاية"
+    retry: "إعادة المحاولة"
+    empty: "أدخل كلمات للبحث في هذه الوثائق."
+    loading: "جارٍ تحميل البحث…"
+    error: "تعذر تحميل البحث. تحقق من الاتصال وأعد المحاولة."
+    no_results: "لم يتم العثور على نتائج. جرّب عبارة أخرى."
+    one_result: "نتيجة واحدة ({count})"
+    results: "{count} نتائج"
+  color_mode:
+    label: "اختر السمة"
+    dark: "داكن"
+    light: "فاتح"
+    auto: "تلقائي"
+  copy:
+    label: "نسخ إلى الحافظة"
+    success: "تم النسخ!"
+    failure: "فشل النسخ"
+  language: "اللغة"
+  callout:
+    note: "ملاحظة"
+    tip: "نصيحة"
+    caution: "تنبيه"
+    danger: "خطر"
+  anchor_label: "قسم بعنوان «{title}»"
+  not_found:
+    title: "الصفحة غير موجودة"
+    back_home: "العودة إلى البداية"
+nav:
+  guides: "أدلة ومراجع تفصيلية طويلة للغاية"
+  home: "البداية"
+  guide: "الدليل"

@@ -1,0 +1,7 @@
+{% assign tab_label = include.label | strip %}
+{% if tab_label != '' %}
+<section class="tab-item">
+  <h3 class="tab-item-label">{% if include.icon %}{% include components/icon.html name=include.icon %}{% endif %}<span class="tab-label-text">{{ include.label | escape }}</span></h3>
+  <div class="tab-panel sl-markdown-content">{% if include.content %}{{ include.content | markdownify }}{% endif %}</div>
+</section>
+{% endif %}

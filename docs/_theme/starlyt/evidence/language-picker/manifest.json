@@ -1,0 +1,57 @@
+{
+  "ticket": 20,
+  "reference": {
+    "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/getting-started/",
+    "captures": [
+      "reference-390.png",
+      "reference-800.png",
+      "reference-1440.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4330/fr/demarrage/",
+    "captures": [
+      "starlyt-390.png",
+      "starlyt-800.png",
+      "starlyt-1440.png"
+    ]
+  },
+  "browser": {
+    "engine": "Chromium 153.0.8010.12",
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+  },
+  "verified": {
+    "reference_control_boxes": {
+      "390": "128x48",
+      "800": "114x44.5",
+      "1440": "114x44.5"
+    },
+    "implementation_control_boxes": {
+      "390": "128x48",
+      "800": "114x44.5",
+      "1440": "114x44.5"
+    },
+    "responsive_placement": {
+      "390": "site-nav",
+      "800": "site-header",
+      "1440": "site-header"
+    },
+    "localized_assistive_label": "Langue: Français — documentation détaillée",
+    "keyboard_focus_outline": "2px solid",
+    "keyboard_link_order": ["English", "العربية — وثائق تفصيلية طويلة"],
+    "edition_links": ["/guide/", "/ar/dalil/"],
+    "query_and_fragment_dropped": true,
+    "back_forward_current_state": ["Arabic", "French", "Arabic"],
+    "optional_edition_links": ["/fr/facultatif/"],
+    "single_edition_control_absent": true,
+    "javascript_disabled_navigation": "/guide/",
+    "horizontal_overflow_at_all_widths": false
+  },
+  "commands": [
+    "sass --no-source-map _sass/starlyt.scss assets/starlyt.css",
+    "node --check assets/language-picker.js",
+    "python tools/localization/check.py --jigyll /tmp/jigyll-code-annotations",
+    "git diff --check"
+  ]
+}

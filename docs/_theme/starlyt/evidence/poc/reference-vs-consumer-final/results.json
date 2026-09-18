@@ -1,0 +1,366 @@
+{
+  "threshold": 0.1,
+  "maxDifferencePercent": 0.1,
+  "results": [
+    {
+      "name": "overview-390x844-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.01708150317227916,
+      "shellProseDifferencePercent": 0.01708150317227916,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "overview-1024x768-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.004714932333577176,
+      "shellProseDifferencePercent": 0.004714932333577176,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "overview-1440x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0034643487024439406,
+      "shellProseDifferencePercent": 0.0034643487024439406,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-390x844-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.010522899263738705,
+      "shellProseDifferencePercent": 0.010522899263738705,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1024x768-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.005272602236279401,
+      "shellProseDifferencePercent": 0.005272602236279401,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0035654531527173038,
+      "shellProseDifferencePercent": 0.0035654531527173038,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "code-examples-390x844-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.2077319295862342,
+      "shellProseDifferencePercent": 0.027172290235891315,
+      "codeDifferencePercent": 0.5176567064732714,
+      "pass": true
+    },
+    {
+      "name": "code-examples-1024x768-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.08816092973740242,
+      "shellProseDifferencePercent": 0.006189232985235866,
+      "codeDifferencePercent": 0.3203629717783067,
+      "pass": true
+    },
+    {
+      "name": "code-examples-1440x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.06471306471306472,
+      "shellProseDifferencePercent": 0.004193351631594998,
+      "codeDifferencePercent": 0.3079044117647059,
+      "pass": true
+    },
+    {
+      "name": "long-guide-799x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.007367772406639798,
+      "shellProseDifferencePercent": 0.007367772406639798,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-800x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0056462432915921285,
+      "shellProseDifferencePercent": 0.0056462432915921285,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1151x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.004422179024807955,
+      "shellProseDifferencePercent": 0.004422179024807955,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1152x900-light-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0043512588727247165,
+      "shellProseDifferencePercent": 0.0043512588727247165,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-390x844-light-menu",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.011684518013631937,
+      "shellProseDifferencePercent": 0.011684518013631937,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-390x844-light-toc",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.011001212866635917,
+      "shellProseDifferencePercent": 0.011001212866635917,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-light-collapsed",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0034016690856313496,
+      "shellProseDifferencePercent": 0.0034016690856313496,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-light-expanded",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0035654531527173038,
+      "shellProseDifferencePercent": 0.0035654531527173038,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-light-scrolled",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0035654531527173038,
+      "shellProseDifferencePercent": 0.0035654531527173038,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-light-focus",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.019754878245444283,
+      "shellProseDifferencePercent": 0.019754878245444283,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "code-examples-1440x900-light-copy",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.06522181522181522,
+      "shellProseDifferencePercent": 0.004193351631594998,
+      "codeDifferencePercent": 0.3104575163398693,
+      "pass": true
+    },
+    {
+      "name": "overview-390x844-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.01708150317227916,
+      "shellProseDifferencePercent": 0.01708150317227916,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "overview-1024x768-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.00414342538405267,
+      "shellProseDifferencePercent": 0.00414342538405267,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "overview-1440x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0030444276476022506,
+      "shellProseDifferencePercent": 0.0030444276476022506,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-390x844-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.010317907719639897,
+      "shellProseDifferencePercent": 0.010317907719639897,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1024x768-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.004924575686029936,
+      "shellProseDifferencePercent": 0.004924575686029936,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0033890703112401223,
+      "shellProseDifferencePercent": 0.0033890703112401223,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "code-examples-390x844-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.21659968679836228,
+      "shellProseDifferencePercent": 0.027172290235891315,
+      "codeDifferencePercent": 0.5417456819230178,
+      "pass": true
+    },
+    {
+      "name": "code-examples-1024x768-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0905867414833215,
+      "shellProseDifferencePercent": 0.005439022926419398,
+      "codeDifferencePercent": 0.3317855321319279,
+      "pass": true
+    },
+    {
+      "name": "code-examples-1440x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0664936914936915,
+      "shellProseDifferencePercent": 0.003685066585341059,
+      "codeDifferencePercent": 0.3188827614379085,
+      "pass": true
+    },
+    {
+      "name": "long-guide-799x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.007224244372744218,
+      "shellProseDifferencePercent": 0.007224244372744218,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-800x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.00527355396541443,
+      "shellProseDifferencePercent": 0.00527355396541443,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1151x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.004203413984711449,
+      "shellProseDifferencePercent": 0.004203413984711449,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1152x900-dark-top",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.004063005130367559,
+      "shellProseDifferencePercent": 0.004063005130367559,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-390x844-dark-menu",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.011206204410734723,
+      "shellProseDifferencePercent": 0.011206204410734723,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-390x844-dark-toc",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.010796221322537112,
+      "shellProseDifferencePercent": 0.010796221322537112,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-dark-collapsed",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.003237885018545396,
+      "shellProseDifferencePercent": 0.003237885018545396,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-dark-expanded",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0033890703112401223,
+      "shellProseDifferencePercent": 0.0033890703112401223,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-dark-scrolled",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.0033890703112401223,
+      "shellProseDifferencePercent": 0.0033890703112401223,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "long-guide-1440x900-dark-focus",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.021039953233349458,
+      "shellProseDifferencePercent": 0.021039953233349458,
+      "codeDifferencePercent": null,
+      "pass": true
+    },
+    {
+      "name": "code-examples-1440x900-dark-copy",
+      "geometryMatches": true,
+      "codeGeometryMatches": true,
+      "wholeDifferencePercent": 0.06690069190069191,
+      "shellProseDifferencePercent": 0.003685066585341059,
+      "codeDifferencePercent": 0.3209252450980392,
+      "pass": true
+    }
+  ]
+}

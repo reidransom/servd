@@ -1,0 +1,32 @@
+title: Localized Starlyt
+url: https://example.test
+baseurl: ""
+theme: starlyt
+navigation:
+  - label_key: nav.guides
+    items:
+      - label_key: nav.home
+        link: /
+      - label_key: nav.guide
+        link: /guide/
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+localization:
+  default_language: en
+  locales:
+    en:
+      tag: en
+      label: English
+      weight: 1
+    fr:
+      tag: fr
+      label: Français — documentation détaillée
+      weight: 2
+    ar:
+      tag: ar
+      label: العربية — وثائق تفصيلية طويلة
+      direction: rtl
+      weight: 3

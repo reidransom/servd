@@ -1,0 +1,7 @@
+{
+  "tools/poc/fixtures.json": "8dd1aa3d80ca44f99d6fa925537aa6972590f8c49049e6c62150cf05abce54aa",
+  "fixtures/content/index.md": "939f5c187bb53a4660388ee1eff0641a99c95aa3fa4e109355a5b2fae8aad553",
+  "fixtures/content/guides/long-guide.md": "dbf3095ecfca88e83d01a578e435525d597fff7117428ae873b81729465dd614",
+  "fixtures/content/reference/code-examples.md": "ef1778c862db668c915faa2ae7845648a5d7b64c10091598bee3e1faf487a7cc",
+  "fixtures/fixture.svg": "e5f31ca2678b3138ba2e002b11b15bb7bc65d58ea504adc2d6a933f815309f6b"
+}

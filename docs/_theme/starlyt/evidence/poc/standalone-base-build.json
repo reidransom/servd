@@ -1,0 +1,13 @@
+{
+  "themeRevision": "aabf80a91436ff539a912e674ad282dc3d7839f8",
+  "themeTree": "5028efae6b6f87f066d40787b97b982e11b516e7",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "/docs",
+  "source": "/home/reid/src/starlyt/.poc/standalone-base",
+  "consumerPath": "/home/reid/src/starlyt/.poc/runtime-bin",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/standalone-base --theme /home/reid/src/starlyt/.poc/theme-standalone-base",
+    "jigyll build --source /home/reid/src/starlyt/.poc/standalone-base",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/standalone-base"
+  ]
+}

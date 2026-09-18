@@ -1,0 +1,39 @@
+{% assign callout_type = include.type | default: 'note' | strip %}
+{% unless callout_type == 'note' or callout_type == 'tip' or callout_type == 'caution' or callout_type == 'danger' %}
+  {% assign callout_type = 'note' %}
+{% endunless %}
+{% case callout_type %}
+  {% when 'tip' %}
+    {% capture callout_title_default %}{% include private/ui-message.html key='starlyt.callout.tip' default='Tip' %}{% endcapture %}
+    {% assign callout_icon_default = 'rocket' %}
+  {% when 'caution' %}
+    {% capture callout_title_default %}{% include private/ui-message.html key='starlyt.callout.caution' default='Caution' %}{% endcapture %}
+    {% assign callout_icon_default = 'warning' %}
+  {% when 'danger' %}
+    {% capture callout_title_default %}{% include private/ui-message.html key='starlyt.callout.danger' default='Danger' %}{% endcapture %}
+    {% assign callout_icon_default = 'error' %}
+  {% else %}
+    {% capture callout_title_default %}{% include private/ui-message.html key='starlyt.callout.note' default='Note' %}{% endcapture %}
+    {% assign callout_icon_default = 'information' %}
+{% endcase %}
+{% assign callout_title = include.title | default: callout_title_default | strip %}
+{% if callout_title == '' %}
+  {% assign callout_title = callout_title_default %}
+{% endif %}
+{% assign callout_icon = callout_icon_default %}
+{% if include.icon %}
+  {% capture callout_custom_icon_path %}{% include private/icon-path.html name=include.icon %}{% endcapture %}
+  {% assign callout_custom_icon_path = callout_custom_icon_path | strip %}
+  {% if callout_custom_icon_path != '' %}
+    {% assign callout_icon = include.icon %}
+  {% endif %}
+{% endif %}
+{% assign callout_content = include.content | strip %}
+{% if callout_content != '' %}
+  {% assign starlyt_callout_index = starlyt_callout_index | default: 0 | plus: 1 %}
+  {% assign callout_title_id = 'starlyt-callout-title-' | append: starlyt_callout_index %}
+<aside class="starlight-aside starlight-aside--{{ callout_type }}" aria-labelledby="{{ callout_title_id }}">
+  <p class="starlight-aside__title" id="{{ callout_title_id }}" aria-hidden="true">{% include components/icon.html name=callout_icon size="large" %}<span>{{ callout_title | escape }}</span></p>
+  <div class="starlight-aside__content">{{ include.content | markdownify }}</div>
+</aside>
+{% endif %}

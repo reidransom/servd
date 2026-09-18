@@ -1,0 +1,12 @@
+{
+  "themeRevision": "f80c1903b34613a36df72eab26834693899badbf",
+  "themeTree": "5677a6d180c5cd475db629aab75e4d3b17121127",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "",
+  "source": "/home/reid/src/starlyt/.poc/integrated-geometry",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/integrated-geometry --theme /home/reid/src/starlyt/.poc/theme-integrated-geometry",
+    "jigyll build --source /home/reid/src/starlyt/.poc/integrated-geometry",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/integrated-geometry"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "starlyt-browser-acceptance",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build-fixture": "node prepare.mjs",
+    "test": "npm run build-fixture && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

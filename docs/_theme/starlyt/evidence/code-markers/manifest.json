@@ -1,0 +1,99 @@
+{
+  "ticket": "14-code-markers",
+  "jigyll": {
+    "feature_commit": "6c1bb85d75cf0d46cd67d6f02895018270f72fdd",
+    "accessibility_fix_commit": "5fb73b48ecd98373e82e472f01a02e826c203187",
+    "release_target": "1.13.0",
+    "validation_fixtures": 14,
+    "all_validation_fixtures_failed_with_path_line_and_expected_diagnostic": true
+  },
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/guides/authoring-content/#code-blocks",
+    "captures": [
+      "reference-lines-390-light.png",
+      "reference-lines-800-light.png",
+      "reference-lines-1440-light.png",
+      "reference-lines-390-dark.png",
+      "reference-lines-800-dark.png",
+      "reference-lines-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4327/code/",
+    "viewports": [390, 800, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "implementation-lines-390-light.png",
+      "implementation-lines-800-light.png",
+      "implementation-lines-1440-light.png",
+      "implementation-lines-390-dark.png",
+      "implementation-lines-800-dark.png",
+      "implementation-lines-1440-dark.png",
+      "implementation-inline-390-light.png",
+      "implementation-inline-800-light.png",
+      "implementation-inline-1440-light.png",
+      "implementation-inline-390-dark.png",
+      "implementation-inline-800-dark.png",
+      "implementation-inline-1440-dark.png",
+      "implementation-wide-scrolled-390-light.png",
+      "implementation-wide-scrolled-390-dark.png"
+    ]
+  },
+  "reference_geometry": {
+    "line_height": "24.5px",
+    "light": {
+      "neutral": "rgba(0, 0, 0, 0.1)",
+      "inserted": "rgba(142, 199, 125, 0.6)",
+      "deleted": "rgba(255, 156, 142, 0.6)"
+    },
+    "dark": {
+      "neutral": "rgba(255, 255, 255, 0.09)",
+      "inserted": "rgba(30, 87, 21, 0.6)",
+      "deleted": "rgba(134, 45, 39, 0.6)"
+    }
+  },
+  "implementation_geometry": {
+    "line_height": "24.5px",
+    "background_colors_match_reference": true,
+    "authored_text_inline_offset": "15.5px",
+    "page_wide_overflow": false,
+    "local_horizontal_scroll": true,
+    "non_color_treatment": {
+      "neutral": "solid inline-start border",
+      "inserted": "solid inline-start border and 135-degree hatch",
+      "deleted": "solid inline-start border and 45-degree hatch"
+    },
+    "marker_region_deviation_from_reference": "Borders and directional hatching are intentional additions required to distinguish marker meaning without color; Chroma token-classification differences are not attributed to marker styling."
+  },
+  "behavior": {
+    "whole_line_types": ["marked", "inserted", "deleted"],
+    "inline_text_types": ["marked", "inserted", "deleted"],
+    "blank_line_selected": true,
+    "adjacent_ranges_render_continuously": true,
+    "neutral_overlap_allowed_and_typed_marker_wins": true,
+    "repeated_exact_text_matches": true,
+    "punctuation_is_literal": true,
+    "escaped_text_matches": true,
+    "cross_token_match_preserves_chroma_classes": true,
+    "private_renderer_metadata_absent_from_output": true,
+    "accessible_description_once_per_region": true,
+    "dom_text_matches_authored_source": true,
+    "clipboard_matches_authored_source_including_terminal_newline": true,
+    "ordinary_selection_matches_authored_visible_lines": true,
+    "ordinary_selection_browser_omits_only_terminal_newline": true,
+    "decorative_characters_in_dom_text": false,
+    "keyboard_focus_and_enter_copy": true,
+    "visible_native_focus": true,
+    "copy_success_feedback": "Copied!",
+    "copy_failure_feedback": "Copy failed",
+    "root_and_prefix_builds": true
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-08-31",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

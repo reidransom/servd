@@ -1,0 +1,13 @@
+{% assign link_card_title = include.title | strip %}
+{% assign link_card_href = include.href | strip %}
+{% assign link_card_prefix = link_card_href | slice: 0, 1 %}
+{% assign link_card_http = link_card_href | slice: 0, 7 %}
+{% assign link_card_https = link_card_href | slice: 0, 8 %}
+{% assign link_card_mail = link_card_href | slice: 0, 7 %}
+{% assign link_card_tel = link_card_href | slice: 0, 4 %}
+{% assign link_card_valid = false %}
+{% if link_card_prefix == '/' or link_card_prefix == '#' or link_card_http == 'http://' or link_card_https == 'https://' or link_card_mail == 'mailto:' or link_card_tel == 'tel:' %}{% assign link_card_valid = true %}{% endif %}
+{% if link_card_title != '' and link_card_href != '' and link_card_valid %}
+  {% if link_card_prefix == '/' %}{% assign link_card_href = link_card_href | relative_url %}{% endif %}
+<a class="sl-link-card not-content" href="{{ link_card_href | escape }}"><span class="link-card-stack"><span class="link-card-title">{{ include.title | escape }}</span>{% if include.description %}{% assign link_card_description = include.description | strip %}{% if link_card_description != '' %}<span class="link-card-description">{{ include.description | escape }}</span>{% endif %}{% endif %}</span><svg class="link-card-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></a>
+{% endif %}

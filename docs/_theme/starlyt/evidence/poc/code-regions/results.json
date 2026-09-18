@@ -1,0 +1,194 @@
+[
+  {
+    "name": "code-examples-390x844-light-top-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.4751814037115521
+  },
+  {
+    "name": "code-examples-390x844-light-top-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.7728119180633147
+  },
+  {
+    "name": "code-examples-390x844-light-top-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.8156424581005586
+  },
+  {
+    "name": "code-examples-390x844-light-top-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.015642458100558657
+  },
+  {
+    "name": "code-examples-1024x768-light-top-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.24583084180453124
+  },
+  {
+    "name": "code-examples-1024x768-light-top-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.5925825348178609
+  },
+  {
+    "name": "code-examples-1024x768-light-top-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.4219653179190751
+  },
+  {
+    "name": "code-examples-1024x768-light-top-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.008092485549132947
+  },
+  {
+    "name": "code-examples-1440x900-light-top-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.23627075351213284
+  },
+  {
+    "name": "code-examples-1440x900-light-top-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.569537658463833
+  },
+  {
+    "name": "code-examples-1440x900-light-top-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.40555555555555556
+  },
+  {
+    "name": "code-examples-1440x900-light-top-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.007777777777777778
+  },
+  {
+    "name": "code-examples-1440x900-light-copy-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.2442528735632184
+  },
+  {
+    "name": "code-examples-1440x900-light-copy-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.569537658463833
+  },
+  {
+    "name": "code-examples-1440x900-light-copy-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.40555555555555556
+  },
+  {
+    "name": "code-examples-1440x900-light-copy-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.007777777777777778
+  },
+  {
+    "name": "code-examples-390x844-dark-top-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.44307455210942015
+  },
+  {
+    "name": "code-examples-390x844-dark-top-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.7597765363128492
+  },
+  {
+    "name": "code-examples-390x844-dark-top-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 1.0223463687150838
+  },
+  {
+    "name": "code-examples-390x844-dark-top-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.015642458100558657
+  },
+  {
+    "name": "code-examples-1024x768-dark-top-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.22922064979071158
+  },
+  {
+    "name": "code-examples-1024x768-dark-top-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.5819141094774412
+  },
+  {
+    "name": "code-examples-1024x768-dark-top-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.5289017341040463
+  },
+  {
+    "name": "code-examples-1024x768-dark-top-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.008092485549132947
+  },
+  {
+    "name": "code-examples-1440x900-dark-top-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.22030651340996169
+  },
+  {
+    "name": "code-examples-1440x900-dark-top-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.5592841163310962
+  },
+  {
+    "name": "code-examples-1440x900-dark-top-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.5083333333333333
+  },
+  {
+    "name": "code-examples-1440x900-dark-top-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.007777777777777778
+  },
+  {
+    "name": "code-examples-1440x900-dark-copy-1",
+    "language": "javascript",
+    "geometryMatches": true,
+    "differencePercent": 0.22669220945083016
+  },
+  {
+    "name": "code-examples-1440x900-dark-copy-2",
+    "language": "json",
+    "geometryMatches": true,
+    "differencePercent": 0.5592841163310962
+  },
+  {
+    "name": "code-examples-1440x900-dark-copy-3",
+    "language": "shell",
+    "geometryMatches": true,
+    "differencePercent": 0.5083333333333333
+  },
+  {
+    "name": "code-examples-1440x900-dark-copy-4",
+    "language": "plain text",
+    "geometryMatches": true,
+    "differencePercent": 0.007777777777777778
+  }
+]

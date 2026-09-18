@@ -1,0 +1,13 @@
+{
+  "themeRevision": "5c4c42d861e6f573e04e865d80abf72312212c29",
+  "themeTree": "16c2b1dfa41522a43dc46b1b03bc3aa9efaa0b48",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "",
+  "source": "/home/reid/src/starlyt/.poc/acceptance",
+  "consumerPath": "/home/reid/src/starlyt/.poc/runtime-bin",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/acceptance --theme /home/reid/src/starlyt/.poc/theme-acceptance",
+    "jigyll build --source /home/reid/src/starlyt/.poc/acceptance",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/acceptance"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "themeRevision": "725be48677c7e20b25397d5ee0f8629a7dc47bfa",
+  "themeTree": "0d7d7ef2f1edf187f61484e6a0cd197f6f40617e",
+  "jigyll": "jigyll version 1.10.1 (Build time: 2026-09-02T20:47)",
+  "baseurl": "",
+  "source": "/home/reid/src/starlyt/.poc/release",
+  "consumerPath": "/home/reid/src/starlyt/.poc/runtime-bin",
+  "commands": [
+    "jigyll new /home/reid/src/starlyt/.poc/release --theme /home/reid/src/starlyt/.poc/theme-release",
+    "jigyll build --source /home/reid/src/starlyt/.poc/release",
+    "jigyll serve --source /home/reid/src/starlyt/.poc/release"
+  ]
+}

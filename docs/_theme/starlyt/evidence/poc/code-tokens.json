@@ -1,0 +1,1840 @@
+[
+  {
+    "origin": "http://127.0.0.1:4321",
+    "mode": "light",
+    "blocks": [
+      {
+        "text": "// Preserve indentation and line breaks.const greeting = \"Hello, reader\";function greet(name) {  return `Hello, ${name}!`;}console.log(greet(\"Starlyt\"));",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#919F9F;--1:#5D6376\">// Preserve indentation and line breaks.</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#C792EA;--1:#8844AE\">const </span><span style=\"--0:#82AAFF;--1:#3B61B0\">greeting</span><span style=\"--0:#C792EA;--1:#8844AE\"> = </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#ECC48D;--1:#984E4D\">Hello, reader</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">;</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#C792EA;--1:#8844AE\">function</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#82AAFF;--1:#3B61B0\">greet</span><span style=\"--0:#D9F5DD;--1:#111111\">(</span><span style=\"--0:#D7DBE0;--1:#403F53\">name</span><span style=\"--0:#D9F5DD;--1:#111111\">)</span><span style=\"--0:#D6DEEB;--1:#403F53\"> {</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#C792EA;--1:#8844AE\">return</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#D6DEEB;--1:#403F53\">`</span><span style=\"--0:#ECC48D;--1:#3B61B0\">Hello, </span><span style=\"--0:#E2817F;--1:#B23834\">${</span><span style=\"--0:#D7DBE0;--1:#403F53\">name</span><span style=\"--0:#E2817F;--1:#B23834\">}</span><span style=\"--0:#ECC48D;--1:#3B61B0\">!</span><span style=\"--0:#D6DEEB;--1:#403F53\">`</span><span style=\"--0:#D6DEEB;--1:#403F53\">;</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#D6DEEB;--1:#403F53\">}</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#7FDBCA;--1:#096E72\">console</span><span style=\"--0:#C792EA;--1:#8844AE\">.</span><span style=\"--0:#82AAFF;--1:#3B61B0\">log</span><span style=\"--0:#D6DEEB;--1:#403F53\">(</span><span style=\"--0:#82AAFF;--1:#3B61B0\">greet</span><span style=\"--0:#D6DEEB;--1:#403F53\">(</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#ECC48D;--1:#984E4D\">Starlyt</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">));</span></div></div></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "// Preserve indentation and line breaks.",
+            "class": "",
+            "color": "rgb(93, 99, 118)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "const ",
+            "class": "",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greeting",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " = ",
+            "class": "",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Hello, reader",
+            "class": "",
+            "color": "rgb(152, 78, 77)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "function",
+            "class": "",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ")",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " {",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "return",
+            "class": "",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "`",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Hello, ",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "${",
+            "class": "",
+            "color": "rgb(178, 56, 52)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "",
+            "color": "rgb(178, 56, 52)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "!",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "`",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "console",
+            "class": "",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ".",
+            "class": "",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "log",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Starlyt",
+            "class": "",
+            "color": "rgb(152, 78, 77)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "));",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "{  \"title\": \"Starlyt Docs\",  \"enabled\": true,  \"navigation\": [\"Overview\", \"Long guide\", \"Code examples\"]}",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#D6DEEB;--1:#403F53\">{</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#7FDBCA;--1:#096E72\">\"title\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">: </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Starlyt Docs</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">,</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#7FDBCA;--1:#096E72\">\"enabled\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">: </span><span style=\"--0:#FF6A83;--1:#A24848\">true</span><span style=\"--0:#D6DEEB;--1:#403F53\">,</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#7FDBCA;--1:#096E72\">\"navigation\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">: [</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Overview</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">, </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Long guide</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">, </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Code examples</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">]</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#D6DEEB;--1:#403F53\">}</span></div></div></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "{",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"title\"",
+            "class": "",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ": ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Starlyt Docs",
+            "class": "",
+            "color": "rgb(124, 86, 134)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"enabled\"",
+            "class": "",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ": ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "true",
+            "class": "",
+            "color": "rgb(162, 72, 72)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"navigation\"",
+            "class": "",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ": [",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Overview",
+            "class": "",
+            "color": "rgb(124, 86, 134)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ", ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Long guide",
+            "class": "",
+            "color": "rgb(124, 86, 134)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ", ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Code examples",
+            "class": "",
+            "color": "rgb(124, 86, 134)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "]",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "# Build an ordinary consumer site.jigyll build --baseurl /docsprintf '%s\\n' \"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#919F9F;--1:#5F636F\"># Build an ordinary consumer site.</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#82AAFF;--1:#3B61B0\">jigyll</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#ECC48D;--1:#3B61B0\">build</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#82AAFF;--1:#3B61B0\">--baseurl</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#ECC48D;--1:#3B61B0\">/docs</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#C5E478;--1:#3B61B0\">printf</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#D9F5DD;--1:#111111\">'</span><span style=\"--0:#ECC48D;--1:#984E4D\">%s\\n</span><span style=\"--0:#D9F5DD;--1:#111111\">'</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#ECC48D;--1:#984E4D\">A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span></div></div></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "# Build an ordinary consumer site.",
+            "class": "",
+            "color": "rgb(95, 99, 111)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "jigyll",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "build",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "--baseurl",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "/docs",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "printf",
+            "class": "",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "'",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "%s\\n",
+            "class": "",
+            "color": "rgb(152, 78, 77)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "'",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.",
+            "class": "",
+            "color": "rgb(152, 78, 77)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(17, 17, 17)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "<article data-example=\"literal\">  & This is text, not executable markup.    indentation stays intact</article>",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#d6deeb;--1:#403f53\">&lt;article data-example=\"literal\"&gt;</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\"><span style=\"--0:#d6deeb;--1:#403f53\">  </span></span><span style=\"--0:#d6deeb;--1:#403f53\">&amp; This is text, not executable markup.</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\"><span style=\"--0:#d6deeb;--1:#403f53\">    </span></span><span style=\"--0:#d6deeb;--1:#403f53\">indentation stays intact</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#d6deeb;--1:#403f53\">&lt;/article&gt;</span></div></div></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "<article data-example=\"literal\">",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "& This is text, not executable markup.",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "    ",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "indentation stays intact",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "</article>",
+            "class": "",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "origin": "http://127.0.0.1:4321",
+    "mode": "dark",
+    "blocks": [
+      {
+        "text": "// Preserve indentation and line breaks.const greeting = \"Hello, reader\";function greet(name) {  return `Hello, ${name}!`;}console.log(greet(\"Starlyt\"));",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#919F9F;--1:#5D6376\">// Preserve indentation and line breaks.</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#C792EA;--1:#8844AE\">const </span><span style=\"--0:#82AAFF;--1:#3B61B0\">greeting</span><span style=\"--0:#C792EA;--1:#8844AE\"> = </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#ECC48D;--1:#984E4D\">Hello, reader</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">;</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#C792EA;--1:#8844AE\">function</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#82AAFF;--1:#3B61B0\">greet</span><span style=\"--0:#D9F5DD;--1:#111111\">(</span><span style=\"--0:#D7DBE0;--1:#403F53\">name</span><span style=\"--0:#D9F5DD;--1:#111111\">)</span><span style=\"--0:#D6DEEB;--1:#403F53\"> {</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#C792EA;--1:#8844AE\">return</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#D6DEEB;--1:#403F53\">`</span><span style=\"--0:#ECC48D;--1:#3B61B0\">Hello, </span><span style=\"--0:#E2817F;--1:#B23834\">${</span><span style=\"--0:#D7DBE0;--1:#403F53\">name</span><span style=\"--0:#E2817F;--1:#B23834\">}</span><span style=\"--0:#ECC48D;--1:#3B61B0\">!</span><span style=\"--0:#D6DEEB;--1:#403F53\">`</span><span style=\"--0:#D6DEEB;--1:#403F53\">;</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#D6DEEB;--1:#403F53\">}</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#7FDBCA;--1:#096E72\">console</span><span style=\"--0:#C792EA;--1:#8844AE\">.</span><span style=\"--0:#82AAFF;--1:#3B61B0\">log</span><span style=\"--0:#D6DEEB;--1:#403F53\">(</span><span style=\"--0:#82AAFF;--1:#3B61B0\">greet</span><span style=\"--0:#D6DEEB;--1:#403F53\">(</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#ECC48D;--1:#984E4D\">Starlyt</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">));</span></div></div></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "// Preserve indentation and line breaks.",
+            "class": "",
+            "color": "rgb(145, 159, 159)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "const ",
+            "class": "",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greeting",
+            "class": "",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " = ",
+            "class": "",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Hello, reader",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "function",
+            "class": "",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "",
+            "color": "rgb(215, 219, 224)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ")",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " {",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "return",
+            "class": "",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "`",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Hello, ",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "${",
+            "class": "",
+            "color": "rgb(226, 129, 127)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "",
+            "color": "rgb(215, 219, 224)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "",
+            "color": "rgb(226, 129, 127)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "!",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "`",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "console",
+            "class": "",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ".",
+            "class": "",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "log",
+            "class": "",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Starlyt",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "));",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "{  \"title\": \"Starlyt Docs\",  \"enabled\": true,  \"navigation\": [\"Overview\", \"Long guide\", \"Code examples\"]}",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#D6DEEB;--1:#403F53\">{</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#7FDBCA;--1:#096E72\">\"title\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">: </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Starlyt Docs</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">,</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#7FDBCA;--1:#096E72\">\"enabled\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">: </span><span style=\"--0:#FF6A83;--1:#A24848\">true</span><span style=\"--0:#D6DEEB;--1:#403F53\">,</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\">  </span><span style=\"--0:#7FDBCA;--1:#096E72\">\"navigation\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">: [</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Overview</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">, </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Long guide</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">, </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#C789D6;--1:#7C5686\">Code examples</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#D6DEEB;--1:#403F53\">]</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#D6DEEB;--1:#403F53\">}</span></div></div></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "{",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"title\"",
+            "class": "",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ": ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Starlyt Docs",
+            "class": "",
+            "color": "rgb(199, 137, 214)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"enabled\"",
+            "class": "",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ": ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "true",
+            "class": "",
+            "color": "rgb(255, 106, 131)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "indent",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"navigation\"",
+            "class": "",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ": [",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Overview",
+            "class": "",
+            "color": "rgb(199, 137, 214)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ", ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Long guide",
+            "class": "",
+            "color": "rgb(199, 137, 214)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ", ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "Code examples",
+            "class": "",
+            "color": "rgb(199, 137, 214)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "]",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "# Build an ordinary consumer site.jigyll build --baseurl /docsprintf '%s\\n' \"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#919F9F;--1:#5F636F\"># Build an ordinary consumer site.</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#82AAFF;--1:#3B61B0\">jigyll</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#ECC48D;--1:#3B61B0\">build</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#82AAFF;--1:#3B61B0\">--baseurl</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#ECC48D;--1:#3B61B0\">/docs</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#C5E478;--1:#3B61B0\">printf</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#D9F5DD;--1:#111111\">'</span><span style=\"--0:#ECC48D;--1:#984E4D\">%s\\n</span><span style=\"--0:#D9F5DD;--1:#111111\">'</span><span style=\"--0:#D6DEEB;--1:#403F53\"> </span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span><span style=\"--0:#ECC48D;--1:#984E4D\">A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.</span><span style=\"--0:#D9F5DD;--1:#111111\">\"</span></div></div></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "# Build an ordinary consumer site.",
+            "class": "",
+            "color": "rgb(145, 159, 159)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "jigyll",
+            "class": "",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "build",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "--baseurl",
+            "class": "",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "/docs",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "printf",
+            "class": "",
+            "color": "rgb(197, 228, 120)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "'",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "%s\\n",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "'",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": " ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.",
+            "class": "",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"",
+            "class": "",
+            "color": "rgb(217, 245, 221)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "<article data-example=\"literal\">  & This is text, not executable markup.    indentation stays intact</article>",
+        "html": "<code><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#d6deeb;--1:#403f53\">&lt;article data-example=\"literal\"&gt;</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\"><span style=\"--0:#d6deeb;--1:#403f53\">  </span></span><span style=\"--0:#d6deeb;--1:#403f53\">&amp; This is text, not executable markup.</span></div></div><div class=\"ec-line\"><div class=\"code\"><span class=\"indent\"><span style=\"--0:#d6deeb;--1:#403f53\">    </span></span><span style=\"--0:#d6deeb;--1:#403f53\">indentation stays intact</span></div></div><div class=\"ec-line\"><div class=\"code\"><span style=\"--0:#d6deeb;--1:#403f53\">&lt;/article&gt;</span></div></div></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "<article data-example=\"literal\">",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "  ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "& This is text, not executable markup.",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "    ",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "indentation stays intact",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "</article>",
+            "class": "",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "origin": "http://127.0.0.1:4322",
+    "mode": "light",
+    "blocks": [
+      {
+        "text": "// Preserve indentation and line breaks.\nconst greeting = \"Hello, reader\";\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet(\"Starlyt\"));\n",
+        "html": "<code><span class=\"line\"><span class=\"cl\"><span class=\"c1\">// Preserve indentation and line breaks.\n</span></span></span><span class=\"line\"><span class=\"cl\"><span class=\"c1\"></span><span class=\"kr\">const</span> <span class=\"nx\">greeting</span> <span class=\"o\">=</span> <span class=\"s2\">\"Hello, reader\"</span><span class=\"p\">;</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"kd\">function</span> <span class=\"nx\">greet</span><span class=\"p\">(</span><span class=\"nx\">name</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"k\">return</span> <span class=\"sb\">`Hello, </span><span class=\"si\">${</span><span class=\"nx\">name</span><span class=\"si\">}</span><span class=\"sb\">!`</span><span class=\"p\">;</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"p\">}</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"nx\">console</span><span class=\"p\">.</span><span class=\"nx\">log</span><span class=\"p\">(</span><span class=\"nx\">greet</span><span class=\"p\">(</span><span class=\"s2\">\"Starlyt\"</span><span class=\"p\">));</span>\n</span></span></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "// Preserve indentation and line breaks.\n",
+            "class": "c1",
+            "color": "rgb(93, 99, 118)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "",
+            "class": "c1",
+            "color": "rgb(93, 99, 118)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "const",
+            "class": "kr",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greeting",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "=",
+            "class": "o",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Hello, reader\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "function",
+            "class": "kd",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ")",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "{",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "return",
+            "class": "k",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "`Hello, ",
+            "class": "sb",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "${",
+            "class": "si",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "si",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "!`",
+            "class": "sb",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "console",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ".",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "log",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "nx",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Starlyt\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "));",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "{\n  \"title\": \"Starlyt Docs\",\n  \"enabled\": true,\n  \"navigation\": [\"Overview\", \"Long guide\", \"Code examples\"]\n}\n",
+        "html": "<code><span class=\"line\"><span class=\"cl\"><span class=\"p\">{</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"nt\">\"title\"</span><span class=\"p\">:</span> <span class=\"s2\">\"Starlyt Docs\"</span><span class=\"p\">,</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"nt\">\"enabled\"</span><span class=\"p\">:</span> <span class=\"kc\">true</span><span class=\"p\">,</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"nt\">\"navigation\"</span><span class=\"p\">:</span> <span class=\"p\">[</span><span class=\"s2\">\"Overview\"</span><span class=\"p\">,</span> <span class=\"s2\">\"Long guide\"</span><span class=\"p\">,</span> <span class=\"s2\">\"Code examples\"</span><span class=\"p\">]</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"p\">}</span>\n</span></span></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "{",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"title\"",
+            "class": "nt",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ":",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Starlyt Docs\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"enabled\"",
+            "class": "nt",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ":",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "true",
+            "class": "kc",
+            "color": "rgb(136, 68, 174)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"navigation\"",
+            "class": "nt",
+            "color": "rgb(9, 110, 114)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ":",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "[",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Overview\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Long guide\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Code examples\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "]",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "p",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "# Build an ordinary consumer site.\njigyll build --baseurl /docs\nprintf '%s\\n' \"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"\n",
+        "html": "<code><span class=\"line\"><span class=\"cl\"><span class=\"c1\"># Build an ordinary consumer site.</span>\n</span></span><span class=\"line\"><span class=\"cl\">jigyll build --baseurl /docs\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"nb\">printf</span> <span class=\"s1\">'%s\\n'</span> <span class=\"s2\">\"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"</span>\n</span></span></code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": [
+          {
+            "text": "# Build an ordinary consumer site.",
+            "class": "c1",
+            "color": "rgb(93, 99, 118)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "jigyll build --baseurl /docs\n",
+            "class": "cl",
+            "color": "rgb(64, 63, 83)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "printf",
+            "class": "nb",
+            "color": "rgb(59, 97, 176)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "'%s\\n'",
+            "class": "s1",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"",
+            "class": "s2",
+            "color": "rgb(152, 75, 0)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "<article data-example=\"literal\">\n  & This is text, not executable markup.\n    indentation stays intact\n</article>\n",
+        "html": "<code>&lt;article data-example=\"literal\"&gt;\n  &amp; This is text, not executable markup.\n    indentation stays intact\n&lt;/article&gt;\n</code>",
+        "background": "rgb(246, 247, 249)",
+        "tokens": []
+      }
+    ]
+  },
+  {
+    "origin": "http://127.0.0.1:4322",
+    "mode": "dark",
+    "blocks": [
+      {
+        "text": "// Preserve indentation and line breaks.\nconst greeting = \"Hello, reader\";\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet(\"Starlyt\"));\n",
+        "html": "<code><span class=\"line\"><span class=\"cl\"><span class=\"c1\">// Preserve indentation and line breaks.\n</span></span></span><span class=\"line\"><span class=\"cl\"><span class=\"c1\"></span><span class=\"kr\">const</span> <span class=\"nx\">greeting</span> <span class=\"o\">=</span> <span class=\"s2\">\"Hello, reader\"</span><span class=\"p\">;</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"kd\">function</span> <span class=\"nx\">greet</span><span class=\"p\">(</span><span class=\"nx\">name</span><span class=\"p\">)</span> <span class=\"p\">{</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"k\">return</span> <span class=\"sb\">`Hello, </span><span class=\"si\">${</span><span class=\"nx\">name</span><span class=\"si\">}</span><span class=\"sb\">!`</span><span class=\"p\">;</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"p\">}</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"nx\">console</span><span class=\"p\">.</span><span class=\"nx\">log</span><span class=\"p\">(</span><span class=\"nx\">greet</span><span class=\"p\">(</span><span class=\"s2\">\"Starlyt\"</span><span class=\"p\">));</span>\n</span></span></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "// Preserve indentation and line breaks.\n",
+            "class": "c1",
+            "color": "rgb(145, 159, 159)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "",
+            "class": "c1",
+            "color": "rgb(145, 159, 159)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "const",
+            "class": "kr",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greeting",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "=",
+            "class": "o",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Hello, reader\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "function",
+            "class": "kd",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ")",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "{",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "return",
+            "class": "k",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "`Hello, ",
+            "class": "sb",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "${",
+            "class": "si",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "name",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "si",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "!`",
+            "class": "sb",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ";",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "console",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ".",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "log",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "greet",
+            "class": "nx",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "(",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Starlyt\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "));",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "{\n  \"title\": \"Starlyt Docs\",\n  \"enabled\": true,\n  \"navigation\": [\"Overview\", \"Long guide\", \"Code examples\"]\n}\n",
+        "html": "<code><span class=\"line\"><span class=\"cl\"><span class=\"p\">{</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"nt\">\"title\"</span><span class=\"p\">:</span> <span class=\"s2\">\"Starlyt Docs\"</span><span class=\"p\">,</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"nt\">\"enabled\"</span><span class=\"p\">:</span> <span class=\"kc\">true</span><span class=\"p\">,</span>\n</span></span><span class=\"line\"><span class=\"cl\">  <span class=\"nt\">\"navigation\"</span><span class=\"p\">:</span> <span class=\"p\">[</span><span class=\"s2\">\"Overview\"</span><span class=\"p\">,</span> <span class=\"s2\">\"Long guide\"</span><span class=\"p\">,</span> <span class=\"s2\">\"Code examples\"</span><span class=\"p\">]</span>\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"p\">}</span>\n</span></span></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "{",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"title\"",
+            "class": "nt",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ":",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Starlyt Docs\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"enabled\"",
+            "class": "nt",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ":",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "true",
+            "class": "kc",
+            "color": "rgb(199, 146, 234)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"navigation\"",
+            "class": "nt",
+            "color": "rgb(127, 219, 202)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ":",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "[",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Overview\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Long guide\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": ",",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"Code examples\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "]",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "}",
+            "class": "p",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "# Build an ordinary consumer site.\njigyll build --baseurl /docs\nprintf '%s\\n' \"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"\n",
+        "html": "<code><span class=\"line\"><span class=\"cl\"><span class=\"c1\"># Build an ordinary consumer site.</span>\n</span></span><span class=\"line\"><span class=\"cl\">jigyll build --baseurl /docs\n</span></span><span class=\"line\"><span class=\"cl\"><span class=\"nb\">printf</span> <span class=\"s1\">'%s\\n'</span> <span class=\"s2\">\"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"</span>\n</span></span></code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": [
+          {
+            "text": "# Build an ordinary consumer site.",
+            "class": "c1",
+            "color": "rgb(145, 159, 159)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "jigyll build --baseurl /docs\n",
+            "class": "cl",
+            "color": "rgb(214, 222, 235)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "printf",
+            "class": "nb",
+            "color": "rgb(130, 170, 255)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "'%s\\n'",
+            "class": "s1",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          },
+          {
+            "text": "\"A deliberately long line that scrolls inside the code block without widening the document or changing the copied source.\"",
+            "class": "s2",
+            "color": "rgb(236, 196, 141)",
+            "fontStyle": "normal"
+          }
+        ]
+      },
+      {
+        "text": "<article data-example=\"literal\">\n  & This is text, not executable markup.\n    indentation stays intact\n</article>\n",
+        "html": "<code>&lt;article data-example=\"literal\"&gt;\n  &amp; This is text, not executable markup.\n    indentation stays intact\n&lt;/article&gt;\n</code>",
+        "background": "rgb(35, 38, 47)",
+        "tokens": []
+      }
+    ]
+  }
+]

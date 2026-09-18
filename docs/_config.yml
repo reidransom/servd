@@ -1,0 +1,19 @@
+title: servd
+lang: en
+theme: starlyt
+url: ""
+baseurl: ""
+navigation:
+  - label: Overview
+    link: /
+  - label: Setup
+    items:
+      - label: Installation
+        link: /installation/
+      - label: Quick start
+        link: /quick-start/
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

@@ -1,0 +1,8 @@
+{
+  "consumerOverride": true,
+  "escapedLabelsAndUrls": true,
+  "explicitAndRepeatedHeadingIds": true,
+  "literalLabels": true,
+  "headingFreeArticle": true,
+  "browserErrors": []
+}

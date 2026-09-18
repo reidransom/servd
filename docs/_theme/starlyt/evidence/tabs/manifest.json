@@ -1,0 +1,89 @@
+{
+  "ticket": "06-tabs",
+  "reference": {
+    "project": "@astrojs/starlight frozen POC",
+    "commit": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/components/tabs/",
+    "captures": [
+      "reference-tabs-390-light.png",
+      "reference-tabs-800-light.png",
+      "reference-tabs-1440-light.png",
+      "reference-tabs-390-dark.png",
+      "reference-tabs-800-dark.png",
+      "reference-tabs-1440-dark.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4317/tabs/",
+    "restoration_url": "http://127.0.0.1:4317/tabs-restoration/",
+    "viewports": [390, 799, 800, 1024, 1151, 1152, 1440],
+    "modes": ["light", "dark"],
+    "captures": [
+      "tabs-390-light.png",
+      "tabs-799-light.png",
+      "tabs-800-light.png",
+      "tabs-1024-light.png",
+      "tabs-1151-light.png",
+      "tabs-1152-light.png",
+      "tabs-1440-light.png",
+      "tabs-390-dark.png",
+      "tabs-799-dark.png",
+      "tabs-800-dark.png",
+      "tabs-1024-dark.png",
+      "tabs-1151-dark.png",
+      "tabs-1152-dark.png",
+      "tabs-1440-dark.png",
+      "tabs-selected-overflow-390-light.png",
+      "tabs-selected-overflow-390-dark.png",
+      "tabs-yarn-rich-390-light.png",
+      "tabs-yarn-rich-390-dark.png",
+      "tabs-icon-390-light.png",
+      "tabs-icon-1440-light.png",
+      "tabs-icon-390-dark.png",
+      "tabs-icon-1440-dark.png"
+    ]
+  },
+  "geometry": {
+    "reference_and_implementation": {
+      "tab_padding": "4.4px 20px",
+      "font_size": "16px",
+      "line_height": "19.2px",
+      "tablist_border_bottom": "2px"
+    }
+  },
+  "behavior": {
+    "groups": 3,
+    "tabs": 7,
+    "unique_tab_panel_ids": true,
+    "aria_relationships_valid": true,
+    "one_selected_tab_and_visible_panel_per_group": true,
+    "pointer_selection": true,
+    "arrow_wrapping": true,
+    "home_end": true,
+    "tab_reaches_selected_panel_link": true,
+    "exact_label_sync": true,
+    "missing_label_retains_selection": true,
+    "synchronization_keeps_focus_in_source_group": true,
+    "versioned_storage_key": "starlyt-tabs:v1:package-manager",
+    "reload_restoration": true,
+    "cross_page_restoration": true,
+    "storage_denial_enhances_all_groups": true,
+    "no_javascript_visible_headings": 7,
+    "no_javascript_visible_panels": 7,
+    "narrow_tablist_scroll_width": 591,
+    "narrow_tablist_client_width": 358,
+    "page_wide_overflow": false,
+    "unequal_height_sync_source_visual_delta_px": 0,
+    "icon_integration_url": "http://127.0.0.1:4323/tabs/",
+    "valid_icon_cloned_into_enhanced_tab": true,
+    "unknown_icon_svg_count": 0,
+    "icon_does_not_change_tab_accessible_name": true,
+    "no_javascript_icon_and_heading_visible": true
+  },
+  "runner": {
+    "tool": "playwright-mcp",
+    "playwright": "1.63.0-alpha-2026-09-09",
+    "browser": "Chromium 153.0.8010.12",
+    "headless": true
+  }
+}

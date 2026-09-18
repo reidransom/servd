@@ -1,0 +1,48 @@
+{
+  "results": [
+    {
+      "origin": "http://127.0.0.1:4322",
+      "width": 390,
+      "source": true,
+      "clipboard": true,
+      "codeTableImageContainment": true
+    },
+    {
+      "origin": "http://127.0.0.1:4322",
+      "width": 1024,
+      "source": true,
+      "clipboard": true,
+      "codeTableImageContainment": true
+    },
+    {
+      "origin": "http://127.0.0.1:4322",
+      "width": 1440,
+      "source": true,
+      "clipboard": true,
+      "codeTableImageContainment": true
+    },
+    {
+      "origin": "http://127.0.0.1:4323/docs",
+      "width": 390,
+      "source": true,
+      "clipboard": true,
+      "codeTableImageContainment": true
+    },
+    {
+      "origin": "http://127.0.0.1:4323/docs",
+      "width": 1024,
+      "source": true,
+      "clipboard": true,
+      "codeTableImageContainment": true
+    },
+    {
+      "origin": "http://127.0.0.1:4323/docs",
+      "width": 1440,
+      "source": true,
+      "clipboard": true,
+      "codeTableImageContainment": true
+    }
+  ],
+  "deniedClipboard": "Copy failed; no false success",
+  "noJavaScript": "Exact source and native highlighting, no copy controls"
+}

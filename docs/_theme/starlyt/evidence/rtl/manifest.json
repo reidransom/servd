@@ -1,0 +1,90 @@
+{
+  "ticket": 21,
+  "reference": {
+    "revision": "39d4e71f23b3fb6fde0e77eb983fcd38629b70b9",
+    "url": "http://127.0.0.1:4312/fa/getting-started/",
+    "captures": [
+      "reference-dark-390.png",
+      "reference-dark-800.png",
+      "reference-dark-1440.png",
+      "reference-light-390.png",
+      "reference-light-800.png",
+      "reference-light-1440.png"
+    ]
+  },
+  "implementation": {
+    "url": "http://127.0.0.1:4330/ar/dalil/",
+    "captures": [
+      "starlyt-dark-390.png",
+      "starlyt-dark-800.png",
+      "starlyt-dark-1440.png",
+      "starlyt-light-390.png",
+      "starlyt-light-800.png",
+      "starlyt-light-1440.png"
+    ]
+  },
+  "browser": {
+    "engine": "Chromium 153.0.8010.12",
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+  },
+  "verified": {
+    "shell": {
+      "navigation": "inline-start/right",
+      "heading_toc": "inline-end/left",
+      "main": "between sidebars",
+      "menu_button_phone_x": 16,
+      "navigation_inline_end_border_px": 1,
+      "toc_inline_start_border_px": 1
+    },
+    "mobile_overlays": {
+      "menu_scrolled_px": 81,
+      "menu_escape_closed": true,
+      "menu_focus_restored": true,
+      "toc_scrolled_px": 5,
+      "toc_escape_closed": true,
+      "toc_focus_restored": true,
+      "toc_link_focused_heading": true
+    },
+    "mixed_direction": {
+      "fenced_code_dir": "ltr",
+      "fenced_code_text_align": "left",
+      "inline_code_dir": "ltr",
+      "tab_code_dir": "ltr",
+      "latin_search_dir": "ltr",
+      "arabic_search_dir": "rtl",
+      "clipboard_source_order_equal": true
+    },
+    "directional_icons": {
+      "right_arrow_mirrored": true,
+      "external_unmirrored": true,
+      "translate_unmirrored": true,
+      "closed_disclosure_caret_mirrored": true
+    },
+    "tabs": {
+      "rtl_arrow_left_selects_next": true,
+      "rtl_arrow_right_selects_previous": true,
+      "ltr_arrow_right_selects_next": true,
+      "ltr_arrow_left_selects_previous": true
+    },
+    "local_overflow": {
+      "phone_table_scroll_px": 571,
+      "phone_code_scroll_px": 581,
+      "page_overflow_px": 0
+    },
+    "ltr_regression_matrix": {
+      "locales": ["en", "fr"],
+      "modes": ["dark", "light"],
+      "widths": [390, 800, 1440],
+      "navigation_remained_inline_start": true,
+      "page_overflow_px": 0
+    },
+    "semantic_order_equal": true
+  },
+  "commands": [
+    "sass --no-source-map _sass/starlyt.scss assets/starlyt.css",
+    "node --check assets/code.js",
+    "node --check assets/tabs.js",
+    "python tools/localization/check.py --jigyll /tmp/jigyll-code-annotations",
+    "git diff --check"
+  ]
+}

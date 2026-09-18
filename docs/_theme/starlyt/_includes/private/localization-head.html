@@ -1,0 +1,7 @@
+{%- if page.language -%}
+  {%- for alternate in page.alternates -%}
+    {%- if alternate.tag == page.language.tag -%}<link rel="canonical" href="{{ alternate.url | escape }}">{%- endif -%}
+    <link rel="alternate" hreflang="{{ alternate.tag | escape }}" href="{{ alternate.url | escape }}">
+    {%- if alternate.x_default -%}<link rel="alternate" hreflang="x-default" href="{{ alternate.url | escape }}">{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
