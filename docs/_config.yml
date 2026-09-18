@@ -12,6 +12,10 @@ navigation:
         link: /installation/
       - label: Quick start
         link: /quick-start/
+      - label: Commands and static serving
+        link: /commands/
+      - label: CLI reference
+        link: /cli-reference/
 defaults:
   - scope:
       path: ""
