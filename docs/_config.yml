@@ -26,6 +26,14 @@ navigation:
     items:
       - label: Dashboard and TUI
         link: /dashboard/
+  - label: Operations
+    items:
+      - label: Automation and JSON
+        link: /automation/
+      - label: Files and platform behavior
+        link: /files-platform/
+      - label: Development
+        link: /development/
 defaults:
   - scope:
       path: ""
