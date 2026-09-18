@@ -149,6 +149,10 @@ func TestCurrentDirectoryTargetingBoundaries(t *testing.T) {
 
 func TestFindSiteByDirectoryPrefersCanonicalRegistration(t *testing.T) {
 	directory := t.TempDir()
+	canonical, err := filepath.EvalSymlinks(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
 	newAlias := func(name string) string {
 		path := filepath.Join(t.TempDir(), name)
 		if err := os.Symlink(directory, path); err != nil {
@@ -165,7 +169,7 @@ func TestFindSiteByDirectoryPrefersCanonicalRegistration(t *testing.T) {
 	registry := &config.Registry{Sites: []config.Site{
 		{Slug: "first", Path: first},
 		{Slug: "second", Path: second},
-		{Slug: "direct", Path: directory},
+		{Slug: "direct", Path: canonical},
 	}}
 
 	site, err := findSiteByDirectory(registry, target)
