@@ -16,6 +16,12 @@ navigation:
         link: /commands/
       - label: CLI reference
         link: /cli-reference/
+  - label: Networking
+    items:
+      - label: Proxy ports and hostnames
+        link: /proxy-hostnames/
+      - label: Migration guidance
+        link: /migration/
 defaults:
   - scope:
       path: ""
