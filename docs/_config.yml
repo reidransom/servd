@@ -34,6 +34,10 @@ navigation:
         link: /files-platform/
       - label: Development
         link: /development/
+  - label: Remote access
+    items:
+      - label: Tailscale access
+        link: /tailscale/
 defaults:
   - scope:
       path: ""
