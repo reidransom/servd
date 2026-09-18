@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -143,5 +144,35 @@ func TestCurrentDirectoryTargetingBoundaries(t *testing.T) {
 				t.Fatalf("%v error = %v, want %q", tc.args, err, tc.err)
 			}
 		})
+	}
+}
+
+func TestFindSiteByDirectoryPrefersCanonicalRegistration(t *testing.T) {
+	directory := t.TempDir()
+	newAlias := func(name string) string {
+		path := filepath.Join(t.TempDir(), name)
+		if err := os.Symlink(directory, path); err != nil {
+			if runtime.GOOS == "windows" {
+				t.Skipf("directory symlinks unavailable: %v", err)
+			}
+			t.Fatal(err)
+		}
+		return path
+	}
+	first := newAlias("first")
+	second := newAlias("second")
+	target := newAlias("target")
+	registry := &config.Registry{Sites: []config.Site{
+		{Slug: "first", Path: first},
+		{Slug: "second", Path: second},
+		{Slug: "direct", Path: directory},
+	}}
+
+	site, err := findSiteByDirectory(registry, target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if site == nil || site.Slug != "direct" {
+		t.Fatalf("findSiteByDirectory(%q) = %#v, want direct registration", target, site)
 	}
 }

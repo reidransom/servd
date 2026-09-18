@@ -326,8 +326,8 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 			want   string
 		}{
 			{target: "other", want: "command: " + launcher.ShellJoin([]string{"servd", "static"})},
-			{target: "./other/", want: "command: echo directory-command"},
-			{target: collision, want: "command: echo directory-command"},
+			{target: "./other/", want: "command: " + launcher.ShellJoin([]string{"echo", "directory-command"})},
+			{target: collision, want: "command: " + launcher.ShellJoin([]string{"echo", "directory-command"})},
 		} {
 			output := runSmokeCommand(t, environment, binary, "which", tc.target)
 			if !strings.Contains(output, tc.want) {
@@ -342,7 +342,7 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 			t.Chdir(collision)
 			runSmokeFailure(t, environment, binary, "accepts 1 arg", "which")
 			output := runSmokeCommand(t, environment, binary, "which", ".")
-			if !strings.Contains(output, "command: echo directory-command") {
+			if !strings.Contains(output, "command: "+launcher.ShellJoin([]string{"echo", "directory-command"})) {
 				t.Fatalf("explicit path required a marker: %s", output)
 			}
 		})

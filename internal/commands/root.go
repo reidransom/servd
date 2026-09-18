@@ -136,11 +136,20 @@ func defaultSiteArgs(reg *config.Registry, args []string) ([]string, error) {
 	return []string{site.Slug}, nil
 }
 
-// findSiteByDirectory prefers an exact registered path, then directory identity
-// (e.g. symlinks or Windows short names). It never searches parent directories.
+// findSiteByDirectory prefers an exact registered path, then a canonical
+// registered root, then directory identity (e.g. symlinks or Windows short
+// names). It never searches parent directories.
 func findSiteByDirectory(reg *config.Registry, path string) (*config.Site, error) {
 	if site := reg.FindByPath(path); site != nil {
 		return site, nil
+	}
+	if canonical, err := filepath.EvalSymlinks(path); err == nil {
+		for i := range reg.Sites {
+			candidate := &reg.Sites[i]
+			if candidate.Path == canonical {
+				return candidate, nil
+			}
+		}
 	}
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
