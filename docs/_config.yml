@@ -22,6 +22,10 @@ navigation:
         link: /proxy-hostnames/
       - label: Migration guidance
         link: /migration/
+  - label: Interface
+    items:
+      - label: Dashboard and TUI
+        link: /dashboard/
 defaults:
   - scope:
       path: ""
