@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/ansi"
+	"github.com/reidransom/servd/internal/app"
 )
 
 // terminalOutput serializes clipboard escapes with Bubble Tea's renderer.
@@ -23,11 +24,17 @@ func (o *terminalOutput) Write(p []byte) (int, error) {
 	return o.File.Write(p)
 }
 
+func (o *terminalOutput) WriteString(s string) (int, error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	return o.File.WriteString(s)
+}
+
 type clipboardDoneMsg struct{ err error }
 
 func (o *terminalOutput) copy(text string) tea.Cmd {
 	return func() tea.Msg {
-		_, err := o.Write([]byte(ansi.SetSystemClipboard(text)))
+		err := app.WriteClipboard(o, text)
 		return clipboardDoneMsg{err}
 	}
 }

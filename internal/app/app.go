@@ -4,9 +4,12 @@ package app
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 	"runtime"
 	"time"
+
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/state"
@@ -59,6 +62,12 @@ func Dash(s string) string {
 		return "-"
 	}
 	return s
+}
+
+// WriteClipboard emits an OSC 52 system-clipboard sequence.
+func WriteClipboard(w io.Writer, text string) error {
+	_, err := io.WriteString(w, ansi.SetSystemClipboard(text))
+	return err
 }
 
 // OpenBrowser opens a URL in the default browser (best effort).

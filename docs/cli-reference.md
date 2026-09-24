@@ -17,6 +17,7 @@ permalink: /cli-reference/
 | `servd restart [slug\|path…]` | Restart selected sites; `--all` selects every site. |
 | `servd logs [slug\|path] [-f]` | Read or follow site output. |
 | `servd open [slug\|path]` | Open a site's primary URL by slug or registered root directory. |
+| `servd copy [slug\|path]` | Copy a site's primary URL through the terminal clipboard protocol. |
 | `servd proxy` | Run the proxy in the foreground; `--enable-mdns` selects `.local` for this run. |
 | `servd proxy up`, `down`, `status` | Manage or inspect the background proxy. |
 | `servd hosts sync`, `status`, `clean` | Manage only servd's hosts-file block. |
@@ -24,4 +25,4 @@ permalink: /cli-reference/
 | `servd version` / `servd --version` | Print version, commit, and build date. |
 | `servd` / `servd tui` | Open the interactive dashboard. |
 
-Target selection and primary URLs are described in [Commands and static serving](../commands/). `open`, dashboard links, and ordinary status URLs always use a site's primary hostname; configured fallback aliases remain routable but are not automatically chosen.
+Target selection and primary URLs are described in [Commands and static serving](../commands/). `open`, `copy`, dashboard links, and ordinary status URLs always use a site's primary hostname; configured fallback aliases remain routable but are not automatically chosen.

@@ -31,7 +31,7 @@ http_port = 8080
 
 For `acme`, the primary is `acme.localhost`; the listed suffixes are exact aliases for the same backend. They are not redirects, DNS failover, or URLs servd attempts automatically. Declared fallback order is preserved on save. Effective routes and fallback URL arrays deduplicate repeated suffixes and a suffix equal to the effective primary.
 
-The landing page, `servd open`, status tables, dashboard links, and browser actions use the primary hostname only. Fallback routes work at the active proxy port; structured output exposes plural fallback URL fields where applicable.
+The landing page, `servd open`, `servd copy`, status tables, dashboard links, and browser actions use the primary hostname only. Fallback routes work at the active proxy port; structured output exposes plural fallback URL fields where applicable.
 
 ## Hosts-file ownership
 

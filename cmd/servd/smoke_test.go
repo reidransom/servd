@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -550,6 +551,67 @@ func TestCLIStaticSiteLifecycle(t *testing.T) {
 		}
 	})
 
+	t.Run("clipboard URL targets", func(t *testing.T) {
+		activeProxyPort := availableSmokePort(t)
+		configuredProxyPort := availableSmokePort(t)
+		for configuredProxyPort == activeProxyPort {
+			configuredProxyPort = availableSmokePort(t)
+		}
+		configPath := filepath.Join(configHome, "servd", "config.toml")
+		writeProxyPort := func(port int) {
+			t.Helper()
+			content := fmt.Sprintf("[hostnames]\nhttp_port = %d\n", port)
+			if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		writeProxyPort(activeProxyPort)
+		t.Cleanup(func() {
+			if err := os.Remove(configPath); err != nil && !os.IsNotExist(err) {
+				t.Error(err)
+			}
+		})
+		runSmokeCommand(t, environment, binary, "proxy", "up")
+		t.Cleanup(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			command := exec.CommandContext(ctx, binary, "proxy", "down")
+			command.Env = environment
+			if output, err := command.CombinedOutput(); err != nil {
+				t.Errorf("stop smoke proxy: %v\n%s", err, output)
+			}
+		})
+		writeProxyPort(configuredProxyPort)
+
+		capture := filepath.Join(t.TempDir(), "opened-url")
+		copyEnv := append(append([]string{}, environment...), "SERVD_SMOKE_OPEN_URL="+capture)
+		primary := func(slug string) string {
+			return fmt.Sprintf("http://%s.localhost:%d/", slug, activeProxyPort)
+		}
+		for _, tc := range []struct {
+			args []string
+			url  string
+		}{
+			{args: []string{"copy"}, url: primary(smokeSlug)},
+			{args: []string{"copy", "other"}, url: primary("other")},
+			{args: []string{"copy", project}, url: primary(smokeSlug)},
+			{args: []string{"copy", "./../site/"}, url: primary(smokeSlug)},
+		} {
+			output := runSmokeCommand(t, copyEnv, binary, tc.args...)
+			if got := smokeClipboardText(t, output); got != tc.url {
+				t.Fatalf("%v copied %q, want primary URL %q", tc.args, got, tc.url)
+			}
+		}
+		failure := runSmokeFailure(t, copyEnv, binary, "unknown site", "copy", "missing")
+		if strings.Contains(failure, "\x1b]52;") {
+			t.Fatalf("failed copy wrote to clipboard: %q", failure)
+		}
+		time.Sleep(100 * time.Millisecond)
+		if _, err := os.Stat(capture); !os.IsNotExist(err) {
+			t.Fatalf("copy opened a browser: %v", err)
+		}
+	})
+
 	t.Run("path invalid command recovery", func(t *testing.T) {
 		otherBefore := smokeSiteStatus(t, environment, binary, "other")
 		configPath := filepath.Join(project, ".servd.toml")
@@ -683,6 +745,20 @@ func runSmokeCommand(t *testing.T, environment []string, binary string, argument
 		t.Fatalf("%s %s: %v\n%s", binary, strings.Join(arguments, " "), err, output)
 	}
 	return string(output)
+}
+
+func smokeClipboardText(t *testing.T, output string) string {
+	t.Helper()
+	const prefix, suffix = "\x1b]52;c;", "\x07"
+	if !strings.HasPrefix(output, prefix) || !strings.HasSuffix(output, suffix) {
+		t.Fatalf("clipboard output = %q, want one OSC 52 system-clipboard sequence", output)
+	}
+	encoded := strings.TrimSuffix(strings.TrimPrefix(output, prefix), suffix)
+	text, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		t.Fatalf("decode clipboard output: %v", err)
+	}
+	return string(text)
 }
 
 func availableSmokePort(t *testing.T) int {

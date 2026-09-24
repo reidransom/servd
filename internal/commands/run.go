@@ -234,6 +234,34 @@ func newLogsCmd() *cobra.Command {
 	return c
 }
 
+func selectedSiteURL(cmd *cobra.Command, args []string) (string, error) {
+	settings, reg, st, err := app.Load()
+	if err != nil {
+		return "", err
+	}
+	site, err := selectSite(cmd, reg, args)
+	if err != nil {
+		return "", err
+	}
+	return proxy.EffectiveSettings(settings, st).SiteURL(*site), nil
+}
+
+func newCopyCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "copy [slug|path]",
+		Short: "Copy a site's primary URL to the clipboard",
+		Long:  "Copy a site's primary URL to the clipboard by slug or registered root directory path. Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml.",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			url, err := selectedSiteURL(cmd, args)
+			if err != nil {
+				return err
+			}
+			return app.WriteClipboard(cmd.OutOrStdout(), url)
+		},
+	}
+}
+
 func newOpenCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "open [slug|path]",
@@ -241,15 +269,10 @@ func newOpenCmd() *cobra.Command {
 		Long:  "Open a site's primary URL in the browser by slug or registered root directory path. Slugs take precedence over directory names. Without a target, use the registered current directory if it contains .servd.toml.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			settings, reg, st, err := app.Load()
+			url, err := selectedSiteURL(cmd, args)
 			if err != nil {
 				return err
 			}
-			s, err := selectSite(cmd, reg, args)
-			if err != nil {
-				return err
-			}
-			url := proxy.EffectiveSettings(settings, st).SiteURL(*s)
 			fmt.Println(url)
 			return app.OpenBrowser(url)
 		},
