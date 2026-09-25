@@ -37,7 +37,7 @@ func newAddCmd() *cobra.Command {
 			if dash := cmd.ArgsLenAtDash(); dash >= 0 {
 				cmdline = launcher.ShellJoin(args[dash:])
 			}
-			settings, err := config.LoadSettings()
+			settings, _, st, err := app.Load()
 			if err != nil {
 				return err
 			}
@@ -56,8 +56,9 @@ func newAddCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			effective := proxy.EffectiveSettings(settings, st)
 			_, err = fmt.Fprintf(cmd.OutOrStdout(), "Added %s :%d\n  %s\n  %s\n  source: %s\n  command: %s\n  direct: http://127.0.0.1:%d/\n",
-				site.Slug, site.Port, site.Path, settings.SiteURL(site), res.Source, res.Cmd, site.Port)
+				site.Slug, site.Port, site.Path, effective.SiteURL(site), res.Source, res.Cmd, site.Port)
 			return err
 		},
 	}

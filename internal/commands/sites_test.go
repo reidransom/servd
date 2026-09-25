@@ -10,6 +10,8 @@ import (
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
+	"github.com/reidransom/servd/internal/proxy"
+	"github.com/reidransom/servd/internal/state"
 )
 
 func TestStatusSites(t *testing.T) {
@@ -199,6 +201,36 @@ func TestAddCommandVectorReportsSourceAndWhich(t *testing.T) {
 	}
 	if got, want := whichOutput.String(), "source: explicit\ncommand: "+wantCommand+"\n"; got != want {
 		t.Fatalf("which output = %q, want %q", got, want)
+	}
+}
+
+func TestAddUsesActiveProxyPortInURL(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	identity, err := state.ProcessIdentity(os.Getpid())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := state.Mutate(func(s *state.State) error {
+		s.Entries[proxy.Slug] = state.Entry{
+			Slug: proxy.Slug, PID: os.Getpid(), Identity: identity, Port: 80,
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	project := t.TempDir()
+	var output bytes.Buffer
+	command := newAddCmd()
+	command.SetOut(&output)
+	command.SetArgs([]string{"--slug", "example", project, "--", "echo"})
+	if err := command.Execute(); err != nil {
+		t.Fatalf("add site: %v", err)
+	}
+	if got, want := output.String(), "\n  http://example.localhost/\n"; !strings.Contains(got, want) {
+		t.Fatalf("add output = %q, want active proxy URL containing %q", got, want)
 	}
 }
 

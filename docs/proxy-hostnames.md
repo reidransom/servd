@@ -9,7 +9,7 @@ The proxy accepts exact configured hostnames and sends every matching request to
 
 With no `config.toml`, the first background start tries port 80. In an interactive terminal it offers listener-only elevation; accepting runs the listener through `sudo` while the proxy remains the invoking user. Refusing falls back to 8080. Noninteractive starts attempt passwordless elevation and fall back immediately; a port-80 conflict also selects 8080. That fallback is runtime-only and is never saved.
 
-An explicit `[hostnames] http_port` is strict. A privileged or occupied configured port fails instead of falling back. Once running, `status`, generated URLs, the dashboard, browser opening, and route reloads use the recorded active runtime port.
+An explicit `[hostnames] http_port` is strict. A privileged or occupied configured port fails instead of falling back. Once running, `servd add` output, `status`, generated URLs, the dashboard, browser opening, and route reloads use the recorded active runtime port.
 
 ## Configure exact names
 
