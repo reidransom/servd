@@ -582,7 +582,8 @@ func TestProxyStartReportsBindFailure(t *testing.T) {
 	if _, duplicate := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")}); duplicate != nil {
 		t.Fatal("s scheduled a second action while busy")
 	}
-	_, refresh := m.Update(cmd())
+	startErr := (&proxyStartExec{settings: m.settings}).Run()
+	_, refresh := m.Update(proxyStartDone(startErr))
 	if refresh == nil {
 		t.Fatal("failed start did not refresh status")
 	}

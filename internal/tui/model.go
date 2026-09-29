@@ -3,6 +3,7 @@ package tui
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -67,6 +68,26 @@ type actionDoneMsg struct {
 	bulk    bool   // true when the action covered multiple sites
 	err     error
 	renamed bool // registry rename succeeded, even if restart failed
+}
+
+// proxyStartExec gives an interactive proxy start exclusive ownership of the
+// terminal. StartBackground and sudo use the process's terminal streams
+// directly, so the ExecCommand stream setters intentionally have no work.
+type proxyStartExec struct {
+	settings config.Settings
+}
+
+func (c *proxyStartExec) Run() error {
+	_, err := proxy.StartBackground(c.settings)
+	return err
+}
+
+func (*proxyStartExec) SetStdin(io.Reader)  {}
+func (*proxyStartExec) SetStdout(io.Writer) {}
+func (*proxyStartExec) SetStderr(io.Writer) {}
+
+func proxyStartDone(err error) tea.Msg {
+	return actionDoneMsg{verb: "proxy started", err: err}
 }
 
 type model struct {
@@ -480,19 +501,14 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "s":
 		if m.selectedSlug() == proxy.Slug && !m.busy {
 			running, settings := m.proxyRunning, m.settings
-			status, verb := "starting proxy…", "proxy started"
 			if running {
-				status, verb = "stopping proxy…", "proxy stopped"
+				return m.action("stopping proxy…", func() actionDoneMsg {
+					return actionDoneMsg{verb: "proxy stopped", err: proxy.StopBackground()}
+				})
 			}
-			return m.action(status, func() actionDoneMsg {
-				var err error
-				if running {
-					err = proxy.StopBackground()
-				} else {
-					_, err = proxy.StartBackground(settings)
-				}
-				return actionDoneMsg{verb: verb, err: err}
-			})
+			m.busy = true
+			m.status = "starting proxy…"
+			return m, tea.Exec(&proxyStartExec{settings: settings}, proxyStartDone)
 		}
 		if s := m.selectedSite(); s != nil && !m.busy {
 			site, settings := *s, m.settings

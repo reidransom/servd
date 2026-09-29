@@ -28,6 +28,8 @@ Moving selection changes the live log. Focus the log with `tab`; scrolling away 
 | `h` | Show or hide help |
 | `q` | Quit |
 
+Starting the proxy on a protected port temporarily suspends the dashboard while the terminal asks for confirmation and, when approved, the sudo password. The dashboard resumes when startup completes or is declined.
+
 The former global `p` proxy shortcut is removed. Proxy-only and site-only actions remain inert for the wrong row.
 
 ## Mouse and selection
