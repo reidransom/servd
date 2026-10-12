@@ -47,6 +47,93 @@ func TestStartStopProcessTree(t *testing.T) {
 	waitForProcessExit(t, childPID)
 }
 
+func TestStartReplacesOccupiedPort(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	t.Setenv("SERVD_SUPERVISOR_CHILD", "1")
+	occupied, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = occupied.Close() }()
+	settings := config.DefaultSettings()
+	settings.PortRangeStart = 42101
+	settings.Hostnames.HTTPPort = 42102
+	site := config.Site{
+		Slug: "port-collision",
+		Path: t.TempDir(),
+		Port: occupied.Addr().(*net.TCPAddr).Port,
+		Cmd: launcher.ShellJoin([]string{
+			os.Args[0], "-test.run=^TestSupervisorChildProcess$", "-test.timeout={port}s",
+		}),
+	}
+	reg := &config.Registry{Sites: []config.Site{
+		site, {Slug: "reserved", Port: settings.PortRangeStart},
+	}}
+	if err := reg.Save(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := Stop(site.Slug); err != nil {
+			t.Error(err)
+		}
+	})
+	if err := Start(site, settings); err != nil {
+		t.Fatal(err)
+	}
+	if err := WaitReady(site, settings, 5*time.Second); err != nil {
+		t.Fatal(err)
+	}
+	reg, err = config.LoadRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := reg.Find(site.Slug).Port
+	if port == site.Port || port <= settings.Hostnames.HTTPPort {
+		t.Fatalf("replacement port = %d, want unoccupied, unreserved backend port", port)
+	}
+	st, err := state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry, ok := st.Get(site.Slug)
+	if !ok || entry.Port != port || !strings.Contains(entry.Cmd, fmt.Sprintf("-test.timeout=%ds", port)) {
+		t.Fatalf("runtime attempt = %+v, want registry port %d in resolved command", entry, port)
+	}
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(settings.BindHost, strconv.Itoa(port)), time.Second)
+	if err != nil {
+		t.Fatalf("replacement server did not listen: %v", err)
+	}
+	_ = conn.Close()
+	if err := Start(site, settings); err != nil {
+		t.Fatal(err)
+	}
+	st, err = state.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	again, _ := st.Get(site.Slug)
+	if again.PID != entry.PID || again.Port != port {
+		t.Fatalf("starting an already-running site replaced its process: %+v", again)
+	}
+	if err := occupied.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := Restart(site, settings); err != nil {
+		t.Fatal(err)
+	}
+	if err := WaitReady(site, settings, 5*time.Second); err != nil {
+		t.Fatal(err)
+	}
+	reg, err = config.LoadRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := reg.Find(site.Slug).Port; got != port {
+		t.Fatalf("restart changed an available saved port: got %d, want %d", got, port)
+	}
+}
+
 func TestStartReportsFailureLog(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	t.Setenv("SERVD_SUPERVISOR_FAILURE", "1")

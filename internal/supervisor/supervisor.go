@@ -16,6 +16,8 @@ import (
 
 	"github.com/reidransom/servd/internal/config"
 	"github.com/reidransom/servd/internal/launcher"
+	"github.com/reidransom/servd/internal/netcheck"
+	"github.com/reidransom/servd/internal/registration"
 	"github.com/reidransom/servd/internal/state"
 )
 
@@ -61,6 +63,47 @@ func Start(site config.Site, settings config.Settings) error {
 	}
 	if e, ok := st.Get(site.Slug); ok && state.EntryAlive(e) {
 		return nil
+	}
+
+	reg, err := config.LoadRegistry()
+	if err != nil {
+		return err
+	}
+	if registered := reg.Find(site.Slug); registered != nil && registered.Port != site.Port {
+		site.Port = registered.Port
+		res, err = launcher.Resolve(site, settings)
+		if err != nil {
+			return err
+		}
+	}
+
+	if site.Port == settings.Hostnames.HTTPPort || !netcheck.PortFree(settings.BindHost, site.Port) {
+		err := config.MutateRegistry(func(reg *config.Registry) error {
+			registered := reg.Find(site.Slug)
+			if registered == nil {
+				return fmt.Errorf("site %q is no longer registered", site.Slug)
+			}
+			// Another start may already have replaced the saved port.
+			port := registered.Port
+			if port == settings.Hostnames.HTTPPort || !netcheck.PortFree(settings.BindHost, port) {
+				var err error
+				port, err = registration.NextFreePort(reg, settings)
+				if err != nil {
+					return err
+				}
+			}
+			site.Port = port
+			var err error
+			res, err = launcher.Resolve(site, settings)
+			if err != nil {
+				return err
+			}
+			registered.Port = port
+			return nil
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := os.MkdirAll(config.LogDir(), 0o755); err != nil {
@@ -210,6 +253,9 @@ func WaitReady(site config.Site, settings config.Settings, timeout time.Duration
 		st, err := state.Load()
 		if err != nil {
 			return err
+		}
+		if entry, ok := st.Get(site.Slug); ok {
+			site.Port = entry.Port
 		}
 		status := Evaluate(site, settings, st)
 		switch status.Kind {

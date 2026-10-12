@@ -13,11 +13,11 @@ hero:
       variant: minimal
 ---
 
-servd runs registered web projects on stable backend ports and routes them through one local proxy. A project becomes a predictable URL such as `http://acme.localhost/`, managed from the CLI or interactive dashboard.
+servd runs registered web projects on automatically allocated backend ports and routes them through one local proxy. A project becomes a predictable URL such as `http://acme.localhost/`, managed from the CLI or interactive dashboard.
 
 ## A small, explicit model
 
-- A **registered project** has a stable slug, backend port, and directory.
+- A **registered project** has a stable slug and directory, plus a saved backend port that is replaced if occupied at startup.
 - The proxy routes each request by its **exact hostname** to that project's backend.
 - A project starts from an **explicit command** stored at registration or a **repository command** in its root `.servd.toml`. servd does not infer commands from framework files, package scripts, installed tools, or parent directories.
 - The default primary hostname is `<slug>.localhost`. `.localhost` resolves to loopback without DNS setup. There are no implicit fallback hostnames; configure every additional alias deliberately.

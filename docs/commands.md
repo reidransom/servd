@@ -30,7 +30,7 @@ servd add <path> -- <command>...
 servd add . -- sh -c 'first && second'
 ```
 
-servd assigns the slug and a stable backend port. The dashboard registration form is path-only and keeps its form open with the repository-command error when invalid.
+servd assigns the slug and an available backend port. Before starting a stopped site, it rechecks the saved port. If that port is occupied or is the proxy listener, servd saves the next free port at or above `port_range_start`, skipping registered ports and the proxy listener, then resolves `{port}` and exports `PORT` with the replacement. A running site is left untouched; an available saved port is reused on restart. The primary hostname does not change. The dashboard registration form is path-only and keeps its form open with the repository-command error when invalid.
 
 `add` never updates a registration. Replace an explicit command by removing and re-adding; return command ownership to `.servd.toml` by re-adding without trailing command arguments:
 

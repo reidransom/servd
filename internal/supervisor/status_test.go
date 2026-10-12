@@ -55,8 +55,8 @@ func TestEvaluate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertStatus("starting", base, &state.Entry{Slug: base.Slug, PID: pid, Identity: identity, StartedAt: time.Now()}, Starting, "")
-	assertStatus("readiness timeout", base, &state.Entry{Slug: base.Slug, PID: pid, Identity: identity, StartedAt: time.Now().Add(-31 * time.Second)}, Error, "not accepting")
+	assertStatus("starting", base, &state.Entry{Slug: base.Slug, PID: pid, Identity: identity, Port: base.Port, StartedAt: time.Now()}, Starting, "")
+	assertStatus("readiness timeout", base, &state.Entry{Slug: base.Slug, PID: pid, Identity: identity, Port: base.Port, StartedAt: time.Now().Add(-31 * time.Second)}, Error, "not accepting")
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -65,5 +65,5 @@ func TestEvaluate(t *testing.T) {
 	defer func() { _ = listener.Close() }()
 	ready := base
 	ready.Port = listener.Addr().(*net.TCPAddr).Port
-	assertStatus("running after readiness window", ready, &state.Entry{Slug: ready.Slug, PID: pid, Identity: identity, StartedAt: time.Now().Add(-31 * time.Second)}, Running, "")
+	assertStatus("running after readiness window", ready, &state.Entry{Slug: ready.Slug, PID: pid, Identity: identity, Port: ready.Port, StartedAt: time.Now().Add(-31 * time.Second)}, Running, "")
 }

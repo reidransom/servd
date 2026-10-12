@@ -1,4 +1,4 @@
-// Package registration registers individual projects with stable slugs and ports.
+// Package registration registers individual projects with stable slugs and available ports.
 package registration
 
 import (
@@ -74,7 +74,10 @@ func AddSite(reg *config.Registry, settings config.Settings, in AddParams) (conf
 	}
 	port := in.Port
 	if port == 0 {
-		port = NextFreePort(reg, settings)
+		port, err = NextFreePort(reg, settings)
+		if err != nil {
+			return config.Site{}, err
+		}
 	} else if reg.HasPort(port) {
 		return config.Site{}, fmt.Errorf("port %d already assigned", port)
 	}
@@ -128,12 +131,14 @@ func RemoveSite(reg *config.Registry, slug string) error {
 // NextFreePort returns the lowest port at or above settings.PortRangeStart
 // that is unused in the registry, isn't the proxy listener, and isn't
 // currently bound by some other process on the host.
-func NextFreePort(reg *config.Registry, settings config.Settings) int {
-	p := settings.PortRangeStart
-	for {
-		if !reg.HasPort(p) && p != settings.Hostnames.HTTPPort && netcheck.PortFree(settings.BindHost, p) {
-			return p
-		}
-		p++
+func NextFreePort(reg *config.Registry, settings config.Settings) (int, error) {
+	if settings.PortRangeStart < 1 || settings.PortRangeStart > 65535 {
+		return 0, fmt.Errorf("port_range_start must be between 1 and 65535")
 	}
+	for p := settings.PortRangeStart; p <= 65535; p++ {
+		if !reg.HasPort(p) && p != settings.Hostnames.HTTPPort && netcheck.PortFree(settings.BindHost, p) {
+			return p, nil
+		}
+	}
+	return 0, fmt.Errorf("no free backend port in range %d–65535", settings.PortRangeStart)
 }

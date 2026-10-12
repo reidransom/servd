@@ -19,7 +19,7 @@ The registry records the path, slug, port, and any explicit command. The reposit
 ## Register and start the site
 
 ```sh
-servd add ~/clients/acme  # assigns a stable slug and backend port
+servd add ~/clients/acme  # assigns a stable slug and an available backend port
 servd up --all            # starts every registered site
 servd proxy up            # starts the hostname proxy
 servd                     # opens the interactive dashboard

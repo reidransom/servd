@@ -46,12 +46,15 @@ func newUpCmd() *cobra.Command {
 				if err == nil && wait {
 					err = supervisor.WaitReady(s, settings, timeout)
 				}
+				// Start may replace an occupied backend port.
+				st, lerr := state.Load()
+				if lerr != nil {
+					return lerr
+				}
+				if entry, ok := st.Get(s.Slug); ok {
+					s.Port = entry.Port
+				}
 				if jsonOut {
-					// Reload state so the result carries the fresh pid/status.
-					st, lerr := state.Load()
-					if lerr != nil {
-						return lerr
-					}
 					r := upResult{siteInfo: newSiteInfo(settings, s, st)}
 					if err != nil {
 						r.Error = err.Error()
@@ -148,6 +151,13 @@ func newRestartCmd() *cobra.Command {
 					failed++
 					fmt.Printf("  %-20s ERROR: %v\n", s.Slug, err)
 					continue
+				}
+				st, err := state.Load()
+				if err != nil {
+					return err
+				}
+				if entry, ok := st.Get(s.Slug); ok {
+					s.Port = entry.Port
 				}
 				fmt.Printf("  %-20s restarted on :%d\n", s.Slug, s.Port)
 			}

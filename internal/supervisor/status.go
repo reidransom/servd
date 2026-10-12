@@ -39,13 +39,13 @@ func Evaluate(site config.Site, settings config.Settings, st *state.State) SiteS
 		}
 		return SiteStatus{Kind: Error, Reason: reason}
 	}
-	if netcheck.PortAccepting("127.0.0.1", site.Port) {
+	if netcheck.PortAccepting("127.0.0.1", entry.Port) {
 		return SiteStatus{Kind: Running}
 	}
 	if time.Since(entry.StartedAt) < readinessWindow {
 		return SiteStatus{Kind: Starting}
 	}
-	return SiteStatus{Kind: Error, Reason: fmt.Sprintf("not accepting connections on :%d after %s", site.Port, readinessWindow)}
+	return SiteStatus{Kind: Error, Reason: fmt.Sprintf("not accepting connections on :%d after %s", entry.Port, readinessWindow)}
 }
 
 func oneLine(reason string) string {

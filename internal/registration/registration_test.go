@@ -27,6 +27,21 @@ func mkSite(t *testing.T, root string, parts ...string) {
 	}
 }
 
+func TestNextFreePortExhaustedRange(t *testing.T) {
+	settings := testSettings()
+	settings.PortRangeStart = 65535
+	reg := &config.Registry{Sites: []config.Site{{Slug: "last-port", Port: 65535}}}
+	if _, err := NextFreePort(reg, settings); err == nil || !strings.Contains(err.Error(), "no free backend port") {
+		t.Fatalf("exhausted range error = %v", err)
+	}
+	for _, start := range []int{0, -1, 65536} {
+		settings.PortRangeStart = start
+		if _, err := NextFreePort(&config.Registry{}, settings); err == nil {
+			t.Errorf("invalid range start %d succeeded", start)
+		}
+	}
+}
+
 func TestAddSite(t *testing.T) {
 	root := t.TempDir()
 	mkSite(t, root, "gamma")
